@@ -23,7 +23,9 @@ mywebsite/
     ├── style.css         全站样式
     ├── i18n.js           中英文案对照表
     ├── main.js           交互脚本
-    └── img/favicon.svg   网站图标
+    └── img/
+        ├── favicon.svg   网站图标
+        └── avatar.jpg    头像图片
 ```
 
 ## 把占位内容换成你自己的
@@ -32,10 +34,10 @@ mywebsite/
 |---|---|
 | 名字、标语、简介 | 首页 `index.html` 的 hero 区域 + `assets/i18n.js` 里的 `home.name`、`home.role`、`home.bio` |
 | 网站名(左上角、页脚) | `assets/i18n.js` 里的 `site.name` |
-| 头像字母 | 各页面顶部的 `brand-mark` 和首页的 `hero-avatar`,把 `H` 换成你的首字母 |
-| 邮箱、GitHub | `about.html` 最下面的"联系方式" |
-| 学校、专业、经历 | `about.html` 里带 `TODO` 注释的区块 |
-| 技能标签 | `about.html` 的"技能"区域 |
+| 头像图片 | 替换 `assets/img/avatar.jpg`(建议用正方形图片,改完刷新即可) |
+| 邮箱 | `about.html` 最下面的“联系方式” |
+| 学校、经历 | `about.html` 里的“经历”和“教育”区域 |
+| 技能 / 爱好标签 | `about.html` 的“技能”“爱好”区域 |
 | 主色 | `assets/style.css` 开头:改 `--accent` 和 `--accent-strong` 两个值 |
 
 改中文文案时,记得同步改 `assets/i18n.js` 里对应的英文,否则英文界面会显示中文。
