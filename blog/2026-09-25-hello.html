@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>你好,世界:小站开张了 · H 的小站</title>
+<meta name="description" content="为什么要做这个个人网站,以及以后打算在这里写些什么。">
+<link rel="icon" type="image/svg+xml" href="../assets/img/favicon.svg">
+<script>document.documentElement.classList.add("js");</script>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/i18n.js" defer></script>
+<script src="../assets/main.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true">H</span>
+      <span class="brand-name" data-i18n="site.name">H 的小站</span>
+    </a>
+    <button class="nav-toggle" type="button" aria-label="菜单 / Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="site-nav" aria-label="主导航 / Main">
+      <a href="../index.html" data-i18n="nav.home">首页</a>
+      <a href="../projects.html" data-i18n="nav.projects">作品</a>
+      <a href="../blog.html" aria-current="page" data-i18n="nav.blog">博客</a>
+      <a href="../about.html" data-i18n="nav.about">关于</a>
+      <button class="lang-toggle" type="button">EN</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap article-wrap">
+
+  <a class="back-link" href="../blog.html" data-i18n="blog.back">← 返回博客</a>
+
+  <article class="prose">
+    <header class="article-head">
+      <h1>你好,世界:小站开张了</h1>
+      <p class="post-meta"><time datetime="2026-09-25">2026-09-25</time><span class="badge badge-lang">中文</span></p>
+    </header>
+
+    <p>这个网站终于建好了。没有用任何框架,也没有用现成的建站工具——每一行 HTML、CSS 和 JavaScript 都是手写的。写这篇当作开张记录,说说它为什么存在。</p>
+
+    <h2>为什么做这个网站</h2>
+    <p>平时做了不少小东西:扫雷、恐龙快跑,还有一份正在整理的错题本。它们散落在电脑的各个文件夹里,想给别人看的时候总要翻半天。所以我需要一个固定的地方,把作品和笔记都放进来,顺便当作前端练习场。</p>
+
+    <h2>这里会有什么</h2>
+    <ul>
+      <li><strong>作品</strong>:小游戏和以后做的各种工具,大多能直接在浏览器里玩。</li>
+      <li><strong>博客</strong>:学习笔记、做东西时踩过的坑,还有一些零碎想法。</li>
+      <li><strong>关于</strong>:一份随时可以打印成 PDF 的简历。</li>
+    </ul>
+
+    <blockquote>
+      <p>把东西做出来,再把它放到一个能被看见的地方——这本身就是一种完成。</p>
+    </blockquote>
+
+    <h2>关于代码</h2>
+    <p>整站是纯静态的,没有构建步骤。想改什么,打开对应的文件直接改就行。语言切换靠一个很小的脚本:</p>
+    <pre><code>&lt;span data-i18n="nav.home"&gt;首页&lt;/span&gt;</code></pre>
+    <p>页面上所有带 <code>data-i18n</code> 标记的文字,会在切换语言时自动替换成对应的英文,不需要维护两套页面。</p>
+
+    <h2>接下来</h2>
+    <p>之后会陆续把错题本整理上线,继续写小游戏,也会在这里记录过程。如果有什么想聊的,欢迎通过<a href="../about.html">关于页</a>里的方式联系我。</p>
+  </article>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <p>© <span data-year>2026</span> <span data-i18n="site.name">H 的小站</span></p>
+    <p><a href="../about.html" data-i18n="footer.contact">联系我</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

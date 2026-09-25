@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>关于 · H 的小站 | About · H's Corner</title>
+<meta name="description" content="关于我,以及一份可以在线查看、打印为 PDF 的简历。About me and a print-friendly résumé.">
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<script>document.documentElement.classList.add("js");</script>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/i18n.js" defer></script>
+<script src="assets/main.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-mark" aria-hidden="true">H</span>
+      <span class="brand-name" data-i18n="site.name">H 的小站</span>
+    </a>
+    <button class="nav-toggle" type="button" aria-label="菜单 / Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="site-nav" aria-label="主导航 / Main">
+      <a href="index.html" data-i18n="nav.home">首页</a>
+      <a href="projects.html" data-i18n="nav.projects">作品</a>
+      <a href="blog.html" data-i18n="nav.blog">博客</a>
+      <a href="about.html" aria-current="page" data-i18n="nav.about">关于</a>
+      <button class="lang-toggle" type="button">EN</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <header class="page-head reveal">
+    <h1 data-i18n="about.title">关于我</h1>
+    <p data-i18n="about.subtitle">一点自我介绍,以及一份可以打印的简历。</p>
+  </header>
+
+  <div class="resume">
+
+    <section class="section reveal">
+      <p data-i18n="about.intro1">我是一名编程爱好者,喜欢用 HTML、CSS 和 JavaScript 做各种小东西。做这个网站,是为了把作品和笔记都放在同一个地方。</p>
+      <p data-i18n="about.intro2">平时写写小游戏,整理学习笔记。如果你对我的作品感兴趣,欢迎通过下面的方式联系我。</p>
+      <p class="no-print">
+        <button class="btn btn-ghost" type="button" data-print data-i18n="about.print">打印 / 保存为 PDF</button>
+      </p>
+    </section>
+
+    <section class="resume-section reveal">
+      <h2 data-i18n="about.skills">技能</h2>
+      <div class="chips">
+        <span class="chip">HTML</span>
+        <span class="chip">CSS</span>
+        <span class="chip">JavaScript</span>
+        <span class="chip">Markdown</span>
+        <span class="chip">Git</span>
+        <span class="chip">GitHub Pages</span>
+      </div>
+    </section>
+
+    <!-- TODO: 把下面两条经历换成你自己的真实经历 -->
+    <section class="resume-section reveal">
+      <h2 data-i18n="about.experience">经历</h2>
+      <div class="timeline">
+        <div class="timeline-item">
+          <span class="when" data-i18n="about.exp1.when">2026</span>
+          <h3 data-i18n="about.exp1.title">开始做个人项目</h3>
+          <p data-i18n="about.exp1.desc">用原生 HTML/CSS/JS 做了扫雷、恐龙快跑等小游戏,并开始整理错题笔记。</p>
+        </div>
+        <div class="timeline-item">
+          <span class="when" data-i18n="about.exp2.when">2026</span>
+          <h3 data-i18n="about.exp2.title">搭建这个网站</h3>
+          <p data-i18n="about.exp2.desc">手写了一个纯静态的中英双语个人网站,计划发布在 GitHub Pages 上。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TODO: 填写你的学校、专业与起止时间 -->
+    <section class="resume-section reveal">
+      <h2 data-i18n="about.education">教育</h2>
+      <div class="timeline">
+        <div class="timeline-item">
+          <h3><span data-i18n="about.edu1.title">你的学校</span> <span class="badge" data-i18n="about.todo">待填写</span></h3>
+          <p data-i18n="about.edu1.desc">在这里填写专业与起止时间。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TODO: 把邮箱和 GitHub 地址换成你自己的 -->
+    <section class="resume-section reveal">
+      <h2 data-i18n="about.contact">联系方式</h2>
+      <div class="contact-list">
+        <div class="contact-item">
+          <span class="label">Email</span>
+          <a href="mailto:you@example.com">you@example.com</a>
+        </div>
+        <div class="contact-item">
+          <span class="label">GitHub</span>
+          <a href="https://github.com/yourname" target="_blank" rel="noopener">github.com/yourname</a>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <p>© <span data-year>2026</span> <span data-i18n="site.name">H 的小站</span></p>
+    <p><a href="about.html" data-i18n="footer.contact">联系我</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

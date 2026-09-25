@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>博客 · H 的小站 | Blog · H's Corner</title>
+<meta name="description" content="学习笔记、折腾记录和一些零碎想法。Study notes, tinkering logs and scattered thoughts.">
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<script>document.documentElement.classList.add("js");</script>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/i18n.js" defer></script>
+<script src="assets/main.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-mark" aria-hidden="true">H</span>
+      <span class="brand-name" data-i18n="site.name">H 的小站</span>
+    </a>
+    <button class="nav-toggle" type="button" aria-label="菜单 / Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="site-nav" aria-label="主导航 / Main">
+      <a href="index.html" data-i18n="nav.home">首页</a>
+      <a href="projects.html" data-i18n="nav.projects">作品</a>
+      <a href="blog.html" aria-current="page" data-i18n="nav.blog">博客</a>
+      <a href="about.html" data-i18n="nav.about">关于</a>
+      <button class="lang-toggle" type="button">EN</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <header class="page-head reveal">
+    <h1 data-i18n="blog.title">博客</h1>
+    <p data-i18n="blog.subtitle">学习笔记、折腾记录和一些零碎想法。</p>
+  </header>
+
+  <section class="section">
+    <div class="post-list">
+
+      <a class="post-card reveal" href="blog/2026-09-25-hello.html">
+        <p class="post-meta"><time datetime="2026-09-25">2026-09-25</time><span class="badge badge-lang">中文</span></p>
+        <h2>你好,世界:小站开张了</h2>
+        <p class="excerpt">说说为什么要做这个网站,以及以后打算在这里写些什么。</p>
+        <span class="more" data-i18n="blog.readMore">阅读全文 →</span>
+      </a>
+
+      <a class="post-card reveal" href="blog/2026-09-18-tiny-games.html">
+        <p class="post-meta"><time datetime="2026-09-18">2026-09-18</time><span class="badge badge-lang">EN</span></p>
+        <h2>Why I keep building tiny games</h2>
+        <p class="excerpt">Minesweeper, dino runs and the joy of actually finishing small things.</p>
+        <span class="more" data-i18n="blog.readMore">阅读全文 →</span>
+      </a>
+
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <p>© <span data-year>2026</span> <span data-i18n="site.name">H 的小站</span></p>
+    <p><a href="about.html" data-i18n="footer.contact">联系我</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>恐龙快跑 · Dino Run</title>
+<style>
+  :root {
+    --bg: #f7f7f7;
+    --fg: #535353;
+    --muted: #9a9a9a;
+    --chip: #ffffff;
+    --edge: #e2e2e2;
+  }
+  html.night {
+    --bg: #0f0f0f;
+    --fg: #f7f7f7;
+    --muted: #6a6a6a;
+    --chip: #1b1b1b;
+    --edge: #2a2a2a;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    padding: 18px 16px 26px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Microsoft YaHei", monospace;
+    color: var(--fg);
+    background: var(--bg);
+    transition: background-color .6s ease, color .6s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    overflow: hidden;
+  }
+  h1 {
+    margin: 0;
+    font-size: 17px;
+    letter-spacing: 5px;
+    font-weight: 600;
+    opacity: .55;
+  }
+  h1 span { opacity: .45; font-size: 12px; letter-spacing: 2px; }
+
+  .stage { width: min(94vw, 900px); }
+  canvas {
+    display: block;
+    width: 100%;
+    height: 150px;
+    touch-action: none;
+    cursor: pointer;
+    background: transparent;
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .key {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 11px;
+    border: 1px solid var(--edge);
+    border-radius: 999px;
+    background: var(--chip);
+    transition: border-color .3s, background-color .3s;
+  }
+  .key b {
+    color: var(--fg);
+    font-weight: 600;
+    font-size: 11px;
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--fg) 12%, transparent);
+  }
+  .key.mute { cursor: pointer; }
+  .key.mute:hover { color: var(--fg); border-color: var(--fg); }
+
+  .tip { font-size: 11px; color: var(--muted); opacity: .75; letter-spacing: 1px; }
+
+  @media (max-width: 520px) {
+    h1 { font-size: 15px; letter-spacing: 3px; }
+    .bar { font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+  <h1>恐 龙 快 跑 <span>DINO RUN</span></h1>
+
+  <div class="stage"><canvas id="game"></canvas></div>
+
+  <div class="bar">
+    <span class="key"><b>空格</b>/<b>↑</b> 跳跃</span>
+    <span class="key"><b>↓</b> 下蹲 / 速降</span>
+    <span class="key"><b>P</b> 暂停</span>
+    <span class="key mute" id="sound">🔊 音效</span>
+  </div>
+
+  <div class="tip">撞到仙人掌或翼龙就结束 · 每 100 分加速 · 700 分天黑</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ================================================================
+     常量
+     ================================================================ */
+  const H         = 150;    // 逻辑高度
+  const GROUND_Y  = 126;    // 地面线
+  const DINO_X    = 62;     // 恐龙固定横向位置
+
+  const GRAVITY   = 2400;   // px/s²
+  const JUMP_V    = 550;    // 起跳初速度 -> 最高约 63px
+  const START_SPD = 340;
+  const MAX_SPD   = 950;
+  const ACCEL     = 9;      // 每秒加速
+
+  const DAY = {
+    bg:   [247, 247, 247],
+    fg:   [ 83,  83,  83],
+    sub:  [186, 186, 186],
+    halo: [214, 214, 214]
+  };
+  const NIGHT = {
+    bg:   [ 15,  15,  15],
+    fg:   [247, 247, 247],
+    sub:  [ 82,  82,  82],
+    halo: [ 58,  58,  58]
+  };
+
+  /* ================================================================
+     画布
+     ================================================================ */
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d', { alpha: false });
+  let W = 600, dpr = 1;
+
+  function resize() {
+    const r = canvas.getBoundingClientRect();
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = Math.max(300, Math.round(r.width || 600));
+    canvas.width  = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.imageSmoothingEnabled = false;
+  }
+
+  /* ================================================================
+     小工具
+     ================================================================ */
+  const rand  = (a, b) => a + Math.random() * (b - a);
+  const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
+  const mix   = (a, b, t) =>
+    'rgb(' + Math.round(a[0] + (b[0] - a[0]) * t) + ',' +
+             Math.round(a[1] + (b[1] - a[1]) * t) + ',' +
+             Math.round(a[2] + (b[2] - a[2]) * t) + ')';
+
+  const pal = { bg: '', fg: '', sub: '', halo: '' };
+  function palette(t) {
+    pal.bg   = mix(DAY.bg,   NIGHT.bg,   t);
+    pal.fg   = mix(DAY.fg,   NIGHT.fg,   t);
+    pal.sub  = mix(DAY.sub,  NIGHT.sub,  t);
+    pal.halo = mix(DAY.halo, NIGHT.halo, t);
+  }
+
+  // 用矩形画像素图：每项 [x, y, w, h]（单位格）
+  function blocks(list, ox, oy, s, color) {
+    ctx.fillStyle = color;
+    for (let i = 0; i < list.length; i++) {
+      const r = list[i];
+      ctx.fillRect(ox + r[0] * s, oy + r[1] * s, r[2] * s, r[3] * s);
+    }
+  }
+  function box(x, y, w, h, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+  }
+
+  /* ================================================================
+     5x7 像素字体（数字 + 需要的字母）
+     ================================================================ */
+  const FONT = {
+    '0': ['.###.', '#...#', '#..##', '#.#.#', '##..#', '#...#', '.###.'],
+    '1': ['..#..', '.##..', '..#..', '..#..', '..#..', '..#..', '.###.'],
+    '2': ['.###.', '#...#', '....#', '...#.', '..#..', '.#...', '#####'],
+    '3': ['####.', '....#', '....#', '.###.', '....#', '....#', '####.'],
+    '4': ['...#.', '..##.', '.#.#.', '#..#.', '#####', '...#.', '...#.'],
+    '5': ['#####', '#....', '####.', '....#', '....#', '#...#', '.###.'],
+    '6': ['..##.', '.#...', '#....', '####.', '#...#', '#...#', '.###.'],
+    '7': ['#####', '....#', '...#.', '..#..', '.#...', '.#...', '.#...'],
+    '8': ['.###.', '#...#', '#...#', '.###.', '#...#', '#...#', '.###.'],
+    '9': ['.###.', '#...#', '#...#', '.####', '....#', '...#.', '.##..'],
+    'A': ['..#..', '.#.#.', '#...#', '#...#', '#####', '#...#', '#...#'],
+    'C': ['.###.', '#...#', '#....', '#....', '#....', '#...#', '.###.'],
+    'D': ['###..', '#..#.', '#...#', '#...#', '#...#', '#..#.', '###..'],
+    'E': ['#####', '#....', '#....', '####.', '#....', '#....', '#####'],
+    'G': ['.###.', '#...#', '#....', '#.###', '#...#', '#...#', '.###.'],
+    'H': ['#...#', '#...#', '#...#', '#####', '#...#', '#...#', '#...#'],
+    'I': ['.###.', '..#..', '..#..', '..#..', '..#..', '..#..', '.###.'],
+    'K': ['#...#', '#..#.', '#.#..', '##...', '#.#..', '#..#.', '#...#'],
+    'L': ['#....', '#....', '#....', '#....', '#....', '#....', '#####'],
+    'M': ['#...#', '##.##', '#.#.#', '#...#', '#...#', '#...#', '#...#'],
+    'N': ['#...#', '##..#', '#.#.#', '#..##', '#...#', '#...#', '#...#'],
+    'O': ['.###.', '#...#', '#...#', '#...#', '#...#', '#...#', '.###.'],
+    'P': ['####.', '#...#', '#...#', '####.', '#....', '#....', '#....'],
+    'R': ['####.', '#...#', '#...#', '####.', '#.#..', '#..#.', '#...#'],
+    'S': ['.####', '#....', '#....', '.###.', '....#', '....#', '####.'],
+    'T': ['#####', '..#..', '..#..', '..#..', '..#..', '..#..', '..#..'],
+    'U': ['#...#', '#...#', '#...#', '#...#', '#...#', '#...#', '.###.'],
+    'V': ['#...#', '#...#', '#...#', '#...#', '#...#', '.#.#.', '..#..'],
+    ' ': ['.....', '.....', '.....', '.....', '.....', '.....', '.....']
+  };
+
+  function textWidth(str, s) {
+    let w = 0, n = 0;
+    for (const ch of str) { w += (ch === ' ' ? 3 : 5); n++; }
+    return (w + Math.max(0, n - 1)) * s;
+  }
+  function drawText(str, x, y, s, color, align) {
+    const w = textWidth(str, s);
+    let cx = align === 'right' ? x - w : align === 'center' ? x - w / 2 : x;
+    ctx.fillStyle = color;
+    for (const ch of str) {
+      const g = FONT[ch] || FONT[' '];
+      const cw = ch === ' ' ? 3 : 5;
+      if (ch !== ' ') {
+        for (let row = 0; row < 7; row++) {
+          const line = g[row];
+          for (let col = 0; col < 5; col++) {
+            if (line[col] === '#') ctx.fillRect(cx + col * s, y + row * s, s, s);
+          }
+        }
+      }
+      cx += (cw + 1) * s;
+    }
+  }
+  const pad5 = n => String(Math.min(99999, Math.floor(n))).padStart(5, '0');
+
+  /* ================================================================
+     精灵图（像素格 + 缩放 2 => 恐龙 44x48）
+     ================================================================ */
+  const DINO_BODY = [
+    [13, 0, 8, 5], [14, 5, 7, 2], [20, 3, 2, 4],    // 头 / 下颌 / 吻部
+    [14, 7, 5, 4],                                   // 脖子
+    [11, 11, 8, 4], [9, 15, 10, 4], [6, 13, 5, 3],   // 胸 / 腹臀 / 背部过渡
+    [3, 12, 4, 2], [0, 10, 4, 2],                    // 尾巴（渐细上翘）
+    [19, 13, 3, 1], [21, 14, 1, 2]                   // 小前爪
+  ];
+  const LEGS = {
+    stand: [[9, 19, 3, 3], [9, 22, 4, 2], [14, 19, 3, 3], [14, 22, 4, 2]],
+    runA:  [[9, 19, 3, 3], [9, 22, 4, 2], [14, 19, 3, 2]],
+    runB:  [[14, 19, 3, 3], [14, 22, 4, 2], [9, 19, 3, 2]]
+  };
+  const DINO_EYE = [18, 2, 1, 2];
+  const DINO_MOUTH = [20, 5, 2, 1];
+
+  const DUCK_BODY = [
+    [0, 5, 9, 3],                                     // 尾巴
+    [7, 4, 14, 6],                                    // 身体
+    [18, 3, 5, 5], [20, 0, 8, 7], [26, 3, 4, 3],      // 脖子 + 头 + 吻
+    [10, 10, 3, 3], [9, 13, 5, 1],                    // 前腿
+    [17, 10, 3, 3], [16, 13, 5, 1]                    // 后腿
+  ];
+  const DUCK_MOUTH = [28, 5, 2, 1];
+
+  // 翼龙：像素尺寸 46x35（1:1，不再缩放）
+  const BIRD_BODY = [
+    [ 8, 17, 26, 8],                                  // 身体
+    [30, 12, 10, 8],                                  // 头
+    [38, 15,  8, 3],                                  // 喙
+    [ 3, 18,  6, 6],                                  // 尾根
+    [ 0, 20,  4, 3]                                   // 尾尖
+  ];
+  // 翅膀用逐级收窄的方块拼出锥形，扇动时更像翼
+  const BIRD_WING_UP = [
+    [12, 12, 12, 5], [14, 7, 8, 5], [16, 3, 5, 4], [17, 0, 3, 3]
+  ];
+  const BIRD_WING_DOWN = [
+    [12, 25, 12, 4], [14, 29, 9, 4], [16, 33, 6, 4]
+  ];
+  const BIRD_EYE = [34, 14, 3, 3];
+
+  /* ================================================================
+     仙人掌
+     ================================================================ */
+  const CACTUS_S = { w: 17, h: 35 };
+  const CACTUS_L = { w: 25, h: 50 };
+
+  function drawCactusSmall(x, y, c) {
+    box(x + 6, y + 0, 5, 35, c);            // 主干
+    box(x + 0, y + 10, 3, 12, c);           // 左臂
+    box(x + 3, y + 18, 4, 4, c);            // 左关节
+    box(x + 14, y + 4, 3, 12, c);           // 右臂
+    box(x + 11, y + 12, 4, 4, c);           // 右关节
+  }
+  function drawCactusLarge(x, y, c) {
+    box(x + 9, y + 0, 7, 50, c);            // 主干
+    box(x + 0, y + 14, 4, 22, c);           // 左臂
+    box(x + 4, y + 31, 6, 4, c);            // 左关节
+    box(x + 21, y + 8, 4, 22, c);           // 右臂
+    box(x + 15, y + 25, 7, 4, c);           // 右关节
+  }
+
+  /* ================================================================
+     云
+     ================================================================ */
+  const CLOUD = [
+    [0, 5, 20, 4],
+    [3, 3, 5, 3],
+    [6, 1, 6, 4],
+    [12, 3, 5, 3]
+  ];
+
+  /* ================================================================
+     音效（WebAudio 合成，无外部资源）
+     ================================================================ */
+  let actx = null, muted = false;
+  function audio() {
+    if (!actx) {
+      try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; }
+    }
+    if (actx.state === 'suspended') actx.resume();
+    return actx;
+  }
+  function tone(f0, f1, dur, vol, type) {
+    if (muted) return;
+    const a = audio(); if (!a) return;
+    const o = a.createOscillator(), g = a.createGain();
+    o.type = type || 'square';
+    o.frequency.setValueAtTime(f0, a.currentTime);
+    if (f1 && f1 !== f0) o.frequency.exponentialRampToValueAtTime(f1, a.currentTime + dur);
+    g.gain.setValueAtTime(vol, a.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + dur);
+    o.connect(g); g.connect(a.destination);
+    o.start(); o.stop(a.currentTime + dur + 0.02);
+  }
+  const sfx = {
+    jump:  () => tone(560, 900, 0.08, 0.05, 'square'),
+    point: () => tone(1180, 1180, 0.09, 0.045, 'square'),
+    die:   () => { tone(420, 90, 0.42, 0.07, 'sawtooth'); tone(210, 60, 0.5, 0.05, 'square'); }
+  };
+
+  /* ================================================================
+     游戏状态
+     ================================================================ */
+  const HI_KEY = 'dino-run-hi';
+
+  let state      = 'ready';     // ready | running | over
+  let paused     = false;
+  let speed, distance, score, nextMilestone, nextNight;
+  let obstacles, pebbles, clouds, stars, pebbleCursor, cloudCursor;
+  let nightT, isNight, moonX, moonPhase;
+  let flashTimer, deadTimer, legFrame, birdFrame;
+  let dino, spawnCountdown;
+  let hiScore = 0;
+  try { hiScore = parseInt(localStorage.getItem(HI_KEY) || '0', 10) || 0; } catch (e) { hiScore = 0; }
+
+  function reset() {
+    speed         = START_SPD;
+    distance      = 0;
+    score         = 0;
+    nextMilestone = 100;
+    nextNight     = 700;
+    obstacles     = [];
+    pebbles       = [];
+    clouds        = [];
+    stars         = [];
+    pebbleCursor  = W + 30;
+    cloudCursor   = W + 60;
+    isNight       = false;
+    nightT        = 0;
+    moonX         = W * 0.72;
+    moonPhase     = 0;
+    flashTimer    = 0;
+    deadTimer     = 0;
+    legFrame      = 0;
+    birdFrame     = 0;
+    dino = { y: 0, vy: 0, air: false, duck: false, blink: 0, blinkAt: rand(1.2, 3.5) };
+    spawnCountdown = W * 0.95;
+    for (let i = 0; i < 16; i++) {
+      stars.push({ x: Math.random() * W, y: rand(8, 72), s: Math.random() < 0.28 ? 2 : 1 });
+    }
+  }
+
+  /* ================================================================
+     障碍物
+     ================================================================ */
+  function gapDistance() {
+    return Math.max(200, speed * rand(0.68, 1.35) + rand(0, 70));
+  }
+
+  function spawnObstacle() {
+    const r = Math.random();
+    const canBird = score > 260;
+    let o;
+
+    if (canBird && r < 0.24) {
+      const high = Math.random() < 0.5;          // true = 需要下蹲（齐头高）
+      o = {
+        kind: 'bird',
+        w: 46, h: 35,
+        x: W + 24,
+        y: high ? 72 : 87,                       // 齐头高（蹲） / 贴地低飞（跳）
+        bx: 10, by: 12, bw: 34, bh: 12           // 碰撞盒贴住身体，和画面一致
+      };
+    } else if (r < 0.68) {
+      const n = Math.random() < 0.42 ? 1 : (Math.random() < 0.65 ? 2 : 3);
+      o = {
+        kind: 'cs', n: n, uw: CACTUS_S.w,
+        w: CACTUS_S.w * n, h: CACTUS_S.h,
+        x: W + 24, y: GROUND_Y - CACTUS_S.h,
+        bx: 4, by: 4, bw: CACTUS_S.w * n - 8, bh: CACTUS_S.h - 4
+      };
+    } else {
+      const n = Math.random() < 0.62 ? 1 : 2;
+      o = {
+        kind: 'cl', n: n, uw: CACTUS_L.w,
+        w: CACTUS_L.w * n, h: CACTUS_L.h,
+        x: W + 24, y: GROUND_Y - CACTUS_L.h,
+        bx: 5, by: 5, bw: CACTUS_L.w * n - 10, bh: CACTUS_L.h - 5
+      };
+    }
+    obstacles.push(o);
+  }
+
+  /* ================================================================
+     碰撞
+     ================================================================ */
+  function hit(a, b) {
+    return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+  }
+  function dinoBox() {
+    if (dino.duck && !dino.air) {
+      const sx = DINO_X - 8, st = GROUND_Y - dino.y - 28;
+      return { x: sx + 8, y: st + 6, w: 46, h: 22 };
+    }
+    const st = GROUND_Y - dino.y - 48;
+    return { x: DINO_X + 6, y: st + 6, w: 32, h: 40 };
+  }
+  function obstacleBox(o) {
+    return { x: o.x + o.bx, y: o.y + o.by, w: o.bw, h: o.bh };
+  }
+
+  /* ================================================================
+     输入
+     ================================================================ */
+  const keys = { jump: false, down: false };
+
+  function startJump() {
+    if (state === 'ready') { state = 'running'; audio(); }
+    if (state !== 'running' || paused) return;
+    if (dino.air || (dino.duck && !dino.air)) { /* 蹲着不能跳 */ }
+    if (!dino.air && !dino.duck) {
+      dino.vy = JUMP_V;
+      dino.air = true;
+      sfx.jump();
+    }
+  }
+
+  function pressRestart() {
+    if (state === 'over' && deadTimer > 0.35) {
+      reset();
+      state = 'running';
+      audio();
+    }
+  }
+
+  function onKey(e, down) {
+    const k = e.code;
+    if (k === 'Space' || k === 'ArrowUp' || k === 'KeyW') {
+      e.preventDefault();
+      if (down) {
+        if (e.repeat) return;
+        if (state === 'ready') { state = 'running'; audio(); return; }
+        if (state === 'over') { pressRestart(); return; }
+        startJump();
+      }
+    } else if (k === 'ArrowDown' || k === 'KeyS') {
+      e.preventDefault();
+      keys.down = down;
+      // 空中按 ↓：立刻中止上升，之后重力加倍速降
+      if (down && dino && dino.air && dino.vy > 0) dino.vy = 0;
+    } else if (down && (k === 'KeyP' || k === 'Escape')) {
+      if (state === 'running' || state === 'ready') paused = !paused;
+    } else if (down && k === 'KeyR') {
+      if (state !== 'ready') { reset(); state = 'running'; }
+    } else if (down && k === 'KeyM') {
+      toggleMute();
+    }
+  }
+  window.addEventListener('keydown', e => onKey(e, true));
+  window.addEventListener('keyup',   e => onKey(e, false));
+
+  // 触屏 / 鼠标
+  let pointerDown = false;
+  function pointerPos(e) {
+    const r = canvas.getBoundingClientRect();
+    return { x: (e.clientX - r.left) * (W / r.width), y: (e.clientY - r.top) * (H / r.height) };
+  }
+  canvas.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    canvas.setPointerCapture && canvas.setPointerCapture(e.pointerId);
+    pointerDown = true;
+    const p = pointerPos(e);
+
+    if (state === 'ready')   { state = 'running'; audio(); return; }
+    if (state === 'over')    { pressRestart(); return; }
+    if (paused)              { paused = false; return; }
+
+    if (p.y > H * 0.62) { keys.down = true; return; }
+    keys.down = false;
+    startJump();
+  });
+  function releasePointer() {
+    pointerDown = false;
+    keys.down = false;
+  }
+  canvas.addEventListener('pointerup', releasePointer);
+  canvas.addEventListener('pointercancel', releasePointer);
+  window.addEventListener('blur', releasePointer);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { paused = true; releasePointer(); }
+  });
+
+  const soundBtn = document.getElementById('sound');
+  function toggleMute() {
+    muted = !muted;
+    soundBtn.textContent = muted ? '🔇 静音' : '🔊 音效';
+  }
+  soundBtn.addEventListener('click', () => { audio(); toggleMute(); });
+
+  /* ================================================================
+     更新
+     ================================================================ */
+  function update(dt) {
+    if (state === 'over') { deadTimer += dt; return; }
+    if (state !== 'running' || paused) {
+      if (state === 'ready') {
+        dino.blinkAt -= dt;
+        if (dino.blinkAt <= 0) { dino.blink = 0.14; dino.blinkAt = rand(1.6, 4.5); }
+        if (dino.blink > 0) dino.blink -= dt;
+      }
+      return;
+    }
+
+    /* --- 速度 & 分数 --- */
+    speed = Math.min(MAX_SPD, speed + ACCEL * dt);
+    const ds = speed * dt;
+    distance += ds;
+    score += ds / 36;
+
+    /* --- 昼夜 --- */
+    if (score >= nextNight) { isNight = !isNight; nextNight += 700; }
+    nightT = clamp(nightT + (isNight ? dt / 1.1 : -dt / 1.1), 0, 1);
+    document.documentElement.classList.toggle('night', nightT > 0.5);
+
+    /* --- 里程碑音效 --- */
+    if (score >= nextMilestone) { sfx.point(); flashTimer = 0.62; nextMilestone += 100; }
+    if (flashTimer > 0) flashTimer -= dt;
+
+    /* --- 恐龙物理 --- */
+    if (dino.air) {
+      const g = (keys.down && dino.vy < 0) ? GRAVITY * 2.2 : GRAVITY;
+      dino.vy -= g * dt;
+      dino.y += dino.vy * dt;
+      if (dino.y <= 0) { dino.y = 0; dino.vy = 0; dino.air = false; }
+    }
+    dino.duck = keys.down && !dino.air;
+
+    if (!dino.air) legFrame = Math.floor(distance / 22) % 2;
+    birdFrame = Math.floor(distance / 16) % 2;
+
+    /* --- 障碍物 --- */
+    for (let i = obstacles.length - 1; i >= 0; i--) {
+      const o = obstacles[i];
+      o.x -= ds;
+      if (o.x + o.w < -30) obstacles.splice(i, 1);
+    }
+    spawnCountdown -= ds;
+    if (spawnCountdown <= 0) { spawnObstacle(); spawnCountdown = gapDistance(); }
+
+    /* --- 地面碎石 --- */
+    pebbleCursor -= ds;
+    while (pebbleCursor < W + 20) {
+      pebbles.push({
+        x: pebbleCursor,
+        y: GROUND_Y + 3 + Math.random() * 3,
+        w: 2 + Math.random() * 5,
+        h: 2 + Math.random() * 3
+      });
+      pebbleCursor += 6 + Math.random() * 46;
+    }
+    for (let i = pebbles.length - 1; i >= 0; i--) {
+      pebbles[i].x -= ds;
+      if (pebbles[i].x < -14) pebbles.splice(i, 1);
+    }
+
+    /* --- 云 --- */
+    cloudCursor -= ds * 0.42;
+    while (cloudCursor < W + 40) {
+      clouds.push({
+        x: cloudCursor,
+        y: rand(12, 52),
+        s: rand(0.7, 1.25) < 1 ? 2 : 2,
+        sc: rand(0.75, 1.15)
+      });
+      cloudCursor += rand(180, 560);
+    }
+    for (let i = clouds.length - 1; i >= 0; i--) {
+      clouds[i].x -= ds * 0.42;
+      if (clouds[i].x < -80) clouds.splice(i, 1);
+    }
+
+    /* --- 星星 & 月亮 --- */
+    for (const s of stars) {
+      s.x -= ds * 0.14;
+      if (s.x < -6) { s.x = W + rand(0, 90); s.y = rand(8, 72); }
+    }
+    moonX -= ds * 0.09;
+    if (moonX < -50) { moonX = W + rand(40, 220); moonPhase = Math.random() < 0.5 ? 0 : 1; }
+
+    /* --- 碰撞 --- */
+    const db = dinoBox();
+    for (const o of obstacles) {
+      if (hit(db, obstacleBox(o))) { gameOver(); break; }
+    }
+  }
+
+  function gameOver() {
+    state = 'over';
+    deadTimer = 0;
+    if (score > hiScore) {
+      hiScore = Math.floor(score);
+      try { localStorage.setItem(HI_KEY, String(hiScore)); } catch (e) {}
+    }
+    sfx.die();
+  }
+
+  /* ================================================================
+     绘制
+     ================================================================ */
+  function drawDino() {
+    const s = 2;
+    const top = Math.round(GROUND_Y - dino.y - 48);
+    const x = DINO_X;
+    const c = pal.fg;
+
+    if (dino.duck && !dino.air) {
+      const dx = DINO_X - 8, dt2 = Math.round(GROUND_Y - dino.y - 28);
+      blocks(DUCK_BODY, dx, dt2, s, c);
+      ctx.fillStyle = pal.bg;
+      ctx.fillRect(dx + 23 * s, dt2 + 2 * s, 1 * s, 2 * s);            // 眼
+      ctx.fillRect(dx + DUCK_MOUTH[0] * s, dt2 + DUCK_MOUTH[1] * s, 2 * s, s);
+      return;
+    }
+
+    let legs = LEGS.stand;
+    if (state === 'running' && !dino.air) legs = legFrame ? LEGS.runB : LEGS.runA;
+
+    blocks(DINO_BODY, x, top, s, c);
+    blocks(legs, x, top, s, c);
+
+    // 眼睛（眨眼时压扁）+ 嘴缝
+    ctx.fillStyle = pal.bg;
+    if (dino.blink > 0 && state !== 'running') {
+      ctx.fillRect(x + DINO_EYE[0] * s, top + (DINO_EYE[1] + 1) * s, DINO_EYE[2] * s, s);
+    } else {
+      ctx.fillRect(x + DINO_EYE[0] * s, top + DINO_EYE[1] * s, DINO_EYE[2] * s, DINO_EYE[3] * s);
+    }
+    ctx.fillRect(x + DINO_MOUTH[0] * s, top + DINO_MOUTH[1] * s, 2 * s, s);
+  }
+
+  function drawObstacles() {
+    for (const o of obstacles) {
+      const x = Math.round(o.x);
+      if (o.kind === 'cs') {
+        for (let i = 0; i < o.n; i++) drawCactusSmall(x + i * o.uw, o.y, pal.fg);
+      } else if (o.kind === 'cl') {
+        for (let i = 0; i < o.n; i++) drawCactusLarge(x + i * o.uw, o.y, pal.fg);
+      } else {
+        const y = Math.round(o.y);
+        blocks(BIRD_BODY, x, y, 1, pal.fg);
+        blocks(birdFrame ? BIRD_WING_DOWN : BIRD_WING_UP, x, y, 1, pal.fg);
+        ctx.fillStyle = pal.bg;
+        ctx.fillRect(x + BIRD_EYE[0], y + BIRD_EYE[1], BIRD_EYE[2], BIRD_EYE[3]);
+      }
+    }
+  }
+
+  function drawGround() {
+    box(0, GROUND_Y, W, 2, pal.fg);
+    for (const p of pebbles) {
+      box(p.x, p.y, p.w, p.h, pal.sub);
+      if (p.w > 4) box(p.x, GROUND_Y - 2, p.w * 0.55, 1.5, pal.sub);
+    }
+  }
+
+  function drawSky() {
+    // 星星
+    const sa = clamp((nightT - 0.25) / 0.75, 0, 1);
+    if (sa > 0.01) {
+      ctx.globalAlpha = sa * 0.85;
+      for (const s of stars) box(s.x, s.y, s.s, s.s, pal.fg);
+      ctx.globalAlpha = 1;
+    }
+    // 月亮
+    const ma = clamp((nightT - 0.45) / 0.55, 0, 1);
+    if (ma > 0.01) {
+      const mx = moonX, my = 34, r = 11;
+      ctx.globalAlpha = ma;
+      ctx.fillStyle = pal.fg;
+      ctx.beginPath(); ctx.arc(mx, my, r, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = pal.bg;
+      ctx.beginPath();
+      ctx.arc(mx + (moonPhase ? -r * 0.32 : r * 0.42), my - r * 0.22, r * 0.94, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+    // 云
+    ctx.globalAlpha = 0.9;
+    for (const c of clouds) {
+      const cs = 2 * c.sc;
+      ctx.fillStyle = pal.halo;
+      for (const r of CLOUD) {
+        ctx.fillRect(c.x + r[0] * cs, c.y + r[1] * cs, r[2] * cs, r[3] * cs);
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawHUD() {
+    const sc = Math.floor(score);
+    const s = 2;
+    const str = pad5(sc);
+    const showScore = flashTimer <= 0 || (Math.floor(flashTimer * 12) % 2 === 0);
+    if (showScore) drawText(str, W - 16, 12, s, pal.fg, 'right');
+    else drawText(str, W - 16, 12, s, pal.sub, 'right');
+
+    if (hiScore > 0) {
+      const w1 = textWidth(str, s);
+      drawText('HI ' + pad5(hiScore), W - 16 - w1 - 22, 12, s, pal.sub, 'right');
+    }
+  }
+
+  function drawRestartIcon(cx, cy, r, c) {
+    ctx.save();
+    ctx.strokeStyle = c;
+    ctx.lineWidth = 3.5;
+    ctx.lineCap = 'butt';
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, Math.PI * 2 * (5 / 6), Math.PI * 2 * (2 / 3));
+    ctx.stroke();
+    // 箭头
+    const a = Math.PI * 2 * (2 / 3);
+    const px = cx + r * Math.cos(a), py = cy + r * Math.sin(a);
+    const dx = -Math.sin(a), dy = Math.cos(a);
+    ctx.fillStyle = c;
+    ctx.beginPath();
+    ctx.moveTo(px + dx * 10, py + dy * 10);
+    ctx.lineTo(px - dy * 7 - dx * 1.5, py + dx * 7 - dy * 1.5);
+    ctx.lineTo(px + dy * 7 - dx * 1.5, py - dx * 7 - dy * 1.5);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  let restartBtn = { x: 0, y: 0, r: 16 };
+
+  function drawOverlays() {
+    if (state === 'ready') {
+      const pulse = 0.55 + 0.35 * Math.sin(performance.now() / 320);
+      ctx.globalAlpha = pulse;
+      ctx.fillStyle = pal.fg;
+      ctx.font = '13px ui-monospace, "Microsoft YaHei", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('按 空格 / 点击 开始奔跑', W / 2, 44);
+      ctx.globalAlpha = 1;
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'alphabetic';
+    } else if (state === 'over') {
+      drawText('GAME OVER', W / 2, 34, 3, pal.fg, 'center');
+      restartBtn = { x: W / 2, y: 88, r: 15 };
+      drawRestartIcon(restartBtn.x, restartBtn.y, 11, pal.fg);
+      ctx.fillStyle = pal.sub;
+      ctx.font = '12px ui-monospace, "Microsoft YaHei", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('空格 重新开始', W / 2, 118);
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'alphabetic';
+      if (Math.floor(score) >= hiScore && hiScore > 0 && deadTimer < 99) {
+        drawText('NEW HI', W / 2, 60, 2, pal.sub, 'center');
+      }
+    } else if (paused) {
+      ctx.fillStyle = pal.bg;
+      ctx.globalAlpha = 0.72;
+      ctx.fillRect(0, 0, W, H);
+      ctx.globalAlpha = 1;
+      drawText('PAUSE', W / 2, 60, 3, pal.fg, 'center');
+    }
+  }
+
+  function render() {
+    palette(nightT);
+    ctx.fillStyle = pal.bg;
+    ctx.fillRect(0, 0, W, H);
+
+    drawSky();
+    drawGround();
+    drawObstacles();
+    drawDino();
+    drawHUD();
+    drawOverlays();
+  }
+
+  /* ================================================================
+     主循环
+     ================================================================ */
+  let last = 0;
+  function loop(now) {
+    if (!last) last = now;
+    let dt = (now - last) / 1000;
+    last = now;
+    if (dt > 0.05) dt = 0.05;         // 切后台后避免瞬移
+    update(dt);
+    render();
+    requestAnimationFrame(loop);
+  }
+
+  window.addEventListener('resize', () => {
+    resize();
+    if (state === 'ready') reset();
+  });
+
+  // 恢复默认音效按钮文案
+  soundBtn.textContent = '🔊 音效';
+
+  resize();
+  reset();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
