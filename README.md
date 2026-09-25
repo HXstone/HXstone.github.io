@@ -1,80 +1,91 @@
-# H 的小站(个人网站)
+# HX STONE
 
-纯静态的中英双语个人网站:**主页 + 作品集 + 博客 + 在线简历**。
-不需要安装任何东西,双击 `index.html` 即可在浏览器里预览。
+个人网站:**一个 AI 时代高中生的个人科技实验室**。
+Student × AI Explorer × Future CS Builder.
+
+纯静态站点,零构建步骤,托管在 GitHub Pages。
+线上地址:https://hxstone.github.io
+
+## 技术构成
+
+| 部分 | 说明 |
+|---|---|
+| 结构 | 手写 HTML(4 个主页面 + 笔记 + 404) |
+| 样式 | `assets/css/base.css`(设计变量 / 基础组件)+ `assets/css/site.css`(各区块) |
+| 动效 | GSAP + ScrollTrigger(本地内置,`assets/js/vendor/`),仅在支持时启用 |
+| 背景 | Canvas 2D 粒子场 + 网格微视差 + 鼠标柔光 |
+| 交互 | 自定义光标、磁吸按钮、头像玻璃球(鼠标跟随)、HX OS 面板动画 |
+| 转场 | View Transitions API;不支持的浏览器降级为黑金遮罩 |
+| 双语 | 默认英文(HTML 原文),中文对照在 `assets/js/i18n.js` |
+
+**没有任何构建步骤**:改完文件直接刷新即可,`git push` 后 1 分钟左右线上更新。
 
 ## 目录结构
 
 ```
-mywebsite/
-├── index.html            首页
-├── projects.html         作品集
-├── blog.html             博客列表
-├── about.html            关于我 + 简历(可打印为 PDF)
-├── 404.html              错误页(GitHub Pages 会自动使用)
-├── blog/
-│   ├── _template.html            文章模板(复制它来写新文章)
-│   ├── 2026-09-25-hello.html     示例文章(中文)
-│   └── 2026-09-18-tiny-games.html 示例文章(英文)
+├── index.html            首页:Hero / HX OS / Case Studies / Notes
+├── projects.html         三个项目的完整案例(问题→思考→方案→技术→结果)
+├── notes.html            笔记列表(可按分类筛选)
+├── about.html            关于(理念 + 简介 + 联系方式)
+├── 404.html              自定义错误页
+├── notes/
+│   ├── _template.html          新笔记模板(复制它来写)
+│   ├── 2026-09-25-hello.html   笔记:小站开张了
+│   └── 2026-09-18-tiny-games.html 笔记:Why I keep making tiny games
 ├── projects/
-│   ├── minesweeper.html  扫雷(从旧目录复制进来)
-│   └── dino-run.html     恐龙快跑(从旧目录复制进来)
+│   ├── minesweeper.html  扫雷(可玩)
+│   └── dino-run.html     恐龙快跑(可玩)
 └── assets/
-    ├── style.css         全站样式
-    ├── i18n.js           中英文案对照表
-    ├── main.js           交互脚本
-    └── img/
-        ├── favicon.svg   网站图标
-        └── avatar.jpg    头像图片
+    ├── css/  base.css · site.css
+    ├── js/   main.js(语言/菜单)· motion.js(动效)· background.js(粒子)
+    │         cursor.js(光标+磁吸)· orb.js(玻璃球)· hxos.js(面板)
+    │         transition.js(转场)· i18n.js(中文对照)
+    │         vendor/gsap.min.js · vendor/ScrollTrigger.min.js
+    └── img/  avatar.jpg(头像)· favicon.svg · og-cover.jpg(分享封面)
 ```
 
-## 把占位内容换成你自己的
+## 常见修改
 
 | 想改什么 | 去哪里改 |
 |---|---|
-| 名字、标语、简介 | 首页 `index.html` 的 hero 区域 + `assets/i18n.js` 里的 `home.name`、`home.role`、`home.bio` |
-| 网站名(左上角、页脚) | `assets/i18n.js` 里的 `site.name` |
-| 头像图片 | 替换 `assets/img/avatar.jpg`(建议用正方形图片,改完刷新即可) |
-| 邮箱 | `about.html` 最下面的“联系方式” |
-| 学校、经历 | `about.html` 里的“经历”和“教育”区域 |
-| 技能 / 爱好标签 | `about.html` 的“技能”“爱好”区域 |
-| 主色 | `assets/style.css` 开头:改 `--accent` 和 `--accent-strong` 两个值 |
+| 页面英文文案 | 直接改对应 HTML 里的文字(默认语言) |
+| 对应的中文文案 | `assets/js/i18n.js` 里同 `data-i18n` 键的值 |
+| HX OS 的指标与百分比 | `index.html` 搜 `data-value`(同时改旁边的 `--v:` 和数字) |
+| 头像 | 替换 `assets/img/avatar.jpg`(建议正方形;同时会用于导航与首页玻璃球) |
+| 分享封面 | 替换 `assets/img/og-cover.jpg`(建议 1200×630) |
+| 主色 | `assets/css/base.css` 顶部的 `--gold` / `--gold-hi` / `--gold-lo` |
+| 案例内容 | `projects.html` 里对应的 `.step` 文本 |
+| 写一篇新笔记 | 复制 `notes/_template.html` → 改内容 → 在 `notes.html` 加一张卡片(`data-cat` 填 ai/science/learning/ideas) |
 
-改中文文案时,记得同步改 `assets/i18n.js` 里对应的英文,否则英文界面会显示中文。
+## 本地预览
 
-## 写一篇新博客
+直接双击 `index.html` 即可(全部使用相对路径,不依赖服务器)。
 
-1. 复制 `blog/_template.html`,重命名为 `日期-短标题.html`(如 `2026-10-01-first-post.html`)
-2. 修改标题、日期、语言标签(中文 / EN)和正文
-3. 打开 `blog.html`,复制一张文章卡片,改成新文章的链接、标题和摘要
-4. 如果它是最新一篇,可以顺手更新 `index.html` 里的"最新文章"
-
-## 部署到 GitHub Pages
-
-### 方式 A:网页上传(不用装任何软件)
-
-1. 登录 GitHub,新建仓库,仓库名填 `你的用户名.github.io`(必须是这个名字)
-2. 进入仓库 → **Add file → Upload files**,把 `mywebsite` 里的**所有文件和文件夹**拖进去,提交
-3. 仓库 **Settings → Pages**,Source 选 `Deploy from a branch`,分支选 `main`,目录选 `/ (root)`,保存
-4. 等一两分钟,访问 `https://你的用户名.github.io`
-
-### 方式 B:命令行(需要先装 Git)
+小提示:`file://` 协议下**页面转场**与粒子背景的部分功能不会生效(浏览器安全限制),用本地服务器预览最完整:
 
 ```bash
-winget install Git.Git        # 安装 Git(只需一次)
-cd E:\mywebsite
-git init
-git add .
-git commit -m "first version"
-git branch -M main
-git remote add origin https://github.com/你的用户名/你的用户名.github.io.git
-git push -u origin main
+py -m http.server 8123 --directory .
+# 然后打开 http://localhost:8123
 ```
 
-推送后,同样在 Settings → Pages 里开启即可。
+## 部署(GitHub Pages)
 
-## 小说明
+```bash
+git add -A
+git commit -m "update"
+git push
+```
 
-- 全站使用相对路径,放在子目录(比如 `用户名.github.io/mywebsite/`)也能正常工作
-- `blog/_template.html` 加了 `noindex`,不会被搜索引擎收录
-- 打印"关于"页会自动隐藏导航和页脚,适合直接另存为 PDF
+推送后 GitHub Pages 自动发布,约 1 分钟生效。
+
+> 如果直连 GitHub 被重置,本仓库已配置走本机代理:
+> `git config --global http.https://github.com.proxy http://127.0.0.1:7890`
+> 代理端口变了就改这一行;不想要了就 `git config --global --unset http.https://github.com.proxy`。
+
+## 设计与动效说明
+
+- **入场**:标题逐字上浮、副标题逐词、其余元素错峰淡入(0.8s,expo 曲线)
+- **滚动**:卡片/面板进入视野时淡入上浮,图片轻微视差,顶部金色进度条
+- **交互**:桌面端有自定义光标(悬停放大)与按钮磁吸;头像玻璃球跟随鼠标倾斜
+- **性能**:只动画 `transform` / `opacity`;移动端关闭粒子与自定义光标;系统开启「减少动态效果」时全部动效关闭
+- **降级**:JS 未加载时内容完整可读(HX OS 显示真实数字,笔记列表可筛选由 JS 增强)

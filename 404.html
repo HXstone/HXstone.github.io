@@ -1,33 +1,58 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>页面走丢了 · Hexun 的小站 | Page not found · Hexun's Corner</title>
-<meta name="description" content="404 · 你要找的页面不存在。Page not found.">
+<title data-i18n="page.notfound.title">Page not found · HX STONE</title>
+<meta name="description" content="404 — this page wandered off.">
+<meta name="theme-color" content="#050505">
+<meta name="robots" content="noindex">
 <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
-<script>document.documentElement.classList.add("js");</script>
-<link rel="stylesheet" href="assets/style.css">
-<script src="assets/i18n.js" defer></script>
-<script src="assets/main.js" defer></script>
+<script>
+(function () {
+  var d = document.documentElement;
+  d.classList.add("js");
+  if (location.protocol.indexOf("http") !== 0) return;
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if ("startViewTransition" in document) return;
+  d.classList.add("veil-prep");
+})();
+</script>
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/site.css">
+<script src="assets/js/vendor/gsap.min.js" defer></script>
+<script src="assets/js/vendor/ScrollTrigger.min.js" defer></script>
+<script src="assets/js/i18n.js" defer></script>
+<script src="assets/js/main.js" defer></script>
+<script src="assets/js/motion.js" defer></script>
+<script src="assets/js/background.js" defer></script>
+<script src="assets/js/cursor.js" defer></script>
+<script src="assets/js/orb.js" defer></script>
+<script src="assets/js/hxos.js" defer></script>
+<script src="assets/js/transition.js" defer></script>
 </head>
 <body>
+
+<div class="bg-grid" aria-hidden="true"></div>
+<canvas class="bg-canvas" aria-hidden="true"></canvas>
+<div class="mouse-light" aria-hidden="true"></div>
+<div class="page-veil" aria-hidden="true"></div>
 
 <header class="site-header">
   <div class="wrap header-inner">
     <a class="brand" href="index.html">
-      <img class="brand-mark" src="assets/img/avatar.jpg" alt="" aria-hidden="true">
-      <span class="brand-name" data-i18n="site.name">Hexun 的小站</span>
+      <img class="brand-avatar" src="assets/img/avatar.jpg" alt="" aria-hidden="true">
+      <span class="brand-text">HX STONE</span>
     </a>
-    <button class="nav-toggle" type="button" aria-label="菜单 / Menu" aria-expanded="false">
+    <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false">
       <span></span><span></span><span></span>
     </button>
-    <nav class="site-nav" aria-label="主导航 / Main">
-      <a href="index.html" data-i18n="nav.home">首页</a>
-      <a href="projects.html" data-i18n="nav.projects">作品</a>
-      <a href="blog.html" data-i18n="nav.blog">博客</a>
-      <a href="about.html" data-i18n="nav.about">关于</a>
-      <button class="lang-toggle" type="button">EN</button>
+    <nav class="site-nav" aria-label="Primary">
+      <a href="index.html" data-i18n="nav.home">Home</a>
+      <a href="projects.html" data-i18n="nav.projects">Projects</a>
+      <a href="notes.html" data-i18n="nav.notes">Notes</a>
+      <a href="about.html" data-i18n="nav.about">About</a>
+      <button class="lang-toggle" type="button">中文</button>
     </nav>
   </div>
 </header>
@@ -36,17 +61,22 @@
   <div class="notfound">
     <div>
       <p class="code">404</p>
-      <h1 data-i18n="notfound.title">页面走丢了</h1>
-      <p data-i18n="notfound.desc">你要找的页面不存在,或者已经被移走了。</p>
-      <a class="btn btn-primary" href="index.html" data-i18n="notfound.home">回到首页</a>
+      <h1 data-i18n="notfound.title">This page wandered off</h1>
+      <p data-i18n="notfound.desc">The page you're looking for doesn't exist, or it has been moved.</p>
+      <a class="btn btn-primary" href="index.html" data-magnetic>
+        <span data-i18n="notfound.home">Back home</span>
+        <span class="arrow" aria-hidden="true">→</span>
+      </a>
     </div>
   </div>
 </main>
 
 <footer class="site-footer">
-  <div class="wrap footer-inner">
-    <p>© <span data-year>2026</span> <span data-i18n="site.name">Hexun 的小站</span></p>
-    <p><a href="about.html" data-i18n="footer.contact">联系我</a></p>
+  <div class="wrap">
+    <div class="footer-meta">
+      <span>© <span data-year>2026</span> HX STONE · Built with curiosity &amp; AI</span>
+      <a href="mailto:hexun120716@outlook.com" data-i18n="footer.contact">Email me</a>
+    </div>
   </div>
 </footer>
 

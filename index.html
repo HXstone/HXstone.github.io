@@ -1,120 +1,279 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Hexun 的小站 · 个人主页 | Hexun's Corner</title>
-<meta name="description" content="Hexun 的个人网站:小作品、博客和学习笔记。A personal corner for projects, notes and thoughts.">
+<title data-i18n="page.home.title">HX STONE — Student × AI Explorer</title>
+<meta name="description" content="HX STONE — a high-school student exploring AI: small games, notes and experiments. Building my future with AI &amp; technology.">
+<meta name="theme-color" content="#050505">
+<meta property="og:type" content="website">
+<meta property="og:title" content="HX STONE — Student × AI Explorer">
+<meta property="og:description" content="Building my future with AI &amp; Technology.">
+<meta property="og:image" content="https://hxstone.github.io/assets/img/og-cover.jpg">
+<meta property="og:url" content="https://hxstone.github.io/">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
-<script>document.documentElement.classList.add("js");</script>
-<link rel="stylesheet" href="assets/style.css">
-<script src="assets/i18n.js" defer></script>
-<script src="assets/main.js" defer></script>
+<script>
+(function () {
+  var d = document.documentElement;
+  d.classList.add("js");
+  if (location.protocol.indexOf("http") !== 0) return;
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if ("startViewTransition" in document) return;
+  d.classList.add("veil-prep");
+})();
+</script>
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/site.css">
+<script src="assets/js/vendor/gsap.min.js" defer></script>
+<script src="assets/js/vendor/ScrollTrigger.min.js" defer></script>
+<script src="assets/js/i18n.js" defer></script>
+<script src="assets/js/main.js" defer></script>
+<script src="assets/js/motion.js" defer></script>
+<script src="assets/js/background.js" defer></script>
+<script src="assets/js/cursor.js" defer></script>
+<script src="assets/js/orb.js" defer></script>
+<script src="assets/js/hxos.js" defer></script>
+<script src="assets/js/transition.js" defer></script>
 </head>
 <body>
+
+<div class="bg-grid" aria-hidden="true"></div>
+<canvas class="bg-canvas" aria-hidden="true"></canvas>
+<div class="mouse-light" aria-hidden="true"></div>
+<div class="page-veil" aria-hidden="true"></div>
 
 <header class="site-header">
   <div class="wrap header-inner">
     <a class="brand" href="index.html">
-      <img class="brand-mark" src="assets/img/avatar.jpg" alt="" aria-hidden="true">
-      <span class="brand-name" data-i18n="site.name">Hexun 的小站</span>
+      <img class="brand-avatar" src="assets/img/avatar.jpg" alt="" aria-hidden="true">
+      <span class="brand-text">HX STONE</span>
     </a>
-    <button class="nav-toggle" type="button" aria-label="菜单 / Menu" aria-expanded="false">
+    <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false">
       <span></span><span></span><span></span>
     </button>
-    <nav class="site-nav" aria-label="主导航 / Main">
-      <a href="index.html" aria-current="page" data-i18n="nav.home">首页</a>
-      <a href="projects.html" data-i18n="nav.projects">作品</a>
-      <a href="blog.html" data-i18n="nav.blog">博客</a>
-      <a href="about.html" data-i18n="nav.about">关于</a>
-      <button class="lang-toggle" type="button">EN</button>
+    <nav class="site-nav" aria-label="Primary">
+      <a href="index.html" aria-current="page" data-i18n="nav.home">Home</a>
+      <a href="projects.html" data-i18n="nav.projects">Projects</a>
+      <a href="notes.html" data-i18n="nav.notes">Notes</a>
+      <a href="about.html" data-i18n="nav.about">About</a>
+      <button class="lang-toggle" type="button">中文</button>
     </nav>
   </div>
 </header>
 
 <main>
 
-  <section class="hero wrap">
-    <div class="hero-text reveal">
-      <p class="eyebrow" data-i18n="home.hello">你好,我是</p>
-      <h1 data-i18n="home.name">你的名字</h1>
-      <p class="hero-role" data-i18n="home.role">学生 · 足球与长跑 · 编程新手</p>
-      <p class="hero-bio" data-i18n="home.bio">这个网站放着我的小作品、学习笔记和平时的一些想法。我不太会写代码,页面主要是在 AI 帮助下做出来的(vibe coding),我负责想点子、提要求和测试。</p>
-      <div class="hero-actions">
-        <a class="btn btn-primary" href="projects.html" data-i18n="home.viewProjects">看看我的作品</a>
-        <a class="btn btn-ghost" href="blog.html" data-i18n="home.readBlog">读读博客</a>
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <p class="label" data-intro>Student × AI Explorer × Future CS Student</p>
+
+        <h1 class="hero-title" data-split="chars">HX STONE</h1>
+
+        <p class="hero-statement" data-split="words">Building my future with AI &amp; Technology.</p>
+
+        <p class="hero-bio" data-intro data-i18n="hero.bio">I explore how AI can turn curiosity into real things — small games, notes and experiments. I set the direction; AI helps me build it.</p>
+
+        <ul class="identity" data-intro>
+          <li class="pill" data-i18n="hero.p1">Student</li>
+          <li class="pill" data-i18n="hero.p2">AI Explorer</li>
+          <li class="pill" data-i18n="hero.p3">Future CS Student</li>
+        </ul>
+
+        <div class="hero-cta" data-intro>
+          <a class="btn btn-primary" href="projects.html" data-magnetic>
+            <span data-i18n="hero.cta1">View projects</span>
+            <span class="arrow" aria-hidden="true">→</span>
+          </a>
+          <a class="btn btn-ghost" href="notes.html" data-magnetic>
+            <span data-i18n="hero.cta2">Read notes</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="orb-wrap reveal" data-reveal="scale">
+        <div class="orb-parallax" data-parallax="0.05">
+          <div class="orb" data-orb>
+            <span class="orb-halo" aria-hidden="true"></span>
+            <span class="orb-ring" aria-hidden="true"></span>
+            <img class="orb-photo" src="assets/img/avatar.jpg" alt="Hexun" width="768" height="768">
+            <span class="orb-glass" aria-hidden="true"></span>
+            <canvas class="orb-particles" data-orb-particles aria-hidden="true"></canvas>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="hero-visual reveal" data-reveal="scale">
-      <div class="hero-parallax" data-parallax="0.05">
-        <span class="hero-ring" aria-hidden="true"></span>
-        <img class="hero-avatar" src="assets/img/avatar.jpg" alt="Hexun">
+
+    <div class="wrap hero-foot" data-intro>
+      <span class="label">Scroll</span>
+      <span class="hero-line" aria-hidden="true"></span>
+    </div>
+  </section>
+
+  <!-- ============ HX OS ============ -->
+  <section class="section" id="system">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div>
+          <p class="label">01 / System</p>
+          <h2>HX OS</h2>
+        </div>
+      </div>
+
+      <div class="os glass reveal" data-reveal="scale" data-os>
+        <div class="os-bar">
+          <span class="os-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span class="os-title">hx-os / v0.1</span>
+          <span class="os-status">online</span>
+        </div>
+
+        <div class="os-body">
+          <div class="os-metrics">
+            <p class="os-group" data-i18n="os.group">Tracking</p>
+
+            <div class="meter">
+              <span class="meter-name" data-i18n="os.m1">Learning</span>
+              <span class="meter-track"><span class="meter-bar" style="--v:60%" data-value="60"></span></span>
+              <span class="meter-val">60%</span>
+            </div>
+
+            <div class="meter">
+              <span class="meter-name" data-i18n="os.m2">AI</span>
+              <span class="meter-track"><span class="meter-bar" style="--v:40%" data-value="40"></span></span>
+              <span class="meter-val">40%</span>
+            </div>
+
+            <div class="meter">
+              <span class="meter-name" data-i18n="os.m3">Programming</span>
+              <span class="meter-track"><span class="meter-bar" style="--v:30%" data-value="30"></span></span>
+              <span class="meter-val">30%</span>
+            </div>
+
+            <div class="meter">
+              <span class="meter-name" data-i18n="os.m4">Running</span>
+              <span class="meter-track"><span class="meter-bar" style="--v:30%" data-value="30"></span></span>
+              <span class="meter-val">30%</span>
+            </div>
+          </div>
+
+          <div class="os-log" aria-hidden="true">
+            <span class="line">&gt; boot <span class="k">hx.os</span> --mode=curiosity</span>
+            <span class="line">&gt; learning.map <span class="v">loaded</span></span>
+            <span class="line">&gt; ai.partner <span class="v">online</span></span>
+            <span class="line">&gt; running/5k <span class="v">in progress</span></span>
+            <span class="line">&gt; next: build something <span class="k">that matters</span></span>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="section wrap">
-    <div class="section-head reveal">
-      <span class="sec-index" aria-hidden="true">01</span>
-      <h2 data-i18n="home.featured">精选作品</h2>
-      <a class="section-link" href="projects.html" data-i18n="home.allProjects">全部作品 →</a>
-    </div>
-    <div class="grid" data-stagger>
-      <a class="card reveal" href="projects/minesweeper.html" target="_blank" rel="noopener">
-        <div class="card-banner banner-blue" aria-hidden="true"><span class="card-num">01</span><span class="banner-emoji">💣</span></div>
-        <div class="card-body">
-          <h3 class="card-title" data-i18n="proj.mine.title">扫雷</h3>
-          <p class="card-desc" data-i18n="proj.mine.desc">经典扫雷游戏,支持初级、中级、高级三种难度,带计时器和深色界面。</p>
-          <span class="card-meta"><span data-i18n="projects.open">打开玩玩 →</span><span class="card-arrow">↗</span></span>
+  <!-- ============ CASE STUDIES ============ -->
+  <section class="section" id="work">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div>
+          <p class="label">02 / Work</p>
+          <h2 data-i18n="work.title">Case Studies</h2>
         </div>
-      </a>
-      <a class="card reveal" href="projects/dino-run.html" target="_blank" rel="noopener">
-        <div class="card-banner banner-green" aria-hidden="true"><span class="card-num">02</span><span class="banner-emoji">🦖</span></div>
-        <div class="card-body">
-          <h3 class="card-title" data-i18n="proj.dino.title">恐龙快跑</h3>
-          <p class="card-desc" data-i18n="proj.dino.desc">点击或按空格开始,支持跳跃、下蹲和昼夜交替,键盘和触屏都能玩。</p>
-          <span class="card-meta"><span data-i18n="projects.open">打开玩玩 →</span><span class="card-arrow">↗</span></span>
-        </div>
-      </a>
-      <div class="card reveal">
-        <div class="card-banner banner-amber" aria-hidden="true"><span class="card-num">03</span><span class="banner-emoji">📒</span></div>
-        <div class="card-body">
-          <h3 class="card-title" data-i18n="proj.notes.title">错题本</h3>
-          <p class="card-desc" data-i18n="proj.notes.desc">整理的数学、物理、化学错题与知识点合集,正在持续更新。</p>
-          <span class="card-status" data-i18n="projects.soon">整理中,敬请期待</span>
-        </div>
+        <a class="sec-link" href="projects.html" data-i18n="work.link">Read the full studies →</a>
+      </div>
+
+      <div class="work-list" data-stagger>
+        <a class="work reveal" href="projects.html#minesweeper">
+          <span class="work-thumb thumb-game" aria-hidden="true">💣</span>
+          <div class="work-main">
+            <p class="work-index"><span>01</span> / <span data-i18n="work.mine.index">Game</span></p>
+            <h3 class="work-title" data-i18n="work.mine.title">Minesweeper</h3>
+            <p class="work-desc" data-i18n="work.mine.desc">Classic Minesweeper with three difficulty levels, a timer, and a first tap that never blows up.</p>
+            <div class="work-tags">
+              <span class="badge">HTML</span>
+              <span class="badge">CSS</span>
+              <span class="badge">JavaScript</span>
+              <span class="badge badge-plain">Playable</span>
+            </div>
+          </div>
+          <span class="work-go"><span data-i18n="work.case">View case study</span><span class="arrow" aria-hidden="true">→</span></span>
+        </a>
+
+        <a class="work reveal" href="projects.html#dino-run">
+          <span class="work-thumb thumb-run" aria-hidden="true">🦖</span>
+          <div class="work-main">
+            <p class="work-index"><span>02</span> / <span data-i18n="work.dino.index">Game</span></p>
+            <h3 class="work-title" data-i18n="work.dino.title">Dino Run</h3>
+            <p class="work-desc" data-i18n="work.dino.desc">A runner with a real difficulty curve, a day-night cycle, and controls for keyboard and touch.</p>
+            <div class="work-tags">
+              <span class="badge">HTML</span>
+              <span class="badge">Canvas</span>
+              <span class="badge">JavaScript</span>
+              <span class="badge badge-plain">Playable</span>
+            </div>
+          </div>
+          <span class="work-go"><span data-i18n="work.case">View case study</span><span class="arrow" aria-hidden="true">→</span></span>
+        </a>
+
+        <a class="work reveal" href="projects.html#mistake-notebook">
+          <span class="work-thumb thumb-notes" aria-hidden="true">📒</span>
+          <div class="work-main">
+            <p class="work-index"><span>03</span> / <span data-i18n="work.notes.index">Knowledge base</span></p>
+            <h3 class="work-title" data-i18n="work.notes.title">Mistake Notebook</h3>
+            <p class="work-desc" data-i18n="work.notes.desc">A second brain for the mistakes I keep repeating, organised by subject and topic.</p>
+            <div class="work-tags">
+              <span class="badge">Markdown</span>
+              <span class="badge">Git</span>
+              <span class="badge badge-plain">In progress</span>
+            </div>
+          </div>
+          <span class="work-go"><span data-i18n="work.case">View case study</span><span class="arrow" aria-hidden="true">→</span></span>
+        </a>
       </div>
     </div>
   </section>
 
-  <section class="section wrap">
-    <div class="section-head reveal">
-      <span class="sec-index" aria-hidden="true">02</span>
-      <h2 data-i18n="home.latest">最新文章</h2>
-      <a class="section-link" href="blog.html" data-i18n="home.allPosts">全部文章 →</a>
-    </div>
-    <div class="post-list" data-stagger>
-      <a class="post-card reveal" href="blog/2026-09-25-hello.html">
-        <p class="post-meta"><time datetime="2026-09-25">2026-09-25</time><span class="badge badge-lang">中文</span></p>
-        <h2>小站开张了</h2>
-        <p class="excerpt">为什么要做这个网站,以及我是怎么做出来的。</p>
-        <span class="more" data-i18n="blog.readMore">阅读全文 →</span>
-      </a>
-      <a class="post-card reveal" href="blog/2026-09-18-tiny-games.html">
-        <p class="post-meta"><time datetime="2026-09-18">2026-09-18</time><span class="badge badge-lang">EN</span></p>
-        <h2>Why I keep making tiny games</h2>
-        <p class="excerpt">I don't really write code — and that hasn't stopped me from finishing small games.</p>
-        <span class="more" data-i18n="blog.readMore">阅读全文 →</span>
-      </a>
+  <!-- ============ NOTES ============ -->
+  <section class="section" id="notes">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div>
+          <p class="label">03 / Notes</p>
+          <h2 data-i18n="notes.title">Notes</h2>
+        </div>
+        <a class="sec-link" href="notes.html" data-i18n="notes.all">All notes →</a>
+      </div>
+
+      <div class="note-list" data-stagger>
+        <a class="note reveal" href="notes/2026-09-25-hello.html">
+          <span class="note-date">2026 · 09 · 25</span>
+          <div>
+            <h3>小站开张了</h3>
+            <p>为什么要做这个网站,以及我是怎么做出来的。</p>
+          </div>
+          <span class="note-cat badge badge-plain">Learning</span>
+        </a>
+
+        <a class="note reveal" href="notes/2026-09-18-tiny-games.html">
+          <span class="note-date">2026 · 09 · 18</span>
+          <div>
+            <h3>Why I keep making tiny games</h3>
+            <p>I don't really write code — and that hasn't stopped me from finishing small games.</p>
+          </div>
+          <span class="note-cat badge badge-plain">Ideas</span>
+        </a>
+      </div>
     </div>
   </section>
 
 </main>
 
 <footer class="site-footer">
-  <div class="wrap footer-inner">
-    <p>© <span data-year>2026</span> <span data-i18n="site.name">Hexun 的小站</span></p>
-    <p><a href="about.html" data-i18n="footer.contact">联系我</a></p>
+  <div class="wrap">
+    <h2 class="footer-big reveal">Let's build <span>something.</span></h2>
+    <div class="footer-meta">
+      <span>© <span data-year>2026</span> HX STONE · Built with curiosity &amp; AI</span>
+      <a href="mailto:hexun120716@outlook.com" data-i18n="footer.contact">Email me</a>
+    </div>
   </div>
 </footer>
 

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<!--
+  ============================================================
+  Notes 文章模板 · 用法
+  ------------------------------------------------------------
+  1. 复制本文件,命名为 日期-英文短标题.html,例如:
+       2026-10-01-my-first-note.html
+  2. 修改 <title>、meta description、h1、日期、分类标签和正文
+  3. 到 ../notes.html 的列表里复制一张卡片,改成新文章的链接与摘要
+     (data-cat 填分类:ai / science / learning / ideas)
+  4. 如果它是最新一篇,可以顺手更新 ../index.html 的 Notes 区块
+  5. 正文写在 <div class="prose"> 里,支持 h2 / h3 / p / ul / ol /
+     blockquote / pre code / img / hr
+  6. 本文件不会被任何页面链接到,留着当模板即可
+  ============================================================
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Note title · HX STONE</title>
+<meta name="description" content="One-line summary.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#050505">
+<link rel="icon" type="image/svg+xml" href="../assets/img/favicon.svg">
+<script>
+(function () {
+  var d = document.documentElement;
+  d.classList.add("js");
+  if (location.protocol.indexOf("http") !== 0) return;
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if ("startViewTransition" in document) return;
+  d.classList.add("veil-prep");
+})();
+</script>
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/site.css">
+<script src="../assets/js/vendor/gsap.min.js" defer></script>
+<script src="../assets/js/vendor/ScrollTrigger.min.js" defer></script>
+<script src="../assets/js/i18n.js" defer></script>
+<script src="../assets/js/main.js" defer></script>
+<script src="../assets/js/motion.js" defer></script>
+<script src="../assets/js/background.js" defer></script>
+<script src="../assets/js/cursor.js" defer></script>
+<script src="../assets/js/orb.js" defer></script>
+<script src="../assets/js/hxos.js" defer></script>
+<script src="../assets/js/transition.js" defer></script>
+</head>
+<body>
+
+<div class="bg-grid" aria-hidden="true"></div>
+<canvas class="bg-canvas" aria-hidden="true"></canvas>
+<div class="mouse-light" aria-hidden="true"></div>
+<div class="page-veil" aria-hidden="true"></div>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-avatar" src="../assets/img/avatar.jpg" alt="" aria-hidden="true">
+      <span class="brand-text">HX STONE</span>
+    </a>
+    <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="site-nav" aria-label="Primary">
+      <a href="../index.html" data-i18n="nav.home">Home</a>
+      <a href="../projects.html" data-i18n="nav.projects">Projects</a>
+      <a href="../notes.html" aria-current="page" data-i18n="nav.notes">Notes</a>
+      <a href="../about.html" data-i18n="nav.about">About</a>
+      <button class="lang-toggle" type="button">中文</button>
+    </nav>
+  </div>
+</header>
+
+<main class="article">
+
+  <a class="back-link" href="../notes.html" data-i18n="article.back">← Back to notes</a>
+
+  <article>
+    <header class="article-head">
+      <h1>Note title</h1>
+      <div class="meta-row">
+        <time datetime="2026-01-01">2026 · 01 · 01</time>
+        <span class="badge badge-plain">EN</span>
+        <span class="badge badge-plain">Ideas</span>
+      </div>
+    </header>
+
+    <div class="prose">
+      <p>Open with one clear sentence.</p>
+
+      <h2>A section</h2>
+      <p>Body text. Use <strong>bold</strong> for emphasis and <code>inline code</code> when needed.</p>
+      <ul>
+        <li>Point one</li>
+        <li>Point two</li>
+      </ul>
+
+      <blockquote>
+        <p>A quote worth keeping.</p>
+      </blockquote>
+    </div>
+  </article>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <h2 class="footer-big reveal">Let's build <span>something.</span></h2>
+    <div class="footer-meta">
+      <span>© <span data-year>2026</span> HX STONE · Built with curiosity &amp; AI</span>
+      <a href="mailto:hexun120716@outlook.com" data-i18n="footer.contact">Email me</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

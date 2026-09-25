@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title data-i18n="page.about.title">About · HX STONE</title>
-<meta name="description" content="About HX STONE — I build with curiosity, and AI is my creative partner.">
+<title data-i18n="page.notes.title">Notes · HX STONE</title>
+<meta name="description" content="A personal knowledge base by HX STONE — study logs, tinkering notes and half-formed ideas about AI, science and learning.">
 <meta name="theme-color" content="#050505">
-<meta property="og:type" content="profile">
-<meta property="og:title" content="About · HX STONE">
-<meta property="og:description" content="I build with curiosity. AI is my creative partner.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Notes · HX STONE">
+<meta property="og:description" content="Study logs, tinkering notes and half-formed ideas.">
 <meta property="og:image" content="https://hxstone.github.io/assets/img/og-cover.jpg">
-<meta property="og:url" content="https://hxstone.github.io/about.html">
+<meta property="og:url" content="https://hxstone.github.io/notes.html">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
 <script>
@@ -55,8 +55,8 @@
     <nav class="site-nav" aria-label="Primary">
       <a href="index.html" data-i18n="nav.home">Home</a>
       <a href="projects.html" data-i18n="nav.projects">Projects</a>
-      <a href="notes.html" data-i18n="nav.notes">Notes</a>
-      <a href="about.html" aria-current="page" data-i18n="nav.about">About</a>
+      <a href="notes.html" aria-current="page" data-i18n="nav.notes">Notes</a>
+      <a href="about.html" data-i18n="nav.about">About</a>
       <button class="lang-toggle" type="button">中文</button>
     </nav>
   </div>
@@ -64,40 +64,40 @@
 
 <main>
 
+  <header class="page-head">
+    <p class="label" data-i18n="nav.notes">Notes</p>
+    <h1 data-i18n="notes.title">Notes</h1>
+    <p class="lead" data-i18n="notes.lead">Study logs, tinkering notes and half-formed ideas.</p>
+  </header>
+
   <section class="section">
     <div class="wrap">
-      <div class="about-hero">
-        <div>
-          <p class="label" data-i18n="nav.about">About</p>
-          <h1 class="quote reveal">I build with <em>curiosity</em>.<br>AI is my <em>creative partner</em>.</h1>
-          <ul class="identity reveal">
-            <li class="pill" data-i18n="hero.p1">Student</li>
-            <li class="pill" data-i18n="hero.p2">AI Explorer</li>
-            <li class="pill" data-i18n="hero.p3">Future CS Student</li>
-          </ul>
-        </div>
-        <img class="about-photo reveal" data-reveal="scale" src="assets/img/avatar.jpg" alt="Hexun" width="768" height="768">
+      <div class="notes-toolbar reveal">
+        <button class="filter" type="button" data-filter="all" aria-pressed="true" data-i18n="notes.f.all">All</button>
+        <button class="filter" type="button" data-filter="ai" aria-pressed="false" data-i18n="notes.f.ai">AI</button>
+        <button class="filter" type="button" data-filter="science" aria-pressed="false" data-i18n="notes.f.science">Science</button>
+        <button class="filter" type="button" data-filter="learning" aria-pressed="false" data-i18n="notes.f.learning">Learning</button>
+        <button class="filter" type="button" data-filter="ideas" aria-pressed="false" data-i18n="notes.f.ideas">Ideas</button>
       </div>
 
-      <div class="about-body">
-        <p class="reveal" data-i18n="about.p1">I'm a high-school student in Huizhou, China. Football and long-distance running keep me moving; AI is where my curiosity goes to work.</p>
-        <p class="reveal" data-i18n="about.p2">I don't write code the way engineers do. I set the direction and the standard, AI does the building, and I test it until it feels right. Everything on this site came out of that loop.</p>
-      </div>
-
-      <div class="about-body">
-        <div class="reveal">
-          <p class="label" data-i18n="about.contact.title">Contact</p>
-          <div class="contact-list">
-            <div class="contact-row">
-              <span class="k">Email</span>
-              <a class="v" href="mailto:hexun120716@outlook.com">hexun120716@outlook.com</a>
-            </div>
+      <div class="note-list" data-stagger>
+        <a class="note reveal" data-cat="learning" href="notes/2026-09-25-hello.html">
+          <span class="note-date">2026 · 09 · 25</span>
+          <div>
+            <h3>小站开张了</h3>
+            <p>为什么要做这个网站,以及我是怎么做出来的。</p>
           </div>
-        </div>
-        <div class="reveal">
-          <p class="label" data-i18n="footer.contact">Say hello</p>
-          <p>Always happy to talk about AI, football or running.</p>
-        </div>
+          <span class="note-cat badge badge-plain">Learning</span>
+        </a>
+
+        <a class="note reveal" data-cat="ideas" href="notes/2026-09-18-tiny-games.html">
+          <span class="note-date">2026 · 09 · 18</span>
+          <div>
+            <h3>Why I keep making tiny games</h3>
+            <p>I don't really write code — and that hasn't stopped me from finishing small games.</p>
+          </div>
+          <span class="note-cat badge badge-plain">Ideas</span>
+        </a>
       </div>
     </div>
   </section>

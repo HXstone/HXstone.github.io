@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>小站开张了 · HX STONE</title>
+<meta name="description" content="为什么要做这个网站,以及我是怎么做出来的。">
+<meta name="theme-color" content="#050505">
+<link rel="icon" type="image/svg+xml" href="../assets/img/favicon.svg">
+<script>
+(function () {
+  var d = document.documentElement;
+  d.classList.add("js");
+  if (location.protocol.indexOf("http") !== 0) return;
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if ("startViewTransition" in document) return;
+  d.classList.add("veil-prep");
+})();
+</script>
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/site.css">
+<script src="../assets/js/vendor/gsap.min.js" defer></script>
+<script src="../assets/js/vendor/ScrollTrigger.min.js" defer></script>
+<script src="../assets/js/i18n.js" defer></script>
+<script src="../assets/js/main.js" defer></script>
+<script src="../assets/js/motion.js" defer></script>
+<script src="../assets/js/background.js" defer></script>
+<script src="../assets/js/cursor.js" defer></script>
+<script src="../assets/js/orb.js" defer></script>
+<script src="../assets/js/hxos.js" defer></script>
+<script src="../assets/js/transition.js" defer></script>
+</head>
+<body>
+
+<div class="bg-grid" aria-hidden="true"></div>
+<canvas class="bg-canvas" aria-hidden="true"></canvas>
+<div class="mouse-light" aria-hidden="true"></div>
+<div class="page-veil" aria-hidden="true"></div>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-avatar" src="../assets/img/avatar.jpg" alt="" aria-hidden="true">
+      <span class="brand-text">HX STONE</span>
+    </a>
+    <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="site-nav" aria-label="Primary">
+      <a href="../index.html" data-i18n="nav.home">Home</a>
+      <a href="../projects.html" data-i18n="nav.projects">Projects</a>
+      <a href="../notes.html" aria-current="page" data-i18n="nav.notes">Notes</a>
+      <a href="../about.html" data-i18n="nav.about">About</a>
+      <button class="lang-toggle" type="button">中文</button>
+    </nav>
+  </div>
+</header>
+
+<main class="article">
+
+  <a class="back-link" href="../notes.html" data-i18n="article.back">← Back to notes</a>
+
+  <article>
+    <header class="article-head">
+      <h1>小站开张了</h1>
+      <div class="meta-row">
+        <time datetime="2026-09-25">2026 · 09 · 25</time>
+        <span class="badge badge-plain">中文</span>
+        <span class="badge badge-plain">Learning</span>
+      </div>
+    </header>
+
+    <div class="prose">
+      <p>这个网站建好了。写这篇当作开张记录,说说它为什么存在,以及它是怎么做出来的。</p>
+
+      <h2>为什么做这个网站</h2>
+      <p>平时做了不少小东西:扫雷、恐龙快跑,还有一份正在整理的错题本。它们散落在电脑的各个文件夹里,想给别人看的时候总要翻半天。所以我需要一个固定的地方,把作品和笔记都放进来。</p>
+
+      <h2>这里会有什么</h2>
+      <ul>
+        <li><strong>作品</strong>:小游戏和以后做的各种东西,大多能直接在浏览器里打开。</li>
+        <li><strong>笔记</strong>:学习记录、折腾日志和一些零碎想法。</li>
+        <li><strong>关于</strong>:我在做什么,以及怎么联系我。</li>
+      </ul>
+
+      <h2>我是怎么做出来的</h2>
+      <p>老实说,我不像工程师那样写代码。我的办法是:把想要的效果尽可能说清楚,让 AI 帮忙实现,自己在浏览器里反复试,哪里不对就继续提要求。</p>
+      <p>这个网站就是这样一点点调出来的。所以如果你觉得哪里好看,功劳有一大半是 AI 的;如果哪里看着别扭,那多半是我没描述清楚 :)</p>
+
+      <blockquote>
+        <p>把东西做出来,再把它放到一个能被看见的地方——这本身就是一种完成。</p>
+      </blockquote>
+
+      <h2>接下来</h2>
+      <p>之后会继续整理错题本,做新的小东西,也会在这里记录过程。如果有什么想聊的,欢迎发邮件给我。</p>
+    </div>
+  </article>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <h2 class="footer-big reveal">Let's build <span>something.</span></h2>
+    <div class="footer-meta">
+      <span>© <span data-year>2026</span> HX STONE · Built with curiosity &amp; AI</span>
+      <a href="mailto:hexun120716@outlook.com" data-i18n="footer.contact">Email me</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
