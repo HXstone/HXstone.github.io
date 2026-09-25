@@ -30,8 +30,8 @@ Student × AI Explorer × Future CS Builder.
 ├── 404.html              自定义错误页
 ├── notes/
 │   ├── _template.html          新笔记模板(复制它来写)
-│   ├── 2026-09-25-hello.html   笔记:小站开张了
-│   └── 2026-09-18-tiny-games.html 笔记:Why I keep making tiny games
+│   ├── 2026-09-25-hello-world.html 笔记:你好,世界:我的个人数字空间(中英双语)
+│   └── 2026-09-25-hello.html   笔记:小站开张了
 ├── projects/
 │   ├── minesweeper.html  扫雷(可玩)
 │   └── dino-run.html     恐龙快跑(可玩)
