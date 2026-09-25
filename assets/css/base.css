@@ -62,7 +62,10 @@
   --cjk: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC",
          "Source Han Sans SC", sans-serif;
 
-  --font: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", var(--cjk);
+  /* 正文中文用 MiSans,由 CDN 按需分包加载(见各页 <head> 的 link);
+     加载失败自动回落到下面的系统中文。 */
+  --font-read-cjk: "MiSans VF", var(--cjk);
+  --font: "Plus Jakarta Sans", var(--font-read-cjk);
   /* 标题沿用改动前的系统字体观感 */
   --font-title: -apple-system, BlinkMacSystemFont, "Segoe UI", var(--cjk);
   --mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", "SF Mono", Menlo,

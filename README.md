@@ -55,7 +55,7 @@ Student × AI Explorer × Future CS Builder.
 | 头像 | 替换 `assets/img/avatar.jpg`(建议正方形;同时会用于导航与首页玻璃球) |
 | 分享封面 | 替换 `assets/img/og-cover.jpg`(建议 1200×630) |
 | 主色 | `assets/css/base.css` 顶部的 `--gold` / `--gold-hi` / `--gold-lo` |
-| 正文字体 | `assets/css/base.css` 里 `--font`(正文)/ `--mono`(小字);文件在 `assets/fonts/` |
+| 正文字体 | `assets/css/base.css` 里 `--font` / `--font-read-cjk`(中文正文)/ `--mono`;拉丁文件在 `assets/fonts/` |
 | 案例内容 | `projects.html` 里对应的 `.step` 文本 |
 | 写一篇新笔记 | 复制 `notes/_template.html` → 改内容 → 在 `notes.html` 加一张卡片(`data-cat` 填 ai/science/learning/ideas) |
 
@@ -96,11 +96,15 @@ git push
 
 自托管、离线可用(`file://` 也能跑),没有外部字体请求:
 
-| 用途 | 字体 | 文件 |
+| 用途 | 字体 | 来源 |
 |---|---|---|
-| 正文 | Plus Jakarta Sans(变量) | `plus-jakarta-sans-latin-wght-normal.woff2` |
-| 小字 / 等宽 | JetBrains Mono(变量) | `jetbrains-mono-latin-wght-normal.woff2` |
+| 正文(拉丁) | Plus Jakarta Sans(变量) | 自托管 `assets/fonts/` |
+| 正文(中文) | MiSans(小米,无衬线) | CDN 按需分包 |
+| 小字 / 等宽 | JetBrains Mono(变量) | 自托管 `assets/fonts/` |
+| 标题 | 系统字体 | — |
 
-- 两款都是 SIL OFL 1.1 的拉丁变量字体,由 `@font-face` 的 `unicode-range` 限定在拉丁字符;中文自动回落到系统字体(`--cjk`)。
-- **标题沿用系统字体**(`base.css` 的 `--font-title`,即改动前的观感),不额外加载字体。
+- 拉丁两款是 SIL OFL 1.1 变量字体,自托管 + `@font-face` 的 `unicode-range` 限定在拉丁字符,离线可用。
+- 中文正文用 **MiSans**(小米开源,免费商用):各页 `<head>` 用 `<link>` 引入 `misans-vf-4web` 的 `result.css`(jsdelivr)。它把字体切成 375 个带 `unicode-range` 的小分包,浏览器只下载当前页面用到的切片并缓存;加载失败自动回落系统中文,且异步加载、不阻塞渲染。
+- **标题和中文小字仍用系统字体**(`base.css` 的 `--font-title` / `--cjk`),不额外加载。
+- 想换中文正文:改各页 `<head>` 里的 CDN 链接,并把 `base.css` 的 `--font-read-cjk` 里的字体名换成对应 `result.css` 中的 `font-family`。
 - 质感:全站叠了一层极淡的 `feTurbulence` 噪点(`base.css` 的 `body::before`),用来消除大面积深色渐变的色带;大标题渐变上有一道一次性扫光,减少动态效果时自动关闭。
