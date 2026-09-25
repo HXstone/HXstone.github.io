@@ -161,3 +161,12 @@ function applyLang(lang) {
     if (value != null) el.textContent = value;
   });
 }
+
+/* 兜底:如果 main.js 没能运行(标记 data-enhanced 不出现),
+   3 秒后强制显示所有动效元素,避免页面空白。 */
+window.setTimeout(function () {
+  if (document.documentElement.getAttribute("data-enhanced")) return;
+  document.querySelectorAll(".reveal").forEach(function (el) {
+    el.classList.add("is-visible");
+  });
+}, 3000);
