@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>扫雷 · Minesweeper</title>
 <style>
   :root {
@@ -13,7 +13,7 @@
     --cell-top: #4a5c80;
     --cell-bottom: #35435e;
     --open-cell: #212b41;
-    --accent: #f0b429;
+    --accent: #d4af37;
     --text: #e8edf7;
     --muted: #8a97b3;
     --led-bg: #170709;
@@ -23,7 +23,7 @@
   html, body { height: 100%; }
   body {
     margin: 0;
-    padding: 18px 16px 26px;
+    padding: 56px 16px 26px;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -31,11 +31,44 @@
     justify-content: center;
     gap: 14px;
     font-family: "Segoe UI", system-ui, -apple-system, "Microsoft YaHei", sans-serif;
-    color: var(--text);
-    background: radial-gradient(1100px 620px at 50% -12%, #1e2a46 0%, var(--bg) 62%);
+    color: #f4f2ed;
+    background: #050505;
     user-select: none;
     -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
+  }
+
+  /* 回到站点:游戏页原先没有任何出口 */
+  .back {
+    position: fixed;
+    top: 14px;
+    left: 16px;
+    z-index: 5;
+    padding: 8px 15px;
+    border: 1px solid rgba(212, 175, 55, .35);
+    border-radius: 999px;
+    background: rgba(212, 175, 55, .06);
+    color: #d4af37;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-decoration: none;
+    transition: background-color .2s, color .2s, border-color .2s;
+  }
+  .back:hover { background: rgba(212, 175, 55, .14); color: #f3e2a9; border-color: #d4af37; }
+
+  /* 黑金外壳包裹游戏面,游戏内部配色只把 accent 对齐到站点主色 */
+  .shell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 22px 20px 24px;
+    border: 1px solid rgba(212, 175, 55, .22);
+    border-radius: 18px;
+    background: radial-gradient(1100px 620px at 50% -12%, #1e2a46 0%, var(--bg) 62%);
+    color: var(--text);
+    box-shadow: 0 40px 80px -50px #000;
+    max-width: 100%;
   }
   h1 {
     margin: 0;
@@ -185,30 +218,34 @@
 </style>
 </head>
 <body>
+  <a class="back" href="../projects.html#minesweeper">← HX STONE</a>
 
-<h1>扫<span>雷</span></h1>
+  <div class="shell">
+    <h1>扫<span>雷</span></h1>
 
-<div class="levels">
-  <button data-level="easy" class="active">初级 9×9</button>
-  <button data-level="medium">中级 16×16</button>
-  <button data-level="hard">高级 30×16</button>
-</div>
+    <div class="levels">
+      <button data-level="easy" class="active">初级 9×9</button>
+      <button data-level="medium">中级 16×16</button>
+      <button data-level="hard">高级 30×16</button>
+    </div>
 
-<div class="game">
-  <div class="panel">
-    <div class="led" id="mineCount">010</div>
-    <button class="face" id="reset" title="重新开始">🙂</button>
-    <div class="led" id="timer">000</div>
+    <div class="game">
+      <div class="panel">
+        <div class="led" id="mineCount">010</div>
+        <button class="face" id="reset" title="重新开始">🙂</button>
+        <div class="led" id="timer">000</div>
+      </div>
+      <div class="board-scroll">
+        <div class="board" id="board"></div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="tips">左键翻开 · 右键插旗 · 点击数字可快速展开（周围旗数正确时）· 触屏长按插旗 · 按 R 重开</div>
+      <div class="tips">Left-click to open · right-click to flag · click a number to expand · long-press to flag on touch · press R to restart</div>
+      <div>最佳成绩：<b id="best">—</b></div>
+    </div>
   </div>
-  <div class="board-scroll">
-    <div class="board" id="board"></div>
-  </div>
-</div>
-
-<div class="footer">
-  <div>最佳成绩：<b id="best">—</b></div>
-  <div class="tips">左键翻开 · 右键插旗 · 点击数字可快速展开（周围旗数正确时）· 触屏长按插旗 · 按 R 重开</div>
-</div>
 
 <script>
 (function () {

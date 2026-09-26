@@ -6,6 +6,7 @@
 <title data-i18n="page.notes.title">Notes · HX STONE</title>
 <meta name="description" content="A personal knowledge base by HX STONE — study logs, tinkering notes and half-formed ideas about AI, science and learning.">
 <meta name="theme-color" content="#050505">
+<meta name="color-scheme" content="dark">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Notes · HX STONE">
 <meta property="og:description" content="Study logs, tinkering notes and half-formed ideas.">
@@ -41,9 +42,10 @@
 </head>
 <body>
 
+<a class="skip" href="#main">Skip to content</a>
+
 <div class="bg-grid" aria-hidden="true"></div>
 <canvas class="bg-canvas" aria-hidden="true"></canvas>
-<div class="mouse-light" aria-hidden="true"></div>
 <div class="page-veil" aria-hidden="true"></div>
 
 <header class="site-header">
@@ -65,10 +67,9 @@
   </div>
 </header>
 
-<main>
+<main id="main">
 
   <header class="page-head">
-    <p class="label" data-i18n="nav.notes">Notes</p>
     <h1 data-i18n="notes.title">Notes</h1>
     <p class="lead" data-i18n="notes.lead">Study logs, tinkering notes and half-formed ideas.</p>
   </header>
@@ -85,21 +86,21 @@
 
       <div class="note-list" data-stagger>
         <a class="note reveal" data-cat="learning" href="notes/2026-09-25-hello-world.html">
-          <span class="note-date">2026 · 09 · 25</span>
+          <span class="note-date">2026-09-25</span>
           <div>
             <h3 data-i18n="note.helloWorld.h1">Hello, World: My Personal Digital Space</h3>
             <p data-i18n="note.helloWorld.card.desc">Recording growth, exploring technology — and leaving a voice of my own.</p>
           </div>
-          <span class="note-cat badge badge-plain">Learning</span>
+          <span class="note-cat badge badge-plain" data-i18n="notes.f.learning">Learning</span>
         </a>
 
         <a class="note reveal" data-cat="learning" href="notes/2026-09-25-hello.html">
-          <span class="note-date">2026 · 09 · 25</span>
+          <span class="note-date">2026-09-25</span>
           <div>
-            <h3>小站开张了</h3>
-            <p>为什么要做这个网站,以及我是怎么做出来的。</p>
+            <h3 data-i18n="note.hello.h1">The Site Goes Live</h3>
+            <p data-i18n="note.hello.card.desc">Why I built this site, and how I made it.</p>
           </div>
-          <span class="note-cat badge badge-plain">Learning</span>
+          <span class="note-cat badge badge-plain" data-i18n="notes.f.learning">Learning</span>
         </a>
       </div>
     </div>
@@ -109,7 +110,7 @@
 
 <footer class="site-footer">
   <div class="wrap">
-    <h2 class="footer-big reveal">Let's build <span>something.</span></h2>
+    <h2 class="footer-big reveal"><span data-i18n="footer.big.1">Let's build</span> <span class="accent" data-i18n="footer.big.2">something.</span></h2>
     <div class="footer-meta">
       <span>© <span data-year>2026</span> HX STONE · Built with curiosity &amp; AI</span>
       <a href="mailto:hexun120716@outlook.com" data-i18n="footer.contact">Email me</a>

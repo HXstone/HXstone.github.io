@@ -22,6 +22,7 @@
 <meta name="description" content="One-line summary.">
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#050505">
+<meta name="color-scheme" content="dark">
 <link rel="icon" type="image/svg+xml" href="../assets/img/favicon.svg">
 <script>
 (function () {
@@ -51,9 +52,10 @@
 </head>
 <body>
 
+<a class="skip" href="#main">Skip to content</a>
+
 <div class="bg-grid" aria-hidden="true"></div>
 <canvas class="bg-canvas" aria-hidden="true"></canvas>
-<div class="mouse-light" aria-hidden="true"></div>
 <div class="page-veil" aria-hidden="true"></div>
 
 <header class="site-header">
@@ -75,7 +77,7 @@
   </div>
 </header>
 
-<main class="article">
+<main class="article" id="main">
 
   <a class="back-link" href="../notes.html" data-i18n="article.back">← Back to notes</a>
 
@@ -83,7 +85,7 @@
     <header class="article-head">
       <h1>Note title</h1>
       <div class="meta-row">
-        <time datetime="2026-01-01">2026 · 01 · 01</time>
+        <time datetime="2026-01-01">2026-01-01</time>
         <span class="badge badge-plain">EN</span>
         <span class="badge badge-plain">Ideas</span>
       </div>
@@ -109,7 +111,7 @@
 
 <footer class="site-footer">
   <div class="wrap">
-    <h2 class="footer-big reveal">Let's build <span>something.</span></h2>
+    <h2 class="footer-big reveal"><span data-i18n="footer.big.1">Let's build</span> <span class="accent" data-i18n="footer.big.2">something.</span></h2>
     <div class="footer-meta">
       <span>© <span data-year>2026</span> HX STONE · Built with curiosity &amp; AI</span>
       <a href="mailto:hexun120716@outlook.com" data-i18n="footer.contact">Email me</a>

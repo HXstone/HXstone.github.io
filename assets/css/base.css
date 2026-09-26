@@ -43,7 +43,7 @@
 
   --text: #f4f2ed;
   --text-2: #a9a6a0;
-  --text-3: #6e6b66;
+  --text-3: #8f8c86;
 
   --glass: rgba(255, 255, 255, .045);
   --glass-2: rgba(255, 255, 255, .02);
@@ -71,9 +71,25 @@
   --mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", "SF Mono", Menlo,
           Consolas, var(--cjk), monospace;
 
+  /* ---- type scale ----
+     小字区间原来有 10 档(10.5 / 11 / 11.5 / 12 / 12.5 / 13 / 13.5 / 14 / 14.5 / 15.5),
+     收敛为 4 档;标题用命名的 fluid 档位。 */
+  --fs-micro: 11px;                        /* 等宽小标签 / 徽章 / 序号 */
+  --fs-xs: 12.5px;                         /* 等宽元信息:日期、导航、页脚 */
+  --fs-sm: 14px;                           /* UI 文案:按钮、描述 */
+  --fs-body: 16px;                         /* 正文 */
+  --fs-md: clamp(19px, 2.2vw, 24px);       /* 卡片标题 */
+  --fs-lg: clamp(26px, 4.2vw, 46px);       /* 区块 / 案例 / 引言标题 */
+  --fs-xl: clamp(34px, 6vw, 68px);         /* 页面主标题 */
+  --fs-display: clamp(42px, 8.6vw, 112px); /* Hero */
+
   /* ---- motion ---- */
-  --ease: cubic-bezier(.16, 1, .3, 1);
+  --ease: cubic-bezier(.16, 1, .3, 1);        /* 入场:expo out */
+  --ease-out: cubic-bezier(.22, .61, .36, 1); /* hover / 小位移 */
   --ease-io: cubic-bezier(.65, 0, .35, 1);
+  --dur-fast: .18s;  /* hover 反馈 */
+  --dur: .26s;       /* 卡片 / 位移 */
+  --dur-slow: .8s;   /* 滚动入场 */
 }
 
 * { box-sizing: border-box; }
@@ -88,7 +104,7 @@ body {
   margin: 0;
   overflow-x: clip;
   font-family: var(--font);
-  font-size: 16px;
+  font-size: var(--fs-body);
   line-height: 1.75;
   color: var(--text);
   background: var(--ink);
@@ -113,7 +129,7 @@ body::before {
   inset: 0;
   z-index: 9997;
   pointer-events: none;
-  opacity: .06;
+  opacity: .04;
   mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
   background-size: 160px 160px;
@@ -130,7 +146,6 @@ body::before {
     linear-gradient(90deg, rgba(255, 255, 255, .028) 1px, transparent 1px);
   background-size: 78px 78px;
   transform: translate3d(var(--bgx, 0), var(--bgy, 0), 0);
-  transition: transform .8s var(--ease);
   -webkit-mask-image: radial-gradient(1100px 760px at 50% 0%, #000 22%, transparent 76%);
   mask-image: radial-gradient(1100px 760px at 50% 0%, #000 22%, transparent 76%);
 }
@@ -143,19 +158,7 @@ body::before {
   pointer-events: none;
 }
 
-/* 背景:跟随鼠标的柔光 */
-.mouse-light {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity .6s ease;
-  background: radial-gradient(520px circle at var(--mx, 50%) var(--my, 30%),
-              rgba(212, 175, 55, .07), transparent 62%);
-}
-
-html.has-cursor .mouse-light { opacity: 1; }
+/* 背景:跟随鼠标的柔光 —— 已移除(与网格视差 + 粒子场作用重叠,减少常驻效果数量) */
 
 /* ---------- typography ---------- */
 
@@ -205,14 +208,11 @@ code {
 
 .section { padding: clamp(72px, 11vw, 140px) 0; }
 
-.label {
+/* 小标签:只在确实需要一个字段名时用,不参与标题的层级 */
+.meta-label {
   margin: 0;
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: .3em;
-  text-transform: uppercase;
-  color: var(--gold);
+  font-size: var(--fs-xs);
+  color: var(--text-3);
 }
 
 .sec-head {
@@ -225,23 +225,34 @@ code {
 }
 
 .sec-head h2 {
-  margin: 10px 0 0;
-  font-size: clamp(28px, 4.4vw, 46px);
+  margin: 0;
+  font-size: var(--fs-lg);
   font-weight: 700;
 }
 
+/* 次级链接:用下划线延展代替「文字 + →」的模板写法 */
 .sec-link {
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  color: var(--gold-hi);
+  position: relative;
   padding-bottom: 4px;
-  border-bottom: 1px solid var(--gold-line);
-  transition: border-color .3s, color .3s;
+  font-size: var(--fs-xs);
+  letter-spacing: 0;
+  color: var(--text-2);
 }
 
-.sec-link:hover { border-color: var(--gold); color: var(--gold); }
+.sec-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--line);
+  transform-origin: left;
+  transition: background-color var(--dur-fast);
+}
+
+.sec-link:hover { color: var(--text); }
+.sec-link:hover::after { background: var(--gold); }
 
 .rule {
   height: 1px;
@@ -288,12 +299,13 @@ code {
   border: 1px solid transparent;
   border-radius: var(--r-pill);
   font-family: inherit;
-  font-size: 14px;
+  font-size: var(--fs-sm);
   font-weight: 650;
   letter-spacing: .04em;
   cursor: pointer;
   overflow: hidden;
-  transition: transform .45s var(--ease), box-shadow .45s, background-color .4s, border-color .4s, color .3s;
+  /* transform 不参与过渡:磁吸由 JS 逐帧写入,这里再缓动一次会「不跟手」 */
+  transition: box-shadow var(--dur), background-color var(--dur), border-color var(--dur), color var(--dur-fast);
 }
 
 .btn-primary {
@@ -312,7 +324,7 @@ code {
 
 .btn-ghost:hover { background: rgba(212, 175, 55, .1); color: var(--gold); }
 
-.btn .arrow { transition: transform .4s var(--ease); }
+.btn .arrow { transition: transform var(--dur) var(--ease-out); }
 .btn:hover .arrow { transform: translateX(4px); }
 
 /* ---------- pills / badges ---------- */
@@ -325,32 +337,32 @@ code {
   border: 1px solid var(--line);
   border-radius: var(--r-pill);
   background: rgba(255, 255, 255, .025);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   color: var(--text-2);
-  transition: border-color .35s, color .35s, background-color .35s;
+  transition: border-color var(--dur-fast), color var(--dur-fast), background-color var(--dur-fast);
 }
 
 .pill:hover { border-color: var(--gold-line); color: var(--text); }
 
+/* 标签:安静的小 chip,不用全大写 / 不用 mono / 不占金色 */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 11px;
-  border: 1px solid var(--gold-line);
+  padding: 3px 10px;
+  border: 1px solid var(--line);
   border-radius: var(--r-pill);
-  background: var(--gold-soft);
-  color: var(--gold);
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
+  background: transparent;
+  color: var(--text-2);
+  font-family: var(--font);
+  font-size: 12px;
+  letter-spacing: 0;
   white-space: nowrap;
 }
 
 .badge-plain {
-  border-color: var(--line);
-  background: rgba(255, 255, 255, .04);
+  border-color: transparent;
+  background: rgba(255, 255, 255, .05);
   color: var(--text-3);
 }
 
@@ -360,9 +372,9 @@ html.js .reveal {
   opacity: 0;
   transform: translateY(40px);
   transition:
-    opacity .8s var(--ease),
-    transform .8s var(--ease),
-    filter .8s var(--ease);
+    opacity var(--dur-slow) var(--ease),
+    transform var(--dur-slow) var(--ease),
+    filter var(--dur-slow) var(--ease);
   transition-delay: var(--rd, 0ms);
 }
 
@@ -426,6 +438,12 @@ html.has-cursor button,
 html.has-cursor [data-magnetic],
 html.has-cursor .filter { cursor: none; }
 
+/* 表单类控件恢复系统光标:自定义光标在这些地方会妨碍输入/选择 */
+html.has-cursor input,
+html.has-cursor textarea,
+html.has-cursor select,
+html.has-cursor [contenteditable] { cursor: auto; }
+
 html.cursor-hot .cursor-ring {
   width: 58px;
   height: 58px;
@@ -477,6 +495,28 @@ html.veil-prep .page-veil { transform: scaleY(1); }
 /* 支持 View Transitions 的浏览器走原生跨文档转场 */
 @view-transition { navigation: auto; }
 
+/* 品牌转场:让原生 View Transitions 也走黑金,和遮罩兜底观感一致
+   (否则 Chrome/Edge/Safari 看到的是浏览器默认的白色交叉淡出) */
+::view-transition { background-color: #050505; }
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  mix-blend-mode: normal;
+  animation-duration: .5s;
+  animation-timing-function: var(--ease-io);
+}
+
+::view-transition-old(root) { animation-name: vt-out; }
+::view-transition-new(root) { animation-name: vt-in; }
+
+@keyframes vt-out {
+  to { opacity: 0; transform: translateY(-10px) scale(.996); }
+}
+
+@keyframes vt-in {
+  from { opacity: 0; transform: translateY(12px) scale(.996); }
+}
+
 /* ---------- helpers ---------- */
 
 .sr-only {
@@ -493,6 +533,27 @@ html.veil-prep .page-veil { transform: scaleY(1); }
 
 [data-parallax] { will-change: transform; }
 
+/* 跳转到主内容:键盘用户第一个可聚焦元素 */
+.skip {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 10000;
+  padding: 10px 18px;
+  border: 1px solid var(--gold-line);
+  border-radius: var(--r-pill);
+  background: #0b0b0d;
+  color: var(--gold-hi);
+  font-family: var(--mono);
+  font-size: var(--fs-xs);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  transform: translateY(-160%);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.skip:focus { transform: none; }
+
 /* ---------- reduced motion ---------- */
 
 @media (prefers-reduced-motion: reduce) {
@@ -504,6 +565,10 @@ html.veil-prep .page-veil { transform: scaleY(1); }
   }
 
   html.js .reveal { opacity: 1; transform: none; filter: none; }
+
+  /* View Transition 伪元素不受通配符规则覆盖,单独关掉 */
+  ::view-transition-old(root),
+  ::view-transition-new(root) { animation: none !important; }
 
   .bg-canvas,
   .cursor-dot,
@@ -518,7 +583,6 @@ html.veil-prep .page-veil { transform: scaleY(1); }
   body::after,
   .bg-grid,
   .bg-canvas,
-  .mouse-light,
   .cursor-dot,
   .cursor-ring,
   .page-veil,
@@ -527,7 +591,7 @@ html.veil-prep .page-veil { transform: scaleY(1); }
   .no-print { display: none !important; }
   .wrap { max-width: none; padding: 0; }
   .glass { border-color: #ddd; background: none; }
-  .label, .sec-link { color: #666; }
+  .sec-link { color: #666; }
   a { color: #111; }
   html.js .reveal { opacity: 1 !important; transform: none !important; filter: none !important; }
 }

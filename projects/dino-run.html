@@ -2,10 +2,17 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>恐龙快跑 · Dino Run</title>
 <style>
   :root {
+    /* ---- 站点外壳 ---- */
+    --page-bg: #050505;
+    --page-fg: #f4f2ed;
+    --gold: #d4af37;
+    --gold-line: rgba(212, 175, 55, .35);
+
+    /* ---- 游戏面(昼夜由 html.night 切换,保持原样) ---- */
     --bg: #f7f7f7;
     --fg: #535353;
     --muted: #9a9a9a;
@@ -20,24 +27,57 @@
     --edge: #2a2a2a;
   }
   * { box-sizing: border-box; }
-  html, body { height: 100%; }
   body {
     margin: 0;
-    padding: 18px 16px 26px;
+    min-height: 100vh;
+    padding: 56px 16px 26px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 16px;
     font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Microsoft YaHei", monospace;
-    color: var(--fg);
-    background: var(--bg);
-    transition: background-color .6s ease, color .6s ease;
+    color: var(--page-fg);
+    background: var(--page-bg);
     user-select: none;
     -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
-    overflow: hidden;
   }
+
+  /* 回到站点:游戏页原先没有任何出口 */
+  .back {
+    position: fixed;
+    top: 14px;
+    left: 16px;
+    z-index: 5;
+    padding: 8px 15px;
+    border: 1px solid var(--gold-line);
+    border-radius: 999px;
+    background: rgba(212, 175, 55, .06);
+    color: var(--gold);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-decoration: none;
+    transition: background-color .2s, color .2s, border-color .2s;
+  }
+  .back:hover { background: rgba(212, 175, 55, .14); color: #f3e2a9; border-color: var(--gold); }
+
+  /* 黑金外壳包裹游戏面,游戏内部配色不变 */
+  .shell {
+    width: min(94vw, 940px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 18px 22px;
+    border: 1px solid rgba(212, 175, 55, .22);
+    border-radius: 18px;
+    background: var(--bg);
+    color: var(--fg);
+    box-shadow: 0 40px 80px -50px #000, 0 0 0 1px rgba(212, 175, 55, .05);
+    transition: background-color .6s ease, color .6s ease, border-color .6s ease;
+  }
+
   h1 {
     margin: 0;
     font-size: 17px;
@@ -47,7 +87,7 @@
   }
   h1 span { opacity: .45; font-size: 12px; letter-spacing: 2px; }
 
-  .stage { width: min(94vw, 900px); }
+  .stage { width: 100%; }
   canvas {
     display: block;
     width: 100%;
@@ -87,27 +127,34 @@
   .key.mute { cursor: pointer; }
   .key.mute:hover { color: var(--fg); border-color: var(--fg); }
 
-  .tip { font-size: 11px; color: var(--muted); opacity: .75; letter-spacing: 1px; }
+  .tip { font-size: 11px; color: var(--muted); opacity: .75; letter-spacing: 1px; text-align: center; }
 
   @media (max-width: 520px) {
     h1 { font-size: 15px; letter-spacing: 3px; }
     .bar { font-size: 11px; }
+    .shell { padding: 16px 12px 18px; border-radius: 14px; }
+    body { padding: 52px 10px 20px; }
   }
 </style>
 </head>
 <body>
-  <h1>恐 龙 快 跑 <span>DINO RUN</span></h1>
+  <a class="back" href="../projects.html#dino-run">← HX STONE</a>
 
-  <div class="stage"><canvas id="game"></canvas></div>
+  <div class="shell">
+    <h1>恐 龙 快 跑 <span>DINO RUN</span></h1>
 
-  <div class="bar">
-    <span class="key"><b>空格</b>/<b>↑</b> 跳跃</span>
-    <span class="key"><b>↓</b> 下蹲 / 速降</span>
-    <span class="key"><b>P</b> 暂停</span>
-    <span class="key mute" id="sound">🔊 音效</span>
+    <div class="stage"><canvas id="game"></canvas></div>
+
+    <div class="bar">
+      <span class="key"><b>空格</b>/<b>↑</b> 跳跃</span>
+      <span class="key"><b>↓</b> 下蹲 / 速降</span>
+      <span class="key"><b>P</b> 暂停</span>
+      <span class="key mute" id="sound">🔊 音效</span>
+    </div>
+
+    <div class="tip">撞到仙人掌或翼龙就结束 · 每 100 分加速 · 700 分天黑</div>
+    <div class="tip">Hit a cactus or a pterodactyl and the run ends · speeds up every 100 points · night falls at 700</div>
   </div>
-
-  <div class="tip">撞到仙人掌或翼龙就结束 · 每 100 分加速 · 700 分天黑</div>
 
 <script>
 (function () {

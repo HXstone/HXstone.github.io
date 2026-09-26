@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>小站开张了 · HX STONE</title>
-<meta name="description" content="为什么要做这个网站,以及我是怎么做出来的。">
+<title data-i18n="note.hello.title">The Site Goes Live · HX STONE</title>
+<meta name="description" content="Why I built this site, and how I made it.">
 <meta name="theme-color" content="#050505">
+<meta name="color-scheme" content="dark">
 <link rel="icon" type="image/svg+xml" href="../assets/img/favicon.svg">
 <script>
 (function () {
@@ -35,9 +36,10 @@
 </head>
 <body>
 
+<a class="skip" href="#main">Skip to content</a>
+
 <div class="bg-grid" aria-hidden="true"></div>
 <canvas class="bg-canvas" aria-hidden="true"></canvas>
-<div class="mouse-light" aria-hidden="true"></div>
 <div class="page-veil" aria-hidden="true"></div>
 
 <header class="site-header">
@@ -59,43 +61,43 @@
   </div>
 </header>
 
-<main class="article">
+<main class="article" id="main">
 
   <a class="back-link" href="../notes.html" data-i18n="article.back">← Back to notes</a>
 
   <article>
     <header class="article-head">
-      <h1>小站开张了</h1>
+      <h1 data-i18n="note.hello.h1">The Site Goes Live</h1>
       <div class="meta-row">
-        <time datetime="2026-09-25">2026 · 09 · 25</time>
-        <span class="badge badge-plain">中文</span>
-        <span class="badge badge-plain">Learning</span>
+        <time datetime="2026-09-25">2026-09-25</time>
+        <span class="badge badge-plain">中文 / EN</span>
+        <span class="badge badge-plain" data-i18n="notes.f.learning">Learning</span>
       </div>
     </header>
 
     <div class="prose">
-      <p>这个网站建好了。写这篇当作开张记录,说说它为什么存在,以及它是怎么做出来的。</p>
+      <p data-i18n="note.hello.p0">The site is up. Consider this the opening entry — why it exists, and how I made it.</p>
 
-      <h2>为什么做这个网站</h2>
-      <p>平时做了不少小东西:扫雷、恐龙快跑,还有一份正在整理的错题本。它们散落在电脑的各个文件夹里,想给别人看的时候总要翻半天。所以我需要一个固定的地方,把作品和笔记都放进来。</p>
+      <h2 data-i18n="note.hello.h.why">Why I built it</h2>
+      <p data-i18n="note.hello.p.why">I make small things: Minesweeper, Dino Run, and a mistake notebook I'm still organising. They were scattered across folders on my computer, and showing them to anyone meant digging around. I wanted one fixed place to put my work and my notes.</p>
 
-      <h2>这里会有什么</h2>
+      <h2 data-i18n="note.hello.h.what">What will be here</h2>
       <ul>
-        <li><strong>作品</strong>:小游戏和以后做的各种东西,大多能直接在浏览器里打开。</li>
-        <li><strong>笔记</strong>:学习记录、折腾日志和一些零碎想法。</li>
-        <li><strong>关于</strong>:我在做什么,以及怎么联系我。</li>
+        <li data-i18n-html="note.hello.li1"><strong>Projects</strong> — small games and whatever comes next, most of them open straight in the browser.</li>
+        <li data-i18n-html="note.hello.li2"><strong>Notes</strong> — study logs, tinkering records and half-formed ideas.</li>
+        <li data-i18n-html="note.hello.li3"><strong>About</strong> — what I'm working on, and how to reach me.</li>
       </ul>
 
-      <h2>我是怎么做出来的</h2>
-      <p>老实说,我不像工程师那样写代码。我的办法是:把想要的效果尽可能说清楚,让 AI 帮忙实现,自己在浏览器里反复试,哪里不对就继续提要求。</p>
-      <p>这个网站就是这样一点点调出来的。所以如果你觉得哪里好看,功劳有一大半是 AI 的;如果哪里看着别扭,那多半是我没描述清楚 :)</p>
+      <h2 data-i18n="note.hello.h.how">How I made it</h2>
+      <p data-i18n="note.hello.p.how1">Honestly, I don't write code the way an engineer does. My method is: describe what I want as clearly as I can, let AI implement it, test it in the browser again and again, and keep asking for changes wherever it feels wrong.</p>
+      <p data-i18n="note.hello.p.how2">The site was tuned into shape piece by piece this way. So if something looks good, AI deserves most of the credit; if something looks off, it's probably because I didn't describe it well enough :)</p>
 
       <blockquote>
-        <p>把东西做出来,再把它放到一个能被看见的地方——这本身就是一种完成。</p>
+        <p data-i18n="note.hello.quote">Making the thing, and putting it somewhere it can be seen — that is a kind of completion in itself.</p>
       </blockquote>
 
-      <h2>接下来</h2>
-      <p>之后会继续整理错题本,做新的小东西,也会在这里记录过程。如果有什么想聊的,欢迎发邮件给我。</p>
+      <h2 data-i18n="note.hello.h.next">What's next</h2>
+      <p data-i18n="note.hello.p.next">I'll keep working on the mistake notebook, build new small things, and record the process here. If you'd like to talk, email me.</p>
     </div>
   </article>
 
@@ -103,7 +105,7 @@
 
 <footer class="site-footer">
   <div class="wrap">
-    <h2 class="footer-big reveal">Let's build <span>something.</span></h2>
+    <h2 class="footer-big reveal"><span data-i18n="footer.big.1">Let's build</span> <span class="accent" data-i18n="footer.big.2">something.</span></h2>
     <div class="footer-meta">
       <span>© <span data-year>2026</span> HX STONE · Built with curiosity &amp; AI</span>
       <a href="mailto:hexun120716@outlook.com" data-i18n="footer.contact">Email me</a>

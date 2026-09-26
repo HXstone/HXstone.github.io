@@ -94,11 +94,40 @@
       { opacity: 1, y: 0, duration: 1, stagger: 0.09 },
       0.55
     );
+
+    /* 球体并入同一条时间线,避免它自己的 reveal 与文字抢跑 */
+    var orbEl = document.querySelector("[data-intro-orb]");
+    if (orbEl) {
+      tl.to(
+        orbEl,
+        { opacity: 1, y: 0, scale: 1, filter: "blur(0px)", duration: 1.2 },
+        0.5
+      );
+    }
   }
+
+  /* 语言切换后重建文字分裂(直接呈现终态,不重播入场) */
+  window.__splitHero = function () {
+    if (!useGsap) return;
+
+    if (titleEl) {
+      gsap.set(splitChars(titleEl), { yPercent: 0 });
+    }
+
+    if (statementEl) {
+      gsap.set(splitWords(statementEl), { yPercent: 0, opacity: 1 });
+    }
+  };
 
   /* ---------- 滚动入场 ---------- */
 
-  var revealEls = document.querySelectorAll(".reveal");
+  // 由 hero 时间线接管的元素不参与普通 reveal
+  var revealEls = Array.prototype.filter.call(
+    document.querySelectorAll(".reveal"),
+    function (el) {
+      return !el.hasAttribute("data-intro-orb");
+    }
+  );
 
   if (useGsap) {
     revealEls.forEach(function (el) {
@@ -193,39 +222,139 @@
     }
   }
 
-  /* ---------- 顶部进度条 + 导航玻璃化 ---------- */
+  /* ---------- 状态栏 ----------
+     整页唯一的「读数」装置。它取代了通用的顶部进度条,并兼作区块指示:
+     滚动时报告当前区块,悬停作品/笔记时报告那一条。 */
+
+  var rail = document.createElement("div");
+  rail.className = "rail";
+  rail.setAttribute("aria-hidden", "true");
+
+  var railSec = document.createElement("span");
+  railSec.className = "rail-sec";
+
+  var railTrack = document.createElement("span");
+  railTrack.className = "rail-track";
+
+  var railFill = document.createElement("span");
+  railFill.className = "rail-fill";
+  railTrack.appendChild(railFill);
+
+  var railVal = document.createElement("span");
+  railVal.className = "rail-val";
+
+  rail.appendChild(railSec);
+  rail.appendChild(railTrack);
+  rail.appendChild(railVal);
+  document.body.appendChild(rail);
+
+  function tidy(text) {
+    return (text || "").replace(/\s+/g, " ").trim();
+  }
+
+  /* 区块名优先取区块自己的 h2;没有 h2 就退回当前页名(取自导航的 aria-current,
+     这样中英文都能自动对上,不用再维护一份词表)。 */
+  var railSections = Array.prototype.slice.call(
+    document.querySelectorAll("main > section")
+  );
+
+  /* 页名取自导航的 aria-current,所以中英文都能自动对上,不用再维护一份词表 */
+  function railPageName() {
+    var cur = document.querySelector('.site-nav a[aria-current="page"]');
+    if (cur) return tidy(cur.textContent);
+    /* 404 这类没有「当前页」的页面,退回 <title> 的第一段 */
+    return tidy((document.title || "").split("·")[0]);
+  }
+
+  function railName(el) {
+    if (!el) return "";
+    var h = el.querySelector("[data-rail], h2");
+    return h ? tidy(h.textContent) : "";
+  }
+
+  var railScrollSec = "";
+  var railHoverSec = "";
+
+  function renderRailSection() {
+    railSec.textContent = railHoverSec || railScrollSec || railPageName() || "—";
+  }
+
+  function updateRailSection() {
+    if (railHoverSec) return;
+
+    var best = null;
+
+    railSections.forEach(function (s) {
+      if (s.getBoundingClientRect().top <= window.innerHeight * 0.45) best = s;
+    });
+
+    railScrollSec = railName(best);
+    renderRailSection();
+  }
+
+  /* 指针停在作品 / 笔记上时,状态栏改报那一条 */
+  document.addEventListener(
+    "pointerover",
+    function (e) {
+      var item = e.target.closest && e.target.closest(".work, .note");
+      if (!item) return;
+
+      var title = item.querySelector("h3");
+      if (!title) return;
+
+      railHoverSec = tidy(title.textContent);
+      renderRailSection();
+    },
+    { passive: true }
+  );
+
+  document.addEventListener(
+    "pointerout",
+    function (e) {
+      var item = e.target.closest && e.target.closest(".work, .note");
+      if (!item) return;
+      if (item.contains(e.relatedTarget)) return;
+
+      railHoverSec = "";
+      renderRailSection();
+    },
+    { passive: true }
+  );
+
+  /* ---------- 滚动量 + 导航玻璃化 ---------- */
 
   var header = document.querySelector(".site-header");
+  var pending = false;
 
-  if (header) {
-    var bar = document.createElement("div");
-    bar.className = "scroll-progress";
-    bar.setAttribute("aria-hidden", "true");
-    header.appendChild(bar);
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var percent = max > 0 ? (window.scrollY / max) * 100 : 0;
 
-    var pending = false;
+    railFill.style.setProperty("--rp", percent.toFixed(2) + "%");
+    railVal.textContent = Math.round(percent) + "%";
 
-    var onScroll = function () {
-      var max = document.documentElement.scrollHeight - window.innerHeight;
-      var percent = max > 0 ? (window.scrollY / max) * 100 : 0;
+    if (header) header.classList.toggle("is-stuck", window.scrollY > 24);
 
-      bar.style.setProperty("--progress", percent.toFixed(2) + "%");
-      header.classList.toggle("is-stuck", window.scrollY > 24);
+    updateRailSection();
 
-      pending = false;
-    };
-
-    window.addEventListener(
-      "scroll",
-      function () {
-        if (pending) return;
-        pending = true;
-        requestAnimationFrame(onScroll);
-      },
-      { passive: true }
-    );
-
-    window.addEventListener("resize", onScroll);
-    onScroll();
+    pending = false;
   }
+
+  window.addEventListener(
+    "scroll",
+    function () {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(onScroll);
+    },
+    { passive: true }
+  );
+
+  window.addEventListener("resize", onScroll);
+
+  /* 语言切换后重新取一次区块名(标题文字会变) */
+  window.__railRefresh = onScroll;
+
+  renderRailSection();
+  onScroll();
 })();

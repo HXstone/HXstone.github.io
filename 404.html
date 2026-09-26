@@ -6,6 +6,7 @@
 <title data-i18n="page.notfound.title">Page not found · HX STONE</title>
 <meta name="description" content="404 — this page wandered off.">
 <meta name="theme-color" content="#050505">
+<meta name="color-scheme" content="dark">
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
 <script>
@@ -36,9 +37,10 @@
 </head>
 <body>
 
+<a class="skip" href="#main">Skip to content</a>
+
 <div class="bg-grid" aria-hidden="true"></div>
 <canvas class="bg-canvas" aria-hidden="true"></canvas>
-<div class="mouse-light" aria-hidden="true"></div>
 <div class="page-veil" aria-hidden="true"></div>
 
 <header class="site-header">
@@ -60,7 +62,7 @@
   </div>
 </header>
 
-<main class="wrap">
+<main class="wrap" id="main">
   <div class="notfound">
     <div>
       <p class="code">404</p>
@@ -76,6 +78,7 @@
 
 <footer class="site-footer">
   <div class="wrap">
+    <h2 class="footer-big reveal"><span data-i18n="footer.big.1">Let's build</span> <span class="accent" data-i18n="footer.big.2">something.</span></h2>
     <div class="footer-meta">
       <span>© <span data-year>2026</span> HX STONE · Built with curiosity &amp; AI</span>
       <a href="mailto:hexun120716@outlook.com" data-i18n="footer.contact">Email me</a>

@@ -6,6 +6,7 @@
 <title data-i18n="page.projects.title">Selected Work · HX STONE</title>
 <meta name="description" content="Three real projects by HX STONE — Minesweeper, Dino Run and a Mistake Notebook. Problem, thinking, solution, technology, result.">
 <meta name="theme-color" content="#050505">
+<meta name="color-scheme" content="dark">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Selected Work · HX STONE">
 <meta property="og:description" content="Minesweeper, Dino Run and a Mistake Notebook — three real case studies.">
@@ -41,9 +42,10 @@
 </head>
 <body>
 
+<a class="skip" href="#main">Skip to content</a>
+
 <div class="bg-grid" aria-hidden="true"></div>
 <canvas class="bg-canvas" aria-hidden="true"></canvas>
-<div class="mouse-light" aria-hidden="true"></div>
 <div class="page-veil" aria-hidden="true"></div>
 
 <header class="site-header">
@@ -65,10 +67,9 @@
   </div>
 </header>
 
-<main>
+<main id="main">
 
   <header class="page-head">
-    <p class="label" data-i18n="nav.projects">Projects</p>
     <h1 data-i18n="projects.title">Selected Work</h1>
     <p class="lead" data-i18n="projects.lead">Three real things I built. Each one started with a problem and ended when it was playable or usable.</p>
   </header>
@@ -77,7 +78,6 @@
   <section class="case" id="minesweeper">
     <div class="wrap case-grid">
       <div class="case-intro reveal" data-reveal="left">
-        <p class="label">01 / Game</p>
         <h2 data-i18n="work.mine.title">Minesweeper</h2>
         <p data-i18n="case.mine.lead">A 1990s classic, rebuilt for my own phone: a dark board, a safer first tap, and three levels.</p>
         <div class="case-actions">
@@ -117,7 +117,6 @@
   <section class="case" id="dino-run">
     <div class="wrap case-grid">
       <div class="case-intro reveal" data-reveal="left">
-        <p class="label">02 / Game</p>
         <h2 data-i18n="work.dino.title">Dino Run</h2>
         <p data-i18n="case.dino.lead">The offline dino game, but with a difficulty curve and a day that actually turns into night.</p>
         <div class="case-actions">
@@ -157,11 +156,10 @@
   <section class="case" id="mistake-notebook">
     <div class="wrap case-grid">
       <div class="case-intro reveal" data-reveal="left">
-        <p class="label">03 / Knowledge base</p>
         <h2 data-i18n="work.notes.title">Mistake Notebook</h2>
         <p data-i18n="case.notes.lead">A second brain for the mistakes I keep repeating, organised by subject and topic.</p>
         <div class="case-actions">
-          <span class="badge">In progress</span>
+          <span class="badge" data-i18n="case.inprogress">In progress</span>
           <a class="btn btn-ghost" href="notes.html" data-magnetic>
             <span data-i18n="case.notesLink">See the notes</span>
           </a>
@@ -197,7 +195,7 @@
 
 <footer class="site-footer">
   <div class="wrap">
-    <h2 class="footer-big reveal">Let's build <span>something.</span></h2>
+    <h2 class="footer-big reveal"><span data-i18n="footer.big.1">Let's build</span> <span class="accent" data-i18n="footer.big.2">something.</span></h2>
     <div class="footer-meta">
       <span>© <span data-year>2026</span> HX STONE · Built with curiosity &amp; AI</span>
       <a href="mailto:hexun120716@outlook.com" data-i18n="footer.contact">Email me</a>

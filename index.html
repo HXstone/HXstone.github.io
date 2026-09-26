@@ -6,6 +6,7 @@
 <title data-i18n="page.home.title">HX STONE — Student × AI Explorer</title>
 <meta name="description" content="HX STONE — a high-school student exploring AI: small games, notes and experiments. Building my future with AI &amp; technology.">
 <meta name="theme-color" content="#050505">
+<meta name="color-scheme" content="dark">
 <meta property="og:type" content="website">
 <meta property="og:title" content="HX STONE — Student × AI Explorer">
 <meta property="og:description" content="Building my future with AI &amp; Technology.">
@@ -41,9 +42,10 @@
 </head>
 <body>
 
+<a class="skip" href="#main">Skip to content</a>
+
 <div class="bg-grid" aria-hidden="true"></div>
 <canvas class="bg-canvas" aria-hidden="true"></canvas>
-<div class="mouse-light" aria-hidden="true"></div>
 <div class="page-veil" aria-hidden="true"></div>
 
 <header class="site-header">
@@ -65,17 +67,15 @@
   </div>
 </header>
 
-<main>
+<main id="main">
 
   <!-- ============ HERO ============ -->
   <section class="hero">
     <div class="wrap hero-grid">
       <div class="hero-copy">
-        <p class="label" data-intro>Student × AI Explorer × Future CS Student</p>
-
         <h1 class="hero-title" data-split="chars">HX STONE</h1>
 
-        <p class="hero-statement" data-split="words">Building my future with AI &amp; Technology.</p>
+        <p class="hero-statement" data-split="words" data-i18n="hero.statement">Building my future with AI &amp; Technology.</p>
 
         <p class="hero-bio" data-intro data-i18n="hero.bio">I explore how AI can turn curiosity into real things — small games, notes and experiments. I set the direction; AI helps me build it.</p>
 
@@ -96,22 +96,18 @@
         </div>
       </div>
 
-      <div class="orb-wrap reveal" data-reveal="scale">
+      <div class="orb-wrap reveal" data-reveal="scale" data-intro-orb>
         <div class="orb-parallax" data-parallax="0.05">
-          <div class="orb" data-orb>
-            <span class="orb-halo" aria-hidden="true"></span>
-            <span class="orb-ring" aria-hidden="true"></span>
-            <img class="orb-photo" src="assets/img/avatar.jpg" alt="Hexun" width="768" height="768">
-            <span class="orb-glass" aria-hidden="true"></span>
-            <canvas class="orb-particles" data-orb-particles aria-hidden="true"></canvas>
+          <div class="orb-lift">
+            <div class="orb" data-orb>
+              <span class="orb-halo" aria-hidden="true"></span>
+              <span class="orb-ring" aria-hidden="true"></span>
+              <img class="orb-photo" src="assets/img/avatar.jpg" alt="Hexun" width="768" height="768">
+              <span class="orb-glass" aria-hidden="true"></span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-
-    <div class="wrap hero-foot" data-intro>
-      <span class="label">Scroll</span>
-      <span class="hero-line" aria-hidden="true"></span>
     </div>
   </section>
 
@@ -120,21 +116,19 @@
     <div class="wrap">
       <div class="sec-head reveal">
         <div>
-          <p class="label">01 / System</p>
           <h2>HX OS</h2>
         </div>
       </div>
 
       <div class="os glass reveal" data-reveal="scale" data-os>
         <div class="os-bar">
-          <span class="os-dots" aria-hidden="true"><i></i><i></i><i></i></span>
           <span class="os-title">hx-os / v0.1</span>
-          <span class="os-status">online</span>
+          <span class="os-status" data-i18n="os.online">online</span>
         </div>
 
         <div class="os-body">
           <div class="os-metrics">
-            <p class="os-group" data-i18n="os.group">Tracking</p>
+            <p class="os-group" data-i18n="os.group">Self-assessment</p>
 
             <div class="meter">
               <span class="meter-name" data-i18n="os.m1">Learning</span>
@@ -159,14 +153,16 @@
               <span class="meter-track"><span class="meter-bar" style="--v:30%" data-value="30"></span></span>
               <span class="meter-val">30%</span>
             </div>
+
+            <p class="os-note" data-i18n="os.note">Rough self-ratings, updated over time — not test scores.</p>
           </div>
 
           <div class="os-log" aria-hidden="true">
             <span class="line">&gt; boot <span class="k">hx.os</span> --mode=curiosity</span>
-            <span class="line">&gt; learning.map <span class="v">loaded</span></span>
-            <span class="line">&gt; ai.partner <span class="v">online</span></span>
-            <span class="line">&gt; running/5k <span class="v">in progress</span></span>
-            <span class="line">&gt; next: build something <span class="k">that matters</span></span>
+            <span class="line">&gt; learning.map <span class="v" data-i18n="os.log.loaded">loaded</span></span>
+            <span class="line">&gt; ai.partner <span class="v" data-i18n="os.log.online">online</span></span>
+            <span class="line">&gt; running/5k <span class="v" data-i18n="os.log.progress">in progress</span></span>
+            <span class="line">&gt; next: <span class="k" data-i18n="os.log.next">build something that matters</span></span>
           </div>
         </div>
       </div>
@@ -178,58 +174,60 @@
     <div class="wrap">
       <div class="sec-head reveal">
         <div>
-          <p class="label">02 / Work</p>
           <h2 data-i18n="work.title">Case Studies</h2>
         </div>
-        <a class="sec-link" href="projects.html" data-i18n="work.link">Read the full studies →</a>
+        <a class="sec-link" href="projects.html" data-i18n="work.link">All case studies</a>
       </div>
 
       <div class="work-list" data-stagger>
         <a class="work reveal" href="projects.html#minesweeper">
+          <span class="work-no" aria-hidden="true">01</span>
           <span class="work-thumb thumb-game" aria-hidden="true">💣</span>
           <div class="work-main">
-            <p class="work-index"><span>01</span> / <span data-i18n="work.mine.index">Game</span></p>
             <h3 class="work-title" data-i18n="work.mine.title">Minesweeper</h3>
             <p class="work-desc" data-i18n="work.mine.desc">Classic Minesweeper with three difficulty levels, a timer, and a first tap that never blows up.</p>
             <div class="work-tags">
+              <span class="badge" data-i18n="work.mine.index">Game</span>
               <span class="badge">HTML</span>
               <span class="badge">CSS</span>
               <span class="badge">JavaScript</span>
               <span class="badge badge-plain">Playable</span>
             </div>
           </div>
-          <span class="work-go"><span data-i18n="work.case">View case study</span><span class="arrow" aria-hidden="true">→</span></span>
+          <span class="work-go" data-i18n="work.case">View case study</span>
         </a>
 
         <a class="work reveal" href="projects.html#dino-run">
+          <span class="work-no" aria-hidden="true">02</span>
           <span class="work-thumb thumb-run" aria-hidden="true">🦖</span>
           <div class="work-main">
-            <p class="work-index"><span>02</span> / <span data-i18n="work.dino.index">Game</span></p>
             <h3 class="work-title" data-i18n="work.dino.title">Dino Run</h3>
             <p class="work-desc" data-i18n="work.dino.desc">A runner with a real difficulty curve, a day-night cycle, and controls for keyboard and touch.</p>
             <div class="work-tags">
+              <span class="badge" data-i18n="work.dino.index">Game</span>
               <span class="badge">HTML</span>
               <span class="badge">Canvas</span>
               <span class="badge">JavaScript</span>
               <span class="badge badge-plain">Playable</span>
             </div>
           </div>
-          <span class="work-go"><span data-i18n="work.case">View case study</span><span class="arrow" aria-hidden="true">→</span></span>
+          <span class="work-go" data-i18n="work.case">View case study</span>
         </a>
 
         <a class="work reveal" href="projects.html#mistake-notebook">
+          <span class="work-no" aria-hidden="true">03</span>
           <span class="work-thumb thumb-notes" aria-hidden="true">📒</span>
           <div class="work-main">
-            <p class="work-index"><span>03</span> / <span data-i18n="work.notes.index">Knowledge base</span></p>
             <h3 class="work-title" data-i18n="work.notes.title">Mistake Notebook</h3>
             <p class="work-desc" data-i18n="work.notes.desc">A second brain for the mistakes I keep repeating, organised by subject and topic.</p>
             <div class="work-tags">
+              <span class="badge" data-i18n="work.notes.index">Knowledge base</span>
               <span class="badge">Markdown</span>
               <span class="badge">Git</span>
               <span class="badge badge-plain">In progress</span>
             </div>
           </div>
-          <span class="work-go"><span data-i18n="work.case">View case study</span><span class="arrow" aria-hidden="true">→</span></span>
+          <span class="work-go" data-i18n="work.case">View case study</span>
         </a>
       </div>
     </div>
@@ -240,29 +238,28 @@
     <div class="wrap">
       <div class="sec-head reveal">
         <div>
-          <p class="label">03 / Notes</p>
           <h2 data-i18n="notes.title">Notes</h2>
         </div>
-        <a class="sec-link" href="notes.html" data-i18n="notes.all">All notes →</a>
+        <a class="sec-link" href="notes.html" data-i18n="notes.all">All notes</a>
       </div>
 
       <div class="note-list" data-stagger>
         <a class="note reveal" href="notes/2026-09-25-hello-world.html">
-          <span class="note-date">2026 · 09 · 25</span>
+          <span class="note-date">2026-09-25</span>
           <div>
             <h3 data-i18n="note.helloWorld.h1">Hello, World: My Personal Digital Space</h3>
             <p data-i18n="note.helloWorld.card.desc">Recording growth, exploring technology — and leaving a voice of my own.</p>
           </div>
-          <span class="note-cat badge badge-plain">Learning</span>
+          <span class="note-cat badge badge-plain" data-i18n="notes.f.learning">Learning</span>
         </a>
 
         <a class="note reveal" href="notes/2026-09-25-hello.html">
-          <span class="note-date">2026 · 09 · 25</span>
+          <span class="note-date">2026-09-25</span>
           <div>
-            <h3>小站开张了</h3>
-            <p>为什么要做这个网站,以及我是怎么做出来的。</p>
+            <h3 data-i18n="note.hello.h1">The Site Goes Live</h3>
+            <p data-i18n="note.hello.card.desc">Why I built this site, and how I made it.</p>
           </div>
-          <span class="note-cat badge badge-plain">Learning</span>
+          <span class="note-cat badge badge-plain" data-i18n="notes.f.learning">Learning</span>
         </a>
       </div>
     </div>
@@ -272,7 +269,7 @@
 
 <footer class="site-footer">
   <div class="wrap">
-    <h2 class="footer-big reveal">Let's build <span>something.</span></h2>
+    <h2 class="footer-big reveal"><span data-i18n="footer.big.1">Let's build</span> <span class="accent" data-i18n="footer.big.2">something.</span></h2>
     <div class="footer-meta">
       <span>© <span data-year>2026</span> HX STONE · Built with curiosity &amp; AI</span>
       <a href="mailto:hexun120716@outlook.com" data-i18n="footer.contact">Email me</a>

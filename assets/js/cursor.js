@@ -45,6 +45,43 @@
     });
   }
 
+  /* ---------- 光标跟随 ----------
+     帧率无关;指针静止后循环自行停止,不再无条件常驻 rAF。 */
+
+  var rafId = 0;
+  var lastT = 0;
+
+  // 60fps 下原系数 0.16 等价于 λ = -ln(1 - 0.16) * 60 ≈ 10.4
+  var LAMBDA = 10.4;
+  var EPS = 0.1;
+
+  function tick(now) {
+    rafId = 0;
+
+    var dt = lastT ? Math.min((now - lastT) / 1000, 0.1) : 1 / 60;
+    lastT = now;
+
+    var k = 1 - Math.exp(-LAMBDA * dt);
+
+    rx += (mx - rx) * k;
+    ry += (my - ry) * k;
+
+    if (Math.abs(mx - rx) > EPS || Math.abs(my - ry) > EPS) {
+      ring.style.transform =
+        "translate3d(" + rx.toFixed(1) + "px," + ry.toFixed(1) + "px,0)";
+      rafId = requestAnimationFrame(tick);
+    } else {
+      rx = mx;
+      ry = my;
+      lastT = 0;
+      ring.style.transform = "translate3d(" + mx + "px," + my + "px,0)";
+    }
+  }
+
+  function wake() {
+    if (!rafId) rafId = requestAnimationFrame(tick);
+  }
+
   document.addEventListener(
     "pointermove",
     function (e) {
@@ -76,6 +113,8 @@
           el.style.transform = "";
         }
       });
+
+      wake();
     },
     { passive: true }
   );
@@ -87,15 +126,6 @@
     },
     { passive: true }
   );
-
-  (function loop() {
-    rx += (mx - rx) * 0.16;
-    ry += (my - ry) * 0.16;
-
-    ring.style.transform = "translate3d(" + rx.toFixed(1) + "px," + ry.toFixed(1) + "px,0)";
-
-    requestAnimationFrame(loop);
-  })();
 
   var HOT = "a, button, [data-magnetic], .work, .note, .pill, .filter";
 

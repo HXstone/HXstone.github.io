@@ -13,6 +13,7 @@ var I18N = {
     "nav.notes": "笔记",
     "nav.about": "关于",
 
+    "hero.statement": "用 AI 和技术,搭建我的未来。",
     "hero.bio": "我在探索如何用 AI 把好奇心变成真实的东西——小游戏、笔记,和各种实验。我负责方向,AI 帮我把它做出来。",
     "hero.cta1": "看看作品",
     "hero.cta2": "读读笔记",
@@ -20,14 +21,20 @@ var I18N = {
     "hero.p2": "AI 探索者",
     "hero.p3": "未来的计算机学生",
 
-    "os.group": "追踪中",
+    "os.group": "自我评估",
+    "os.note": "自己估的粗略进度,会随时间更新——不是考试成绩。",
+    "os.online": "在线",
+    "os.log.loaded": "已加载",
+    "os.log.online": "在线",
+    "os.log.progress": "进行中",
+    "os.log.next": "做点真正重要的事",
     "os.m1": "学习",
     "os.m2": "人工智能",
     "os.m3": "编程",
     "os.m4": "长跑",
 
     "work.title": "案例研究",
-    "work.link": "查看完整案例 →",
+    "work.link": "全部案例",
     "work.mine.title": "扫雷",
     "work.mine.desc": "经典扫雷:三档难度、计时器,第一下永远不会踩雷。",
     "work.dino.title": "恐龙快跑",
@@ -38,8 +45,7 @@ var I18N = {
 
     "notes.title": "笔记",
     "notes.lead": "学习记录、折腾日志,和零碎的想法。",
-    "notes.all": "全部笔记 →",
-    "notes.readMore": "阅读全文",
+    "notes.all": "全部笔记",
     "notes.f.all": "全部",
     "notes.f.ai": "AI",
     "notes.f.science": "科学",
@@ -48,7 +54,7 @@ var I18N = {
 
     "projects.title": "精选作品",
     "projects.lead": "三个真实做过的东西。每个都从问题开始,到能玩、能用为止。",
-    "case.demo": "试玩 Demo",
+    "case.inprogress": "进行中",
     "case.play": "打开游戏",
     "case.notesLink": "了解错题本",
     "case.mine.lead": "把 90 年代的经典搬到自己的手机上:深色棋盘、更安全的第一下、三档难度。",
@@ -77,10 +83,14 @@ var I18N = {
     "step.result": "结果",
 
     "about.title": "关于",
+    "about.quote": "我用<em>好奇心</em>做东西。<br>AI 是我的<em>创造伙伴</em>。",
     "about.p1": "我是惠州的一名高中生。足球和长跑让我保持状态,好奇心则都放在 AI 上。",
     "about.p2": "我不像工程师那样写代码。我定方向和标准,AI 负责实现,我负责一遍遍测试到满意——这个网站也是这么做出来的。",
     "about.contact.title": "联系方式",
+    "about.hello": "随时欢迎聊聊 AI、足球或跑步。",
 
+    "footer.big.1": "一起做点",
+    "footer.big.2": "有意思的。",
     "footer.contact": "写信给我",
 
     "notfound.title": "这个页面走丢了",
@@ -101,6 +111,23 @@ var I18N = {
     "note.helloWorld.p3": "未来，我会在这个网站中分享关于 AI、科技、国际新闻以及个人成长的一些思考。这里可能会有我对新技术的观察，也可能会有学习过程中的总结、生活中的感悟，以及对世界变化的理解。我希望这些文字能够成为自己不断探索过程中的记录。",
     "note.helloWorld.h.future": "写给未来的自己",
     "note.helloWorld.p4": "未来几年，我不知道自己最终会走向哪里，也不知道会遇见怎样的挑战。但我希望自己能够始终保持好奇，持续学习，不断尝试新的事物，并在探索中逐渐成长。这个网站，就是我为未来留下的一份记录。希望多年以后再次打开它时，我能够看到一个不断进步、不断变化的自己。",
+
+    "note.hello.title": "小站开张了 · HX STONE",
+    "note.hello.h1": "小站开张了",
+    "note.hello.card.desc": "为什么要做这个网站,以及我是怎么做出来的。",
+    "note.hello.p0": "这个网站建好了。写这篇当作开张记录,说说它为什么存在,以及它是怎么做出来的。",
+    "note.hello.h.why": "为什么做这个网站",
+    "note.hello.p.why": "平时做了不少小东西:扫雷、恐龙快跑,还有一份正在整理的错题本。它们散落在电脑的各个文件夹里,想给别人看的时候总要翻半天。所以我需要一个固定的地方,把作品和笔记都放进来。",
+    "note.hello.h.what": "这里会有什么",
+    "note.hello.li1": "<strong>作品</strong>:小游戏和以后做的各种东西,大多能直接在浏览器里打开。",
+    "note.hello.li2": "<strong>笔记</strong>:学习记录、折腾日志和一些零碎想法。",
+    "note.hello.li3": "<strong>关于</strong>:我在做什么,以及怎么联系我。",
+    "note.hello.h.how": "我是怎么做出来的",
+    "note.hello.p.how1": "老实说,我不像工程师那样写代码。我的办法是:把想要的效果尽可能说清楚,让 AI 帮忙实现,自己在浏览器里反复试,哪里不对就继续提要求。",
+    "note.hello.p.how2": "这个网站就是这样一点点调出来的。所以如果你觉得哪里好看,功劳有一大半是 AI 的;如果哪里看着别扭,那多半是我没描述清楚 :)",
+    "note.hello.quote": "把东西做出来,再把它放到一个能被看见的地方——这本身就是一种完成。",
+    "note.hello.h.next": "接下来",
+    "note.hello.p.next": "之后会继续整理错题本,做新的小东西,也会在这里记录过程。如果有什么想聊的,欢迎发邮件给我。",
 
     "page.home.title": "HX STONE — 学生 × AI 探索者",
     "page.projects.title": "精选作品 · HX STONE",
@@ -123,6 +150,10 @@ function cacheEnglishText() {
     el.setAttribute("data-en", el.textContent);
   });
 
+  document.querySelectorAll("[data-i18n-html]").forEach(function (el) {
+    el.setAttribute("data-en-html", el.innerHTML);
+  });
+
   root.setAttribute("data-i18n-cached", "1");
 }
 
@@ -142,6 +173,19 @@ function applyLang(lang) {
     } else {
       var en = el.getAttribute("data-en");
       if (en != null) el.textContent = en;
+    }
+  });
+
+  /* 带行内标签(如 <em> / <strong> / <br>)的文案走 innerHTML,避免结构被抹掉 */
+  document.querySelectorAll("[data-i18n-html]").forEach(function (el) {
+    var key = el.getAttribute("data-i18n-html");
+
+    if (lang === "zh") {
+      var value = I18N.zh[key];
+      if (value != null) el.innerHTML = value;
+    } else {
+      var en = el.getAttribute("data-en-html");
+      if (en != null) el.innerHTML = en;
     }
   });
 }

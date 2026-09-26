@@ -63,6 +63,11 @@
 
       applyLang(lang);
       refreshLangButton();
+
+      /* Hero 的文字分裂由 motion.js 重建(否则逐字/逐词结构会被 textContent 覆盖) */
+      if (typeof window.__splitHero === "function") window.__splitHero();
+      /* 状态栏的区块名也要跟着换语言 */
+      if (typeof window.__railRefresh === "function") window.__railRefresh();
     });
   }
 

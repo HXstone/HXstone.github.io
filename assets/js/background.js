@@ -1,6 +1,7 @@
 /* =========================================================
    HX STONE · background.js
-   粒子场 · 网格微视差 · 跟随鼠标的柔光
+   粒子场 · 网格微视差
+   (跟随鼠标的柔光层已移除,其作用与网格视差 + 粒子场重叠)
    ========================================================= */
 
 (function () {
@@ -13,39 +14,53 @@
     window.matchMedia && window.matchMedia("(hover: hover)").matches;
 
   var grid = document.querySelector(".bg-grid");
-  var light = document.querySelector(".mouse-light");
 
-  /* ---------- 鼠标柔光 + 网格微视差 ---------- */
+  /* ---------- 网格微视差 ----------
+     帧率无关:每帧按 dt 计算逼近系数,120Hz / 60Hz 手感一致。 */
 
-  if (grid && light && canHover && !reduce) {
+  if (grid && canHover && !reduce) {
     var gx = 0;
     var gy = 0;
     var tx = 0;
     var ty = 0;
     var animating = false;
+    var lastT = 0;
 
-    var step = function () {
-      gx += (tx - gx) * 0.08;
-      gy += (ty - gy) * 0.08;
+    // 60fps 下原系数 0.08 等价于 λ = -ln(1 - 0.08) * 60 ≈ 5.0
+    var LAMBDA = 5.0;
+    var EPS = 0.2;
 
+    function write() {
       grid.style.setProperty("--bgx", gx.toFixed(1) + "px");
       grid.style.setProperty("--bgy", gy.toFixed(1) + "px");
+    }
 
-      if (Math.abs(tx - gx) > 0.2 || Math.abs(ty - gy) > 0.2) {
+    function step(now) {
+      var dt = lastT ? Math.min((now - lastT) / 1000, 0.1) : 1 / 60;
+      lastT = now;
+
+      var k = 1 - Math.exp(-LAMBDA * dt);
+
+      gx += (tx - gx) * k;
+      gy += (ty - gy) * k;
+
+      if (Math.abs(tx - gx) > EPS || Math.abs(ty - gy) > EPS) {
+        write();
         requestAnimationFrame(step);
       } else {
+        gx = tx;
+        gy = ty;
+        write();
         animating = false;
+        lastT = 0;
       }
-    };
+    }
 
     window.addEventListener(
       "pointermove",
       function (e) {
         var w = window.innerWidth;
         var h = window.innerHeight;
-
-        light.style.setProperty("--mx", e.clientX + "px");
-        light.style.setProperty("--my", e.clientY + "px");
 
         tx = (e.clientX / w - 0.5) * -22;
         ty = (e.clientY / h - 0.5) * -22;
@@ -71,6 +86,7 @@
   var h = 0;
   var parts = [];
   var running = !document.hidden;
+  var rafId = 0;
 
   function build() {
     var count = w < 720 ? 26 : 68;
@@ -103,6 +119,7 @@
   }
 
   function frame() {
+    rafId = 0;
     if (!running) return;
 
     ctx.clearRect(0, 0, w, h);
@@ -130,16 +147,21 @@
       ctx.fill();
     }
 
-    requestAnimationFrame(frame);
+    rafId = requestAnimationFrame(frame);
+  }
+
+  /* 单循环守卫:标签页可见性来回切换时不会叠出第二条循环 */
+  function start() {
+    if (!rafId && running) rafId = requestAnimationFrame(frame);
   }
 
   document.addEventListener("visibilitychange", function () {
     running = !document.hidden;
-    if (running) requestAnimationFrame(frame);
+    start();
   });
 
   window.addEventListener("resize", resize);
 
   resize();
-  requestAnimationFrame(frame);
+  start();
 })();
