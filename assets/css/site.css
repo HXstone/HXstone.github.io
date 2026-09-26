@@ -570,26 +570,6 @@ html.js .os-log .line.on { opacity: 1; transform: none; }
 
 .work:hover .work-no { color: var(--gold); }
 
-/* ---------- games hub ---------- */
-
-/* 只有一个游戏时,把它当成「正在运行的东西」放进面板,而不是留一行空列表 */
-.games-title { margin: 0 0 14px; font-size: var(--fs-lg); letter-spacing: -.02em; }
-
-.games-pitch {
-  margin: 0;
-  max-width: 48ch;
-  color: var(--text-2);
-  font-size: var(--fs-body);
-}
-
-.games-points { margin-top: 18px; }
-
-.games-more {
-  margin: clamp(26px, 4vw, 42px) 0 0;
-  font-size: var(--fs-sm);
-  color: var(--text-3);
-}
-
 /* ---------- case study page ---------- */
 
 .page-head {
@@ -626,6 +606,10 @@ html.js .os-log .line.on { opacity: 1; transform: none; }
 
 .case-intro h2 { margin: 12px 0 0; font-size: var(--fs-lg); }
 .case-intro p { margin: 18px 0 0; max-width: 42ch; color: var(--text-2); }
+
+/* 标题旁的新标签:让最新的一件作品先被看到 */
+.case-title { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin: 12px 0 0; }
+.case-title h2 { margin: 0; }
 
 .case-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
 

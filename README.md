@@ -37,7 +37,6 @@ Student × AI Explorer × Future CS Builder.
 │   ├── dino-run.html     恐龙快跑(可玩)
 │   └── tank-battle.html   坦克大战(可玩)
 ├── games/
-│   ├── index.html        游戏聚合页(全站 Games 入口 · 中英双语简介)
 │   └── 2359/
 │       ├── index.html    23:59｜住宿生(可玩 · 终端风格 · 14 天周期模拟)
 │       ├── style.css     游戏样式(独立作用域,不污染全站)
@@ -74,8 +73,7 @@ Student × AI Explorer × Future CS Builder.
 - **玩法**:一晚 6 小时(18:00–23:59),用 7 个行动(学习 / 运动 / 娱乐 / 社交 / 洗澡 / 吃饭 / 睡觉)分配时间;14 天为一个周期,周期结束给出评级并存入档案。
 - **系统**:5 项状态(体力 / 专注 / 心情 / 压力 / 成绩)、状态告警与行动限制、加权条件事件库、跨天事件链、`localStorage` 存档与档案。
 - **独立性**:只引入本站字体文件,所有样式限定在 `.g2359` 作用域内,不污染全站;自带返回入口。
-- **入口**:导航栏 `Games` → `games/index.html` 聚合页(中英双语简介 + 试玩按钮);首页 Case Studies 第 05 条直达游戏。
-- **聚合页**:新游戏在 `games/` 下建一个目录,复制 `games/index.html` 里的 `.games-feature` 面板或在下方加一条 `.work` 记录即可接入。
+- **入口**:`projects.html` 第 05 个案例(标题旁带金色「新」标签 `.badge-new`),导航栏 `Games` 指向该案例锚点;首页 Case Studies 第 05 条直达游戏。
 - **扩展**:改数值看 `game.js` 顶部常量(`ACTIONS` / `DIMINISH` / 各类阈值);加事件只需在 `events.js` 追加一条对象,引擎会自动纳入加权抽取。
 
 ## 本地预览

@@ -399,6 +399,15 @@ code {
   color: var(--text-3);
 }
 
+/* 新推出:全站唯一用金色的标签,专门用来抓注意力 */
+.badge-new {
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--gold-hi), var(--gold));
+  color: #08080a;
+  font-weight: 650;
+  letter-spacing: .02em;
+}
+
 /* ---------- reveal / scroll motion ---------- */
 
 html.js .reveal {

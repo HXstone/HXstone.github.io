@@ -50,18 +50,6 @@ var I18N = {
     "work.2359.desc": "扮演高中住宿生度过一个晚上：六小时、五项状态，每个选择都有代价。",
     "work.2359.index": "游戏",
 
-    "games.title": "游戏",
-    "games.lead": "我做来玩的小东西。不用安装、不用注册——点开就能在浏览器里跑。",
-    "games.status": "可玩",
-    "games.feature.label": "现已上线",
-    "games.pitch": "你是住宿生,离午夜还有六个小时。学习、跑步、吃饭、聊天,还得想着按时睡觉——每花掉一小时,五项状态都会顶回来。十四天后,终端给出评级。真正有意思的,是你愿意拿什么去换。",
-    "games.point.terminal": "终端界面",
-    "games.point.cycle": "14 天周期",
-    "games.point.save": "本地存档",
-    "games.point.noinstall": "免安装",
-    "games.play": "开始玩 23:59",
-    "games.more": "更多游戏在路上——我做游戏是为了学点东西,也只会留下真正好玩的那些。",
-
     "notes.title": "笔记",
     "notes.lead": "学习记录、折腾日志,和零碎的想法。",
     "notes.all": "全部笔记",
@@ -72,7 +60,7 @@ var I18N = {
     "notes.f.ideas": "想法",
 
     "projects.title": "精选作品",
-    "projects.lead": "四个真实做过的东西。每个都从问题开始,到能玩、能用为止。",
+    "projects.lead": "五个真实做过的东西。每个都从问题开始,到能玩、能用为止。",
     "case.inprogress": "进行中",
     "case.play": "打开游戏",
     "case.notesLink": "了解错题本",
@@ -100,6 +88,14 @@ var I18N = {
     "case.notes.solution": "用 Markdown 按学科和知识点分类,每道题都标上错因。",
     "case.notes.tech": "纯文本 + Git 版本管理,每次修改都有记录。",
     "case.notes.result": "还在持续整理中,下一步是做成可以在线检索的版本。",
+
+    "case.new": "新",
+    "case.2359.lead": "一款终端风格的住宿生活模拟器:一个晚上、六个小时、五项状态,以及要撑过去的十四天。",
+    "case.2359.problem": "我想做一个真正需要取舍的游戏,而不只是比反应——一个没办法什么都拿满的局。",
+    "case.2359.thinking": "每个小时只能花一次。如果好好学习永远有回报,游戏就不成立了——张力来自代价。",
+    "case.2359.solution": "七个行动、五项可视状态,状态告急时会告警并限制选择;再加上加权随机事件,以及每 14 天一结算的评级。",
+    "case.2359.tech": "手写 HTML、CSS 和 JavaScript,事件库与引擎分离;存档和档案存在 localStorage。",
+    "case.2359.result": "总共约 90 KB,零依赖。打开浏览器就能玩,还会把你每一轮完成的周期记录下来。",
 
     "step.problem": "问题",
     "step.thinking": "思考",
@@ -155,7 +151,6 @@ var I18N = {
     "note.hello.p.next": "之后会继续整理错题本,做新的小东西,也会在这里记录过程。如果有什么想聊的,欢迎发邮件给我。",
 
     "page.home.title": "HX STONE — 学生 × AI 探索者",
-    "page.games.title": "游戏 · HX STONE",
     "page.projects.title": "精选作品 · HX STONE",
     "page.notes.title": "笔记 · HX STONE",
     "page.about.title": "关于 · HX STONE",

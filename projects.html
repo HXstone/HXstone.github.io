@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title data-i18n="page.projects.title">Selected Work · HX STONE</title>
-<meta name="description" content="Four real projects by HX STONE — Minesweeper, Dino Run, Tank Battle and a Mistake Notebook. Problem, thinking, solution, technology, result.">
+<meta name="description" content="Five real projects by HX STONE — Minesweeper, Dino Run, Tank Battle, a Mistake Notebook and the 23:59 boarding-school simulator. Problem, thinking, solution, technology, result.">
 <meta name="theme-color" content="#050505">
 <meta name="color-scheme" content="dark">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Selected Work · HX STONE">
-<meta property="og:description" content="Minesweeper, Dino Run, Tank Battle and a Mistake Notebook — four real case studies.">
+<meta property="og:description" content="Minesweeper, Dino Run, Tank Battle, a Mistake Notebook and a boarding-school simulator — five real case studies.">
 <meta property="og:image" content="https://hxstone.github.io/assets/img/og-cover.jpg">
 <meta property="og:url" content="https://hxstone.github.io/projects.html">
 <meta name="twitter:card" content="summary_large_image">
@@ -60,7 +60,7 @@
     <nav class="site-nav" aria-label="Primary">
       <a href="index.html" data-i18n="nav.home">Home</a>
       <a href="projects.html" aria-current="page" data-i18n="nav.projects">Projects</a>
-      <a href="games/index.html" data-i18n="nav.games">Games</a>
+      <a href="projects.html#game-2359" data-i18n="nav.games">Games</a>
       <a href="notes.html" data-i18n="nav.notes">Notes</a>
       <a href="about.html" data-i18n="nav.about">About</a>
       <button class="lang-toggle" type="button">中文</button>
@@ -72,7 +72,7 @@
 
   <header class="page-head">
     <h1 data-i18n="projects.title">Selected Work</h1>
-    <p class="lead" data-i18n="projects.lead">Four real things I built. Each one started with a problem and ended when it was playable or usable.</p>
+    <p class="lead" data-i18n="projects.lead">Five real things I built. Each one started with a problem and ended when it was playable or usable.</p>
   </header>
 
   <!-- ============ 01 MINESWEEPER ============ -->
@@ -210,6 +210,48 @@
         <div class="step reveal">
           <span class="step-k" data-i18n="step.result">Result</span>
           <p class="step-v" data-i18n="case.notes.result">Work in progress — a searchable online version is the next step.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 05 23:59 BOARDING SCHOOL ============ -->
+  <section class="case" id="game-2359">
+    <div class="wrap case-grid">
+      <div class="case-intro reveal" data-reveal="left">
+        <div class="case-title">
+          <h2 data-i18n="work.2359.title">23:59 | Boarding School Simulator</h2>
+          <span class="badge badge-new" data-i18n="case.new">New</span>
+        </div>
+        <p data-i18n="case.2359.lead">A terminal-style boarding-school simulator: one evening, six hours, five stats, and fourteen nights to survive.</p>
+        <div class="case-actions">
+          <a class="btn btn-primary" href="games/2359/index.html" data-magnetic>
+            <span data-i18n="case.play">Open the game</span>
+            <span class="arrow" aria-hidden="true">→</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="steps">
+        <div class="step reveal">
+          <span class="step-k" data-i18n="step.problem">Problem</span>
+          <p class="step-v" data-i18n="case.2359.problem">I wanted a game with real decisions, not just reflexes — one where you cannot win everything.</p>
+        </div>
+        <div class="step reveal">
+          <span class="step-k" data-i18n="step.thinking">Thinking</span>
+          <p class="step-v" data-i18n="case.2359.thinking">Each hour can only be spent once. If studying always paid off there would be no game — the tension comes from the cost.</p>
+        </div>
+        <div class="step reveal">
+          <span class="step-k" data-i18n="step.solution">Solution</span>
+          <p class="step-v" data-i18n="case.2359.solution">Seven actions, five visible stats, warnings and limits when one runs low, weighted events, and a rating at the end of each 14-day cycle.</p>
+        </div>
+        <div class="step reveal">
+          <span class="step-k" data-i18n="step.technology">Technology</span>
+          <p class="step-v" data-i18n="case.2359.tech">Hand-written HTML, CSS and JavaScript, with the event library split from the engine; saves and records live in localStorage.</p>
+        </div>
+        <div class="step reveal">
+          <span class="step-k" data-i18n="step.result">Result</span>
+          <p class="step-v" data-i18n="case.2359.result">About 90 KB with no dependencies. It runs in the browser and keeps a record of every cycle you finish.</p>
         </div>
       </div>
     </div>
