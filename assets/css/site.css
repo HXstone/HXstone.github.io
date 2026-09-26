@@ -609,7 +609,10 @@ html.js .os-log .line.on { opacity: 1; transform: none; }
 
 /* 标题旁的新标签:让最新的一件作品先被看到 */
 .case-title { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin: 12px 0 0; }
-.case-title h2 { margin: 0; }
+.case-title h2,
+.case-title h3 { margin: 0; }
+/* 首页作品行里,这个标题行沿用原来的下间距 */
+.work .case-title { margin: 0 0 8px; }
 
 .case-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
 
