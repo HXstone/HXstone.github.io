@@ -96,18 +96,6 @@ window.G2359_EVENTS = [
     ]
   },
   {
-    id: 'mistake_review',
-    category: 'academic',
-    title: '错题该整理了',
-    prompt: '错题本已经\n好几天没动过了。',
-    weight: 8,
-    lifecycle: 'daily',
-    options: [
-      { label: '整理一会儿', time: 60, stats: { energy: -6, focus: -2, stress: 2, grade: 2 } },
-      { label: '改天再说', time: 0, stats: { mood: 1 } }
-    ]
-  },
-  {
     id: 'focus_slip',
     category: 'academic',
     title: '学不进去',

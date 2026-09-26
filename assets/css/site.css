@@ -413,24 +413,40 @@
 
 .thumb-game { background: radial-gradient(120% 120% at 30% 0%, rgba(90, 140, 230, .18), transparent 62%), linear-gradient(180deg, #0e1420, #0a0b12); }
 .thumb-run { background: radial-gradient(120% 120% at 30% 0%, rgba(70, 200, 140, .16), transparent 62%), linear-gradient(180deg, #0d1512, #0a0b10); }
-.thumb-notes { background: radial-gradient(120% 120% at 30% 0%, rgba(230, 180, 60, .22), transparent 62%), linear-gradient(180deg, #171208, #0c0b0a); }
 .thumb-night { background: radial-gradient(120% 120% at 30% 0%, rgba(150, 160, 235, .16), transparent 62%), linear-gradient(180deg, #0c0e1b, #090a11); }
 
 .work-title { margin: 0 0 8px; font-size: var(--fs-md); }
 .work-desc { margin: 0; max-width: 62ch; color: var(--text-2); font-size: var(--fs-sm); }
 .work-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 
-/* 次级动作:安静的文字,不再叠一个 → */
+/* 入口按钮:停在行尾的小胶囊,平时中性,hover 才亮起金色 */
 .work-go {
-  align-self: start;
-  padding-top: 5px;
+  align-self: center;
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, .02);
+  color: var(--text-2);
   font-size: var(--fs-xs);
-  color: var(--text-3);
+  font-weight: 600;
+  letter-spacing: .02em;
   white-space: nowrap;
-  transition: color var(--dur);
+  transition: color var(--dur), border-color var(--dur), background-color var(--dur);
 }
 
-.work:hover .work-go { color: var(--gold-hi); }
+.work:hover .work-go,
+.work:focus-visible .work-go {
+  border-color: var(--gold-line);
+  background: rgba(212, 175, 55, .08);
+  color: var(--gold-hi);
+}
+
+.work-go .arrow { transition: transform var(--dur) var(--ease-out); }
+.work:hover .work-go .arrow { transform: translateX(4px); }
 
 /* 目录序号:等宽、安静,是索引不是眉标 */
 .work-no {
@@ -848,7 +864,7 @@
   .work { grid-template-columns: 24px 64px minmax(0, 1fr); column-gap: 12px; row-gap: 10px; }
   .work-thumb { width: 64px; height: 64px; font-size: 27px; }
   .work-no { padding-top: 2px; }
-  .work-go { grid-column: 2 / -1; align-self: start; padding-top: 0; }
+  .work-go { grid-column: 2 / -1; justify-self: start; align-self: start; }
 
   .note { grid-template-columns: 1fr; row-gap: 6px; }
   .note-cat { justify-self: start; }
