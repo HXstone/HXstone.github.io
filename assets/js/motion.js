@@ -248,6 +248,21 @@
   rail.appendChild(railVal);
   document.body.appendChild(rail);
 
+  /* 小屏上状态栏只在滚动时出现,停手约 1.4s 后自动淡出 */
+  var railIdleTimer = 0;
+  var railNarrow =
+    window.matchMedia && window.matchMedia("(max-width: 720px)");
+
+  function markRailLive() {
+    if (!railNarrow || !railNarrow.matches) return;
+
+    rail.classList.add("is-live");
+    window.clearTimeout(railIdleTimer);
+    railIdleTimer = window.setTimeout(function () {
+      rail.classList.remove("is-live");
+    }, 1400);
+  }
+
   function tidy(text) {
     return (text || "").replace(/\s+/g, " ").trim();
   }
@@ -268,8 +283,18 @@
 
   function railName(el) {
     if (!el) return "";
-    var h = el.querySelector("[data-rail], h2");
-    return h ? tidy(h.textContent) : "";
+
+    var explicit = el.querySelector("[data-rail]");
+    if (explicit) return tidy(explicit.textContent);
+
+    /* 取区块自己的标题;作品/笔记卡片内部的标题不算 */
+    var heads = el.querySelectorAll("h2");
+
+    for (var i = 0; i < heads.length; i++) {
+      if (!heads[i].closest(".work, .note")) return tidy(heads[i].textContent);
+    }
+
+    return "";
   }
 
   var railScrollSec = "";
@@ -299,7 +324,7 @@
       var item = e.target.closest && e.target.closest(".work, .note");
       if (!item) return;
 
-      var title = item.querySelector("h3");
+      var title = item.querySelector("h2, h3");
       if (!title) return;
 
       railHoverSec = tidy(title.textContent);
@@ -326,7 +351,7 @@
   var header = document.querySelector(".site-header");
   var pending = false;
 
-  function onScroll() {
+  function onScroll(fromUser) {
     var max = document.documentElement.scrollHeight - window.innerHeight;
     var percent = max > 0 ? (window.scrollY / max) * 100 : 0;
 
@@ -336,6 +361,7 @@
     if (header) header.classList.toggle("is-stuck", window.scrollY > 24);
 
     updateRailSection();
+    if (fromUser) markRailLive();
 
     pending = false;
   }
@@ -345,16 +371,20 @@
     function () {
       if (pending) return;
       pending = true;
-      requestAnimationFrame(onScroll);
+      requestAnimationFrame(function () {
+        onScroll(true);
+      });
     },
     { passive: true }
   );
 
-  window.addEventListener("resize", onScroll);
+  window.addEventListener("resize", function () {
+    onScroll(false);
+  });
 
   /* 语言切换后重新取一次区块名(标题文字会变) */
   window.__railRefresh = onScroll;
 
   renderRailSection();
-  onScroll();
+  onScroll(false);
 })();

@@ -98,6 +98,8 @@ html {
   -webkit-text-size-adjust: 100%;
   overflow-x: clip;
   scroll-behavior: smooth;
+  /* 底部状态栏不挡住键盘聚焦到的元素 */
+  scroll-padding-bottom: 44px;
 }
 
 body {
@@ -108,7 +110,13 @@ body {
   line-height: 1.75;
   color: var(--text);
   background: var(--ink);
+  /* 有意设置触摸高亮:用品牌色代替系统的蓝色方块 */
+  -webkit-tap-highlight-color: rgba(212, 175, 55, .14);
 }
+
+/* 去掉移动端双击缩放的 300ms 点击延迟 */
+a,
+button { touch-action: manipulation; }
 
 /* 背景:顶部金色光晕 + 底部微光 */
 body::after {
@@ -133,6 +141,12 @@ body::before {
   mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
   background-size: 160px 160px;
+}
+
+/* 移动端:全屏 mix-blend-mode 会让合成器在每帧重新合成整屏,
+   小屏上改用普通叠加,保留细颗粒质感但省掉这层开销 */
+@media (max-width: 720px) {
+  body::before { mix-blend-mode: normal; opacity: .025; }
 }
 
 /* 背景:细网格(随鼠标轻微偏移,由 JS 设置 --bgx / --bgy) */
@@ -166,6 +180,8 @@ h1, h2, h3, h4 {
   font-family: var(--font-title);
   line-height: 1.15;
   letter-spacing: -.02em;
+  /* 避免标题出现孤字 */
+  text-wrap: balance;
 }
 
 p { margin: 0 0 1em; }

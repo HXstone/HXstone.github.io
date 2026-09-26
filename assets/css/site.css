@@ -148,6 +148,7 @@
   font-size: 11px;
   color: var(--text-3);
   pointer-events: none;
+  transition: opacity var(--dur) var(--ease-out), transform var(--dur) var(--ease-out);
 }
 
 .rail-sec {
@@ -180,6 +181,20 @@
   flex: 0 0 auto;
   font-variant-numeric: tabular-nums;
   color: var(--text-2);
+}
+
+@media (max-width: 720px) {
+  /* 小屏上状态栏默认收起:滚动时才出现,停手后自动淡出,
+     不再常驻遮挡页面内容 */
+  .rail {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+
+  .rail.is-live {
+    transform: none;
+    opacity: 1;
+  }
 }
 
 @media (max-width: 560px) {
@@ -478,7 +493,7 @@ html.js .os-log .line.on { opacity: 1; transform: none; }
 /* ---------- work / case studies ---------- */
 
 /* 作品 = 一条条被划线分开的台面记录,不是一叠同构卡片 */
-.work-list { display: grid; }
+.work-list { display: grid; border-bottom: 1px solid var(--line); }
 
 .work {
   position: relative;
@@ -491,7 +506,7 @@ html.js .os-log .line.on { opacity: 1; transform: none; }
   color: inherit;
 }
 
-.work:last-child { border-bottom: 1px solid var(--line); }
+.work:last-child { border-bottom: 0; }
 
 /* hover 让规则线与序号回应,而不是把整张卡抬起来 */
 .work::before {
@@ -509,6 +524,10 @@ html.js .os-log .line.on { opacity: 1; transform: none; }
 
 .work:hover { color: inherit; }
 .work:hover::before { transform: scaleX(1); }
+
+/* 触摸反馈:按下时给一点即时回应,不依赖 hover */
+.work:active,
+.note:active { background: rgba(255, 255, 255, .035); }
 
 .work-thumb {
   display: grid;
@@ -641,6 +660,7 @@ html.js .os-log .line.on { opacity: 1; transform: none; }
 }
 
 .filter:hover { color: var(--text); border-color: var(--gold-line); }
+.filter:active { transform: translateY(1px); }
 
 .filter[aria-pressed="true"] {
   color: #08080a;
@@ -650,7 +670,7 @@ html.js .os-log .line.on { opacity: 1; transform: none; }
 }
 
 /* 笔记 = 带日期的日志行,形态刻意和作品不同 */
-.note-list { display: grid; }
+.note-list { display: grid; border-bottom: 1px solid var(--line); }
 
 .note {
   display: grid;
@@ -662,10 +682,11 @@ html.js .os-log .line.on { opacity: 1; transform: none; }
   color: inherit;
 }
 
-.note:last-child { border-bottom: 1px solid var(--line); }
+.note:last-child { border-bottom: 0; }
 
 .note:hover { color: inherit; }
 .note:hover .note-date { color: var(--gold); }
+.note:hover h2,
 .note:hover h3 { color: var(--gold-hi); }
 
 .note[hidden] { display: none; }
@@ -679,6 +700,7 @@ html.js .os-log .line.on { opacity: 1; transform: none; }
   transition: color var(--dur);
 }
 
+.note h2,
 .note h3 { margin: 0 0 7px; font-size: var(--fs-md); transition: color var(--dur); }
 .note p { margin: 0; color: var(--text-2); font-size: var(--fs-sm); }
 .note-cat { justify-self: end; align-self: center; }
@@ -959,10 +981,27 @@ html.js .os-log .line.on { opacity: 1; transform: none; }
   .note-cat { justify-self: start; }
 
   .step { grid-template-columns: 24px minmax(0, 1fr); column-gap: 10px; row-gap: 4px; }
+  /* 编号占左栏,标签与正文都落在右栏 */
+  .step-k,
+  .step-v { grid-column: 2; }
 
   .meter { grid-template-columns: 92px minmax(0, 1fr) 46px; gap: 12px; }
 
   .contact-row { flex-direction: column; align-items: flex-start; gap: 6px; }
+
+  /* 小屏收紧:头部更矮、球体更小,好让标题和按钮留在首屏 */
+  .header-inner { min-height: 64px; }
+  .orb { width: clamp(168px, 42vw, 220px); }
+  .hero { padding-bottom: clamp(28px, 6vw, 44px); }
+  .hero-bio { margin-top: 20px; }
+  .hero-cta { margin-top: 28px; }
+  .identity { margin-top: 24px; }
+
+  /* 触摸目标:筛选按钮抬到 44px 左右 */
+  .filter { padding: 11px 18px; }
+
+  /* 状态栏在小屏会自己收起,底部不需要为它留那么多空间 */
+  .site-footer { padding-bottom: 44px; }
 }
 
 /* ---------- 极窄屏保护 ---------- */
