@@ -15,12 +15,12 @@ var I18N = {
     "nav.games": "游戏",
 
     "hero.statement": "用 AI 和技术,搭建我的未来。",
-    "hero.bio": "我在探索如何用 AI 把好奇心变成真实的东西——小游戏、笔记,和各种实验。我负责方向,AI 帮我把它做出来。",
+    "hero.bio": "我把好奇心做成一个个小东西——游戏、笔记和实验;和 AI 一起实现,再反复测到满意。",
     "hero.cta1": "看看作品",
     "hero.cta2": "读读笔记",
     "hero.p1": "学生",
+    "hero.p4": "跑者",
     "hero.p2": "AI 探索者",
-    "hero.p3": "未来的计算机学生",
 
     "work.title": "案例研究",
     "work.link": "全部案例",
@@ -94,7 +94,7 @@ var I18N = {
     "about.title": "关于",
     "about.quote": "我用<em>好奇心</em>做东西。<br>AI 是我的<em>创造伙伴</em>。",
     "about.p1": "我是惠州的一名高中生。足球和长跑让我保持状态,好奇心则都放在 AI 上。",
-    "about.p2": "我不像工程师那样写代码。我定方向和标准,AI 负责实现,我负责一遍遍测试到满意——这个网站也是这么做出来的。",
+    "about.p2": "我不像工程师那样写代码,所以我有自己的做法:先定下做什么、什么叫好,借 AI 抵达,再反复测试打磨到站得住。这个网站就是这么来的。",
     "about.contact.title": "联系方式",
     "about.hello": "随时欢迎聊聊 AI、足球或跑步。",
 
@@ -138,7 +138,7 @@ var I18N = {
     "note.hello.h.next": "接下来",
     "note.hello.p.next": "之后会继续整理错题本,做新的小东西,也会在这里记录过程。如果有什么想聊的,欢迎发邮件给我。",
 
-    "page.home.title": "HX STONE — 学生 × AI 探索者",
+    "page.home.title": "HX STONE — 学生 × 跑者 × AI 探索者",
     "page.projects.title": "精选作品 · HX STONE",
     "page.notes.title": "笔记 · HX STONE",
     "page.about.title": "关于 · HX STONE",

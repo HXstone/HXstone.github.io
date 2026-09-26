@@ -1,7 +1,7 @@
 # HX STONE
 
-个人网站:**一个 AI 时代高中生的个人科技实验室**。
-Student × AI Explorer × Future CS Builder.
+个人网站:**一个高中生的个人小站,记录 AI、代码和跑步**。
+Student × Runner × AI Explorer.
 
 纯静态站点,零构建步骤,托管在 GitHub Pages。
 线上地址:https://hxstone.github.io
