@@ -248,20 +248,7 @@
   rail.appendChild(railVal);
   document.body.appendChild(rail);
 
-  /* 小屏上状态栏只在滚动时出现,停手约 1.4s 后自动淡出 */
-  var railIdleTimer = 0;
-  var railNarrow =
-    window.matchMedia && window.matchMedia("(max-width: 720px)");
-
-  function markRailLive() {
-    if (!railNarrow || !railNarrow.matches) return;
-
-    rail.classList.add("is-live");
-    window.clearTimeout(railIdleTimer);
-    railIdleTimer = window.setTimeout(function () {
-      rail.classList.remove("is-live");
-    }, 1400);
-  }
+  /* 小屏上进度条收成细线(见 site.css),始终可见,不遮挡正文 */
 
   function tidy(text) {
     return (text || "").replace(/\s+/g, " ").trim();
@@ -349,9 +336,19 @@
   /* ---------- 滚动量 + 导航玻璃化 ---------- */
 
   var header = document.querySelector(".site-header");
+  var rootEl = document.documentElement;
   var pending = false;
 
-  function onScroll(fromUser) {
+  /* 把导航栏的实测高度写进 --header-h(含刘海安全区),
+     供 scroll-padding-top / :target 使用 —— 不写死高度 */
+  function syncHeaderHeight() {
+    if (!header) return;
+
+    var h = Math.round(header.getBoundingClientRect().height);
+    if (h > 0) rootEl.style.setProperty("--header-h", h + "px");
+  }
+
+  function onScroll() {
     var max = document.documentElement.scrollHeight - window.innerHeight;
     var percent = max > 0 ? (window.scrollY / max) * 100 : 0;
 
@@ -361,7 +358,6 @@
     if (header) header.classList.toggle("is-stuck", window.scrollY > 24);
 
     updateRailSection();
-    if (fromUser) markRailLive();
 
     pending = false;
   }
@@ -371,20 +367,22 @@
     function () {
       if (pending) return;
       pending = true;
-      requestAnimationFrame(function () {
-        onScroll(true);
-      });
+      requestAnimationFrame(onScroll);
     },
     { passive: true }
   );
 
   window.addEventListener("resize", function () {
-    onScroll(false);
+    syncHeaderHeight();
+    onScroll();
   });
+
+  syncHeaderHeight();
+  window.addEventListener("load", syncHeaderHeight);
 
   /* 语言切换后重新取一次区块名(标题文字会变) */
   window.__railRefresh = onScroll;
 
   renderRailSection();
-  onScroll(false);
+  onScroll();
 })();

@@ -9,12 +9,15 @@
   position: sticky;
   top: 0;
   z-index: 60;
+  /* 刘海 / 灵动岛:内容不被状态栏压住,黑色背景依然铺满整条 */
+  padding-top: env(safe-area-inset-top, 0px);
   border-bottom: 1px solid transparent;
   transition: background-color var(--dur), border-color var(--dur);
 }
 
 .site-header.is-stuck {
-  background: rgba(5, 5, 5, .74);
+  /* 90%:正文从下面滚过时不再透出来干扰阅读 */
+  background: rgba(5, 5, 5, .9);
   backdrop-filter: blur(18px) saturate(140%);
   -webkit-backdrop-filter: blur(18px) saturate(140%);
   border-bottom-color: var(--line);
@@ -138,8 +141,10 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  height: 30px;
-  padding: 0 var(--gutter);
+  height: calc(var(--rail-h) + env(safe-area-inset-bottom, 0px));
+  padding-left: max(var(--gutter), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--gutter), env(safe-area-inset-right, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   border-top: 1px solid var(--line);
   background: rgba(5, 5, 5, .82);
   backdrop-filter: blur(14px) saturate(130%);
@@ -148,7 +153,6 @@
   font-size: 11px;
   color: var(--text-3);
   pointer-events: none;
-  transition: opacity var(--dur) var(--ease-out), transform var(--dur) var(--ease-out);
 }
 
 .rail-sec {
@@ -184,21 +188,14 @@
 }
 
 @media (max-width: 720px) {
-  /* 小屏上状态栏默认收起:滚动时才出现,停手后自动淡出,
-     不再常驻遮挡页面内容 */
-  .rail {
-    transform: translateY(100%);
-    opacity: 0;
-  }
+  /* 小屏:进度条收成一条细线 —— 仍然常驻、仍然随滚动更新,
+     但不再占掉视口底部那 30px,正文不会被压住 */
+  .rail { gap: 0; }
 
-  .rail.is-live {
-    transform: none;
-    opacity: 1;
-  }
-}
+  .rail-sec,
+  .rail-val { display: none; }
 
-@media (max-width: 560px) {
-  .rail-sec { display: none; }
+  .rail-track { height: 2px; min-width: 0; }
 }
 
 /* ---------- hero ---------- */
@@ -773,7 +770,8 @@ html.js .os-log .line.on { opacity: 1; transform: none; }
 
 .site-footer {
   margin-top: clamp(40px, 6vw, 90px);
-  padding: clamp(52px, 7vw, 96px) 0 74px;
+  /* 底部留出进度条占的高度,最后一行正文才不会被固定元素压住 */
+  padding: clamp(52px, 7vw, 96px) 0 calc(44px + var(--rail-h));
   border-top: 1px solid var(--line);
 }
 
@@ -999,9 +997,6 @@ html.js .os-log .line.on { opacity: 1; transform: none; }
 
   /* 触摸目标:筛选按钮抬到 44px 左右 */
   .filter { padding: 11px 18px; }
-
-  /* 状态栏在小屏会自己收起,底部不需要为它留那么多空间 */
-  .site-footer { padding-bottom: 44px; }
 }
 
 /* ---------- 极窄屏保护 ---------- */

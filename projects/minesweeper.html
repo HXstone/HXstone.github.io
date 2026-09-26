@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>扫雷 · Minesweeper</title>
 <meta name="description" content="在线扫雷:三档难度、计时器,第一下永远不会踩雷。Playable Minesweeper with three difficulty levels and a first tap that never blows up.">
 <meta name="theme-color" content="#050505">
@@ -26,6 +26,11 @@
   body {
     margin: 0;
     padding: 56px 16px 26px;
+    /* 刘海 / 底部指示条:黑色底铺满,内容不被切掉 */
+    padding-top: max(56px, calc(16px + env(safe-area-inset-top, 0px)));
+    padding-bottom: max(26px, calc(12px + env(safe-area-inset-bottom, 0px)));
+    padding-left: max(16px, calc(8px + env(safe-area-inset-left, 0px)));
+    padding-right: max(16px, calc(8px + env(safe-area-inset-right, 0px)));
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -43,8 +48,8 @@
   /* 回到站点:游戏页原先没有任何出口 */
   .back {
     position: fixed;
-    top: 14px;
-    left: 16px;
+    top: calc(14px + env(safe-area-inset-top, 0px));
+    left: calc(16px + env(safe-area-inset-left, 0px));
     z-index: 5;
     padding: 8px 15px;
     border: 1px solid rgba(212, 175, 55, .35);
