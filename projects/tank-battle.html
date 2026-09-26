@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#050505">
+  <title>Tank Battle · 坦克大战</title>
+  <meta name="description" content="A playable Tank Battle game with destructible walls, enemy AI and touch controls.">
+  <style>
+    :root{--gold:#d4af37;--ink:#050505;--paper:#edf0e7;--muted:#aeb8ac;--panel:#101813;--line:#2f4034}
+    *{box-sizing:border-box} body{margin:0;min-height:100vh;min-height:100dvh;display:grid;place-items:center;padding:64px 16px 28px;background:radial-gradient(900px 600px at 50% -20%,#1b2c20 0,var(--ink) 67%);color:var(--paper);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Microsoft YaHei",monospace;user-select:none;-webkit-tap-highlight-color:transparent}
+    .back{position:fixed;top:max(15px,calc(12px + env(safe-area-inset-top)));left:max(16px,calc(10px + env(safe-area-inset-left)));z-index:5;padding:8px 14px;border:1px solid rgba(212,175,55,.42);border-radius:999px;color:var(--gold);background:rgba(5,5,5,.5);font-size:12px;letter-spacing:1.5px;text-decoration:none}.back:hover{background:rgba(212,175,55,.14)}
+    .shell{width:min(720px,100%);padding:18px;border:1px solid rgba(212,175,55,.28);border-radius:18px;background:rgba(11,16,12,.85);box-shadow:0 28px 80px #0008}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 2px 14px}.brand{font-size:clamp(18px,4vw,25px);font-weight:800;letter-spacing:4px}.brand b{color:var(--gold)}.stats{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.stat{min-width:72px;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:#071009;color:var(--muted);font-size:10px;line-height:1.25;text-align:center}.stat strong{display:block;color:var(--paper);font-size:15px;letter-spacing:1px}
+    .stage{position:relative;border:3px solid #26362a;border-radius:11px;overflow:hidden;background:#697c52;box-shadow:inset 0 0 0 2px #101a12;touch-action:none}.stage:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,#0002 1px,transparent 1px),linear-gradient(#0002 1px,transparent 1px);background-size:24px 24px;mix-blend-mode:multiply}canvas{display:block;width:100%;aspect-ratio:1.1875/1;height:auto;image-rendering:pixelated}
+    .bottom{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:13px;color:var(--muted);font-size:11px;line-height:1.5}.keys{color:#cbd4c9}.keys kbd{display:inline-block;padding:1px 5px;border:1px solid #526354;border-radius:3px;background:#182119;color:var(--paper);font:inherit}.restart{border:1px solid rgba(212,175,55,.55);border-radius:7px;padding:8px 11px;color:#201704;background:linear-gradient(135deg,#f2d87c,var(--gold));font:700 11px inherit;letter-spacing:1px;cursor:pointer}.restart:hover{filter:brightness(1.08)}
+    .touch{display:grid;grid-template-columns:112px 1fr 112px;gap:14px;align-items:end;margin-top:14px}.pad{display:grid;grid-template-columns:repeat(3,36px);grid-template-rows:repeat(3,36px);gap:2px}.control{border:1px solid #506451;border-radius:7px;background:#19251a;color:#e7eee5;font:700 16px inherit;cursor:pointer;touch-action:none}.control:active{background:#425d43}.up{grid-column:2}.left{grid-column:1;grid-row:2}.down{grid-column:2;grid-row:2}.right{grid-column:3;grid-row:2}.fire{height:74px;border-color:rgba(212,175,55,.7);color:var(--gold);letter-spacing:1px}
+    @media(max-width:600px),(pointer:coarse){body{padding-top:58px;align-items:start}.shell{padding:12px}.top{margin-bottom:10px}.stat{min-width:57px;padding:4px}.stat strong{font-size:13px}.bottom{display:none}.brand{letter-spacing:2px;font-size:18px}}
+  </style>
+</head>
+<body>
+  <a class="back" href="../projects.html#tank-battle">← HX STONE</a>
+  <main class="shell">
+    <div class="top"><div class="brand">TANK <b>BATTLE</b></div><div class="stats"><div class="stat">SCORE<strong id="score">0000</strong></div><div class="stat">LIVES<strong id="lives">●●●</strong></div><div class="stat">BEST<strong id="best">0000</strong></div></div></div>
+    <div class="stage"><canvas id="game" width="608" height="512" tabindex="0" aria-label="Tank Battle game"></canvas></div>
+    <div class="bottom"><span class="keys"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / arrow keys to drive · <kbd>SPACE</kbd> to fire</span><button class="restart" id="restart">↻ NEW GAME</button></div>
+    <div class="touch"><div class="pad"><button class="control up" data-key="up">▲</button><button class="control left" data-key="left">◀</button><button class="control down" data-key="down">▼</button><button class="control right" data-key="right">▶</button></div><div></div><button class="control fire" data-key="fire">FIRE<br>●</button></div>
+  </main>
+<script>
+(() => {
+  'use strict';
+  const c=document.getElementById('game'),x=c.getContext('2d'),W=c.width=608,H=c.height,T=32,COLS=W/T,ROWS=H/T;
+  const ui={score:document.getElementById('score'),lives:document.getElementById('lives'),best:document.getElementById('best')};
+  const KEY={up:false,down:false,left:false,right:false,fire:false}; let walls,player,enemies,bullets,particles,score,lives,state,last,spawnClock,level;
+  let best=+(localStorage.getItem('tank-battle-best')||0); ui.best.textContent=String(best).padStart(4,'0');
+  const dirs=[[0,-1],[1,0],[0,1],[-1,0]], clamp=(n,a,b)=>Math.max(a,Math.min(b,n)), rand=a=>Math.floor(Math.random()*a);
+
+  /* ---------- 地图:一张固定的经典布局 ----------
+     19×16 网格,每格 32px。'.' 空地 / 'B' 砖墙(可打穿) / '#' 钢墙(打不穿)。
+     左右两侧与首尾两行留空,形成外圈走廊;玩家出生在底部 ★ 的位置,
+     敌人从上方 5 个点进场。 */
+
+  const LANE=4;                                   // 坦克 24 宽、格子 32,格内对齐偏移 (32-24)/2
+  const START=[9,15];                             // 玩家起点(也是 ★ 底座所在行)
+  const SPAWNS=[[1,1],[17,1],[9,1],[1,5],[17,5]]; // 敌人出生点
+
+  function map(){
+    const rows=['...................','..B...#...#...B....','..#...#...#...#....','..#.......#...#....','..###.#####.###....','...................','..#.##..#..##.#....','..#.....#.....#....','..###.#####.###....','....#...#...#......','....#...#...#......','..B.#...#...#.B....','..#.###.#.###.#....','..#...........#....','..######.######....','...................'];
+    return rows.map(r=>[...r]);
+  }
+
+  function reset(){walls=map();score=0;lives=3;level=1;state='play';bullets=[];particles=[];enemies=[];spawnClock=0;player={x:START[0]*T+4,y:START[1]*T+4,d:0,cd:0,inv:1.8}; for(let i=0;i<3;i++) spawn(); renderUI()}
+  function spawn(){let p=SPAWNS[rand(SPAWNS.length)];enemies.push({x:p[0]*T+4,y:p[1]*T+4,d:2,cd:.8+Math.random(),turn:.35+Math.random()*1.4,dead:0})}
+  function renderUI(){ui.score.textContent=String(score).padStart(4,'0');ui.lives.textContent='●'.repeat(lives)+'○'.repeat(3-lives);if(score>best){best=score;localStorage.setItem('tank-battle-best',best);ui.best.textContent=String(best).padStart(4,'0')}}
+  function solid(px,py){if(px<0||py<0||px+24>W||py+24>H)return true;let a=Math.floor(px/T),b=Math.floor(py/T),d=Math.floor((px+23)/T),e=Math.floor((py+23)/T);for(let r=b;r<=e;r++)for(let q=a;q<=d;q++)if(walls[r]?.[q]==='#'||walls[r]?.[q]==='B')return true;return false}
+  /* 车道对齐 —— 「转身后推不动」的根因修复。
+     坦克 24 宽、格子 32,格内偏移只有落在 LANE(4) 上时才完整待在一格内。
+     但转向后,新的垂直坐标是上一轴随便停下的位置(比如偏移 20),这时坦克跨在
+     两格之间,只要相邻那格是墙,solid() 就判定前方不通 → 完全推不动。
+     做法:在最近的两条车道里,优先挑「放上去之后前方还能走」的那条,每帧朝它轻推
+     1.4 倍步长(不是瞬移)。两条都堵就保持原位,每一步都过 solid(),不会推进墙里。 */
+  function laneFree(t,dir,lane){
+    const alongY=dir===0||dir===2;
+    const nx=alongY?lane:t.x, ny=alongY?t.y:lane;
+    if(solid(nx,ny))return false;
+    const [dx,dy]=dirs[dir];
+    return !solid(nx+dx,ny+dy);
+  }
+  function alignLane(t,dir,s){
+    const alongY=dir===0||dir===2, cur=alongY?t.x:t.y;
+    const near=Math.round((cur-LANE)/T)*T+LANE;
+    if(Math.abs(cur-near)<.01)return;
+    const other=near+(cur>near?T:-T);
+    const target=laneFree(t,dir,near)?near:(laneFree(t,dir,other)?other:near);
+    const step=Math.sign(target-cur)*Math.min(Math.abs(target-cur),s*1.4);
+    const nx=alongY?cur+step:t.x, ny=alongY?t.y:cur+step;
+    if(!solid(nx,ny)){t.x=nx;t.y=ny}
+  }
+  function move(t,dir,s){alignLane(t,dir,s);let [dx,dy]=dirs[dir],nx=t.x+dx*s,ny=t.y+dy*s;if(!solid(nx,ny)){t.x=nx;t.y=ny;return true}return false}
+  function shoot(t,own){if(t.cd>0)return;t.cd=own?.38:.82;let[dX,dY]=dirs[t.d];bullets.push({x:t.x+12+dX*15,y:t.y+12+dY*15,dx:dX*265,dy:dY*265,own});beep(own?180:120,.045)}
+  let ac;function beep(f,d){try{ac??=new AudioContext();let o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;o.type='square';g.gain.setValueAtTime(.025,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+d);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d)}catch(e){}}
+  function explode(X,Y,col='#ffc84e'){for(let i=0;i<13;i++)particles.push({x:X,y:Y,dx:(Math.random()-.5)*125,dy:(Math.random()-.5)*125,t:.35+Math.random()*.3,col})}
+  function hitTank(b,t){return b.x>t.x-2&&b.x<t.x+26&&b.y>t.y-2&&b.y<t.y+26}
+  function update(dt){if(state!=='play')return;player.cd-=dt;player.inv-=dt;let d=KEY.up?0:KEY.right?1:KEY.down?2:KEY.left?3:null;if(d!==null){player.d=d;move(player,d,108*dt)}if(KEY.fire){shoot(player,true);KEY.fire=false}
+    spawnClock-=dt;if(enemies.length<level+2&&spawnClock<=0){spawn();spawnClock=1.1}
+    for(const e of enemies){e.cd-=dt;e.turn-=dt;if(e.turn<0||!move(e,e.d,62*dt)){e.d=rand(4);e.turn=.45+Math.random()*1.2} if(Math.random()<.006)e.d=rand(4);if(e.cd<=0)shoot(e,false)}
+    for(let i=bullets.length-1;i>=0;i--){let b=bullets[i];b.x+=b.dx*dt;b.y+=b.dy*dt;let q=Math.floor(b.x/T),r=Math.floor(b.y/T);if(b.x<0||b.y<0||b.x>W||b.y>H){bullets.splice(i,1);continue}let cell=walls[r]?.[q];if(cell==='B'){walls[r][q]='.';explode(b.x,b.y,'#c87944');bullets.splice(i,1);continue}if(cell==='#'){explode(b.x,b.y,'#cbd6c4');bullets.splice(i,1);continue}if(b.own){let k=enemies.findIndex(e=>hitTank(b,e));if(k>=0){explode(enemies[k].x+12,enemies[k].y+12,'#ff7b52');enemies.splice(k,1);bullets.splice(i,1);score+=100;renderUI()}}else if(player.inv<=0&&hitTank(b,player)){bullets.splice(i,1);hurt()}}
+    for(let i=particles.length-1;i>=0;i--){let p=particles[i];p.t-=dt;p.x+=p.dx*dt;p.y+=p.dy*dt;if(p.t<=0)particles.splice(i,1)} if(score>=level*900){level++;spawnClock=.4}}
+  function hurt(){lives--;player.inv=2;explode(player.x+12,player.y+12,'#ffe66d');beep(70,.2);renderUI();if(lives<=0){state='over';setTimeout(()=>{},0)}else{player.x=START[0]*T+4;player.y=START[1]*T+4;player.d=0}}
+  function tank(t,col){x.save();x.translate(t.x+12,t.y+12);x.rotate(t.d*Math.PI/2);x.fillStyle='#18251b';x.fillRect(-12,-11,24,22);x.fillStyle=col;x.fillRect(-8,-9,16,18);x.fillStyle='#b9cbb6';x.fillRect(-3,-6,6,12);x.fillStyle='#172018';x.fillRect(-2,-19,4,15);x.restore()}
+  function draw(){x.fillStyle='#718755';x.fillRect(0,0,W,H);for(let r=0;r<ROWS;r++)for(let q=0;q<COLS;q++){let a=walls[r][q],X=q*T,Y=r*T;if(a==='#'){x.fillStyle='#d0d8c3';x.fillRect(X+2,Y+2,28,28);x.fillStyle='#97a38f';x.fillRect(X+2,Y+15,28,3);x.fillRect(X+14,Y+2,3,13)}if(a==='B'){x.fillStyle='#a64e36';x.fillRect(X+1,Y+1,30,30);x.fillStyle='#d7784d';for(let i=0;i<3;i++)x.fillRect(X+3,Y+5+i*9+(i%2)*2,26,3)}}
+    x.fillStyle='#2e4330';x.fillRect(8*T+6,15*T+10,52,16);x.fillStyle='#d4af37';x.fillText('★',9*T+10,15*T+23);for(const b of bullets){x.fillStyle=b.own?'#ffe26a':'#ff8054';x.beginPath();x.arc(b.x,b.y,3,0,7);x.fill()}for(const e of enemies)tank(e,'#d65343');if(player.inv<=0||Math.floor(player.inv*10)%2)tank(player,'#e0bd42');for(const p of particles){x.globalAlpha=Math.min(1,p.t*3);x.fillStyle=p.col;x.fillRect(p.x,p.y,3,3)}x.globalAlpha=1;if(state==='over'){x.fillStyle='#000a';x.fillRect(0,0,W,H);x.fillStyle='#f1f3e9';x.textAlign='center';x.font='bold 30px monospace';x.fillText('GAME OVER',W/2,H/2-12);x.fillStyle='#d4af37';x.font='14px monospace';x.fillText('PRESS SPACE OR TAP TO RESTART',W/2,H/2+22);x.textAlign='start'}}
+  function loop(t){let dt=Math.min(.035,(t-last||t)/1000);last=t;update(dt);draw();requestAnimationFrame(loop)}
+  const keymap={ArrowUp:'up',KeyW:'up',ArrowDown:'down',KeyS:'down',ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',Space:'fire'};
+  function keyDown(e){let k=keymap[e.code]||keymap[e.key];if(k){e.preventDefault();c.focus();if(state==='over'){reset();return}KEY[k]=true}}
+  function keyUp(e){let k=keymap[e.code]||keymap[e.key];if(k){e.preventDefault();KEY[k]=false}}
+  addEventListener('keydown',keyDown,{passive:false});addEventListener('keyup',keyUp,{passive:false});addEventListener('blur',()=>Object.keys(KEY).forEach(k=>KEY[k]=false));
+  document.querySelectorAll('[data-key]').forEach(b=>{let k=b.dataset.key;b.addEventListener('pointerdown',e=>{e.preventDefault();if(state==='over')reset();else KEY[k]=true});for(const ev of ['pointerup','pointercancel','pointerleave'])b.addEventListener(ev,()=>KEY[k]=false)});c.addEventListener('pointerdown',()=>{c.focus();if(state==='over')reset();else KEY.fire=true});document.getElementById('restart').onclick=reset;
+  reset();requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

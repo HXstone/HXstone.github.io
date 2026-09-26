@@ -39,6 +39,8 @@ var I18N = {
     "work.mine.desc": "经典扫雷:三档难度、计时器,第一下永远不会踩雷。",
     "work.dino.title": "恐龙快跑",
     "work.dino.desc": "带难度曲线的跑酷:昼夜循环,键盘和触屏都能玩。",
+    "work.tank.title": "坦克大战",
+    "work.tank.desc": "可破坏砖墙、敌方 AI 与本地最高分的街机坦克游戏。",
     "work.notes.title": "错题本",
     "work.notes.desc": "按学科和知识点整理的错题集,正在做成可检索的版本。",
     "work.case": "查看案例",
@@ -53,7 +55,7 @@ var I18N = {
     "notes.f.ideas": "想法",
 
     "projects.title": "精选作品",
-    "projects.lead": "三个真实做过的东西。每个都从问题开始,到能玩、能用为止。",
+    "projects.lead": "四个真实做过的东西。每个都从问题开始,到能玩、能用为止。",
     "case.inprogress": "进行中",
     "case.play": "打开游戏",
     "case.notesLink": "了解错题本",
@@ -69,6 +71,12 @@ var I18N = {
     "case.dino.solution": "跳跃、下蹲、速降三种动作,滚动式昼夜循环,键盘和触屏都能操作。",
     "case.dino.tech": "一个 HTML 文件 + 自适应画布,不用任何库,也不需要构建步骤。",
     "case.dino.result": "大约 27 KB,打开瞬间完成,旧手机上也不卡。",
+    "case.tank.lead": "一局紧凑的街机坦克大战:击穿砖墙、避开敌方炮火,清空战场。",
+    "case.tank.problem": "我想做一个访客几秒就能懂、但又愿意为了高分继续玩的小游戏。",
+    "case.tank.thinking": "经典坦克操作几乎不需要说明;可破坏地形则让每一局的走位都不一样。",
+    "case.tank.solution": "驾驶、开火、利用掩体,在越来越密集的敌方巡逻中守住三条生命。",
+    "case.tank.tech": "一个自适应 Canvas 游戏,音效和触屏操作都内置,不需要素材或第三方库。",
+    "case.tank.result": "电脑和手机都能玩,并会把最高分保存在本地,下次回来还能继续挑战。",
     "case.notes.lead": "给自己做一个「第二大脑」,把反复做错的题按学科和知识点存下来。",
     "case.notes.problem": "错题都留在纸上:零散、搜不到,考前根本翻不完。",
     "case.notes.thinking": "如果一个笔记五秒钟找不到,它就不会被复习。",
@@ -136,6 +144,7 @@ var I18N = {
     "page.notfound.title": "页面走丢了 · HX STONE",
 
     "work.dino.index": "游戏",
+    "work.tank.index": "游戏",
     "work.mine.index": "游戏",
     "work.notes.index": "知识库"
   }

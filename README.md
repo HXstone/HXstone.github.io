@@ -24,7 +24,7 @@ Student × AI Explorer × Future CS Builder.
 
 ```
 ├── index.html            首页:Hero / HX OS / Case Studies / Notes
-├── projects.html         三个项目的完整案例(问题→思考→方案→技术→结果)
+├── projects.html         四个项目的完整案例(问题→思考→方案→技术→结果)
 ├── notes.html            笔记列表(可按分类筛选)
 ├── about.html            关于(理念 + 简介 + 联系方式)
 ├── 404.html              自定义错误页
@@ -34,7 +34,8 @@ Student × AI Explorer × Future CS Builder.
 │   └── 2026-09-25-hello.html   笔记:小站开张了
 ├── projects/
 │   ├── minesweeper.html  扫雷(可玩)
-│   └── dino-run.html     恐龙快跑(可玩)
+│   ├── dino-run.html     恐龙快跑(可玩)
+│   └── tank-battle.html   坦克大战(可玩)
 └── assets/
     ├── css/  base.css · site.css
     ├── js/   main.js(语言/菜单)· motion.js(动效)· background.js(粒子)
