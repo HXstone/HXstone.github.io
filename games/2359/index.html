@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>23:59 | Boarding School Simulator</title>
+  <meta name="description" content="A 14-day boarding school life simulator. Six hours a night. Every choice costs something.">
+  <meta name="theme-color" content="#0b0b0b">
+  <meta name="color-scheme" content="dark">
+
+  <link rel="preload" href="../../assets/fonts/jetbrains-mono-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="g2359-body">
+
+  <div class="g2359" id="game">
+
+    <!-- ===== HEADER ===== -->
+    <header class="g2359-header">
+      <div class="g2359-header-left">
+        <a class="g2359-home" href="../../index.html" aria-label="Back to hxstone.github.io">← index</a>
+        <span class="g2359-brand">HX STONE · 23:59</span>
+      </div>
+      <div class="g2359-header-right">
+        <button class="g2359-arch-btn" id="archive-btn" type="button" aria-label="view archive">[archive]</button>
+        <span class="g2359-best" id="best-rating">BEST --</span>
+        <span class="g2359-clock">DAY 01/14 · 18:00</span>
+      </div>
+    </header>
+
+    <!-- ===== BOOT (click to skip) ===== -->
+    <div class="g2359-boot" id="boot" role="status" aria-label="Boot sequence" title="click to skip">
+      <div class="g2359-boot-line"><span class="g2359-prompt">&gt;</span> boot campus-os --mode=boarding</div>
+      <div class="g2359-boot-line"><span class="g2359-prompt">&gt;</span> system.check ............... <span class="g2359-ok">OK</span></div>
+      <div class="g2359-boot-line"><span class="g2359-prompt">&gt;</span> residence.network .......... <span class="g2359-ok">ONLINE</span></div>
+      <div class="g2359-boot-line"><span class="g2359-prompt">&gt;</span> cycle.start <span class="g2359-dim">14 days</span></div>
+    </div>
+
+    <!-- ===== MAIN ===== -->
+    <main class="g2359-main">
+
+      <!-- STATUS -->
+      <section class="g2359-status" aria-label="Player status">
+        <h2 class="g2359-sec-title">STATUS</h2>
+
+        <div class="g2359-stat" data-stat="energy" role="progressbar" aria-label="energy" aria-valuemin="0" aria-valuemax="100" aria-valuenow="70">
+          <span class="g2359-stat-label">energy</span>
+          <span class="g2359-meter" data-meter><span class="g2359-meter-fill">█████████████</span>░░░░░</span>
+          <span class="g2359-stat-val" data-val>70</span>
+        </div>
+        <div class="g2359-stat" data-stat="focus" role="progressbar" aria-label="focus" aria-valuemin="0" aria-valuemax="100" aria-valuenow="60">
+          <span class="g2359-stat-label">focus</span>
+          <span class="g2359-meter" data-meter><span class="g2359-meter-fill">███████████</span>░░░░░░░</span>
+          <span class="g2359-stat-val" data-val>60</span>
+        </div>
+        <div class="g2359-stat" data-stat="mood" role="progressbar" aria-label="mood" aria-valuemin="0" aria-valuemax="100" aria-valuenow="70">
+          <span class="g2359-stat-label">mood</span>
+          <span class="g2359-meter" data-meter><span class="g2359-meter-fill">█████████████</span>░░░░░</span>
+          <span class="g2359-stat-val" data-val>70</span>
+        </div>
+        <div class="g2359-stat" data-stat="stress" role="progressbar" aria-label="stress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="30">
+          <span class="g2359-stat-label">stress</span>
+          <span class="g2359-meter" data-meter><span class="g2359-meter-fill">█████</span>░░░░░░░░░░░░░</span>
+          <span class="g2359-stat-val" data-val>30</span>
+        </div>
+        <div class="g2359-stat" data-stat="grade" role="progressbar" aria-label="grade" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+          <span class="g2359-stat-label">grade</span>
+          <span class="g2359-meter" data-meter><span class="g2359-meter-fill">█████████</span>░░░░░░░░░</span>
+          <span class="g2359-stat-val" data-val>50</span>
+        </div>
+      </section>
+
+      <!-- LOG -->
+      <section class="g2359-log-panel" aria-label="Game log">
+        <h2 class="g2359-sec-title" id="log-title">LOG</h2>
+        <div class="g2359-log-body" id="log" role="log" aria-live="polite" aria-label="Game log">
+          <div class="g2359-log-line"><span class="g2359-prompt">&gt;</span> 晚自习结束了。</div>
+          <div class="g2359-log-line">&nbsp;</div>
+          <div class="g2359-log-line"><span class="g2359-prompt">&gt;</span> 你准备做什么？</div>
+          <div class="g2359-log-line">&nbsp;</div>
+          <div class="g2359-log-line"><span class="g2359-prompt">&gt;</span> <span class="g2359-cursor"></span></div>
+        </div>
+      </section>
+
+      <!-- ACTIONS / EVENT / DAY COMPLETE -->
+      <section class="g2359-actions" aria-label="Available actions">
+        <h2 class="g2359-sec-title" id="action-title">ACTIONS</h2>
+        <div class="g2359-action-list" id="action-list">
+          <button class="g2359-btn" data-action="study" aria-label="study"><span class="g2359-key">[1]</span> study</button>
+          <button class="g2359-btn" data-action="exercise" aria-label="exercise"><span class="g2359-key">[2]</span> exercise</button>
+          <button class="g2359-btn" data-action="entertainment" aria-label="entertainment"><span class="g2359-key">[3]</span> entertainment</button>
+          <button class="g2359-btn" data-action="social" aria-label="social"><span class="g2359-key">[4]</span> social</button>
+          <button class="g2359-btn" data-action="shower" aria-label="shower"><span class="g2359-key">[5]</span> shower</button>
+          <button class="g2359-btn" data-action="eat" aria-label="eat"><span class="g2359-key">[6]</span> eat</button>
+          <button class="g2359-btn" data-action="out" aria-label="out"><span class="g2359-key">[7]</span> out</button>
+          <button class="g2359-btn" data-action="sleep" aria-label="sleep"><span class="g2359-key">[8]</span> sleep</button>
+        </div>
+        <div class="g2359-event-list" id="event-list" hidden></div>
+      </section>
+
+    </main>
+
+    <!-- ===== TIMELINE ===== -->
+    <footer class="g2359-timeline" aria-label="Timeline">
+      <div class="g2359-time-marks">
+        <span class="g2359-time is-active" data-time="18">18:00</span>
+        <span class="g2359-time" data-time="19">19:00</span>
+        <span class="g2359-time" data-time="20">20:00</span>
+        <span class="g2359-time" data-time="21">21:00</span>
+        <span class="g2359-time" data-time="22">22:00</span>
+        <span class="g2359-time" data-time="23">23:00</span>
+      </div>
+    </footer>
+
+    <!-- ===== ARCHIVE VIEW ===== -->
+    <div class="g2359-archive" id="archive-view" hidden>
+      <div class="g2359-archive-box" role="dialog" aria-label="Cycle archive">
+        <h2 class="g2359-sec-title">ARCHIVE · COMPLETED CYCLES</h2>
+        <div class="g2359-archive-body" id="archive-body"></div>
+        <div class="g2359-archive-foot">
+          <button class="g2359-btn" id="archive-close" aria-label="close archive"><span class="g2359-key">[1]</span> close</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="events.js"></script>
+  <script src="achievements.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

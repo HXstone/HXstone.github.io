@@ -539,6 +539,7 @@ html.js .os-log .line.on { opacity: 1; transform: none; }
 .thumb-game { background: radial-gradient(120% 120% at 30% 0%, rgba(90, 140, 230, .18), transparent 62%), linear-gradient(180deg, #0e1420, #0a0b12); }
 .thumb-run { background: radial-gradient(120% 120% at 30% 0%, rgba(70, 200, 140, .16), transparent 62%), linear-gradient(180deg, #0d1512, #0a0b10); }
 .thumb-notes { background: radial-gradient(120% 120% at 30% 0%, rgba(230, 180, 60, .22), transparent 62%), linear-gradient(180deg, #171208, #0c0b0a); }
+.thumb-night { background: radial-gradient(120% 120% at 30% 0%, rgba(150, 160, 235, .16), transparent 62%), linear-gradient(180deg, #0c0e1b, #090a11); }
 
 .work-title { margin: 0 0 8px; font-size: var(--fs-md); }
 .work-desc { margin: 0; max-width: 62ch; color: var(--text-2); font-size: var(--fs-sm); }
@@ -568,6 +569,26 @@ html.js .os-log .line.on { opacity: 1; transform: none; }
 }
 
 .work:hover .work-no { color: var(--gold); }
+
+/* ---------- games hub ---------- */
+
+/* 只有一个游戏时,把它当成「正在运行的东西」放进面板,而不是留一行空列表 */
+.games-title { margin: 0 0 14px; font-size: var(--fs-lg); letter-spacing: -.02em; }
+
+.games-pitch {
+  margin: 0;
+  max-width: 48ch;
+  color: var(--text-2);
+  font-size: var(--fs-body);
+}
+
+.games-points { margin-top: 18px; }
+
+.games-more {
+  margin: clamp(26px, 4vw, 42px) 0 0;
+  font-size: var(--fs-sm);
+  color: var(--text-3);
+}
 
 /* ---------- case study page ---------- */
 

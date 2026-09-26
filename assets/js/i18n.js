@@ -12,6 +12,7 @@ var I18N = {
     "nav.projects": "作品",
     "nav.notes": "笔记",
     "nav.about": "关于",
+    "nav.games": "游戏",
 
     "hero.statement": "用 AI 和技术,搭建我的未来。",
     "hero.bio": "我在探索如何用 AI 把好奇心变成真实的东西——小游戏、笔记,和各种实验。我负责方向,AI 帮我把它做出来。",
@@ -44,6 +45,22 @@ var I18N = {
     "work.notes.title": "错题本",
     "work.notes.desc": "按学科和知识点整理的错题集,正在做成可检索的版本。",
     "work.case": "查看案例",
+    "work.play": "立即游玩",
+    "work.2359.title": "23:59 ｜ 住宿生",
+    "work.2359.desc": "扮演高中住宿生度过一个晚上：六小时、五项状态，每个选择都有代价。",
+    "work.2359.index": "游戏",
+
+    "games.title": "游戏",
+    "games.lead": "我做来玩的小东西。不用安装、不用注册——点开就能在浏览器里跑。",
+    "games.status": "可玩",
+    "games.feature.label": "现已上线",
+    "games.pitch": "你是住宿生,离午夜还有六个小时。学习、跑步、吃饭、聊天,还得想着按时睡觉——每花掉一小时,五项状态都会顶回来。十四天后,终端给出评级。真正有意思的,是你愿意拿什么去换。",
+    "games.point.terminal": "终端界面",
+    "games.point.cycle": "14 天周期",
+    "games.point.save": "本地存档",
+    "games.point.noinstall": "免安装",
+    "games.play": "开始玩 23:59",
+    "games.more": "更多游戏在路上——我做游戏是为了学点东西,也只会留下真正好玩的那些。",
 
     "notes.title": "笔记",
     "notes.lead": "学习记录、折腾日志,和零碎的想法。",
@@ -138,6 +155,7 @@ var I18N = {
     "note.hello.p.next": "之后会继续整理错题本,做新的小东西,也会在这里记录过程。如果有什么想聊的,欢迎发邮件给我。",
 
     "page.home.title": "HX STONE — 学生 × AI 探索者",
+    "page.games.title": "游戏 · HX STONE",
     "page.projects.title": "精选作品 · HX STONE",
     "page.notes.title": "笔记 · HX STONE",
     "page.about.title": "关于 · HX STONE",
