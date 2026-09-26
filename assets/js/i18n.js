@@ -22,18 +22,6 @@ var I18N = {
     "hero.p2": "AI 探索者",
     "hero.p3": "未来的计算机学生",
 
-    "os.group": "自我评估",
-    "os.note": "自己估的粗略进度,会随时间更新——不是考试成绩。",
-    "os.online": "在线",
-    "os.log.loaded": "已加载",
-    "os.log.online": "在线",
-    "os.log.progress": "进行中",
-    "os.log.next": "做点真正重要的事",
-    "os.m1": "学习",
-    "os.m2": "人工智能",
-    "os.m3": "编程",
-    "os.m4": "长跑",
-
     "work.title": "案例研究",
     "work.link": "全部案例",
     "work.mine.title": "扫雷",

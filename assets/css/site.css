@@ -1,6 +1,6 @@
 /* =========================================================
    HX STONE · site.css
-   Navbar · Hero · HX OS · Case studies · Notes · About · Footer
+   Navbar · Hero · Case studies · Games · Notes · About · Footer
    ========================================================= */
 
 /* ---------- navbar ---------- */
@@ -361,131 +361,6 @@
 }
 
 /* .orb-particles 已移除:与全局粒子场重复,减少常驻效果数量 */
-
-/* ---------- HX OS ---------- */
-
-.os { max-width: 1040px; margin: 0 auto; }
-
-.os-window { overflow: hidden; }
-
-.os-bar {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 14px 22px;
-  border-bottom: 1px solid var(--line);
-  background: rgba(255, 255, 255, .022);
-}
-
-/* 面板头:去掉 macOS 三点的假窗口套路,只留版本与状态灯 */
-.os-title {
-  font-family: var(--mono);
-  font-size: var(--fs-xs);
-  color: var(--text-2);
-}
-
-.os-status {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-left: auto;
-  font-family: var(--mono);
-  font-size: var(--fs-micro);
-  letter-spacing: .06em;
-  color: var(--gold);
-}
-
-.os-status::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--gold);
-  box-shadow: 0 0 12px var(--gold);
-  animation: os-pulse 2.6s ease-in-out infinite;
-}
-
-@keyframes os-pulse { 50% { opacity: .3; } }
-
-.os-body {
-  display: grid;
-  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-  gap: clamp(22px, 3vw, 44px);
-  padding: clamp(22px, 3vw, 36px);
-}
-
-.os-group {
-  margin: 0 0 18px;
-  font-size: var(--fs-xs);
-  color: var(--text-3);
-}
-
-.meter {
-  display: grid;
-  grid-template-columns: 116px minmax(0, 1fr) 54px;
-  align-items: center;
-  gap: 16px;
-  padding: 10px 0;
-}
-
-.meter-name { font-size: var(--fs-sm); color: var(--text); }
-
-.meter-track {
-  position: relative;
-  height: 6px;
-  border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, .06);
-  overflow: hidden;
-}
-
-.meter-bar {
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: var(--v, 0);
-  border-radius: var(--r-pill);
-  background: linear-gradient(90deg, var(--gold-lo), var(--gold-hi));
-  box-shadow: 0 0 20px rgba(212, 175, 55, .55);
-  transition: width 1.5s var(--ease);
-}
-
-/* 数值本身用中性色,让填充条单独承担金色 */
-.meter-val {
-  font-family: var(--mono);
-  font-size: var(--fs-xs);
-  color: var(--text-2);
-  text-align: right;
-}
-
-/* 指标口径说明:百分比是自评,不是考试成绩 */
-.os-note {
-  margin: 14px 0 0;
-  font-size: var(--fs-xs);
-  line-height: 1.6;
-  color: var(--text-3);
-}
-
-.os-log {
-  padding-left: clamp(16px, 2vw, 28px);
-  border-left: 1px solid var(--line);
-  font-family: var(--mono);
-  font-size: var(--fs-xs);
-  line-height: 2.15;
-  color: var(--text-3);
-}
-
-.os-log .line {
-  display: block;
-  transition: opacity .55s var(--ease), transform .55s var(--ease);
-}
-
-html.js .os-log .line {
-  opacity: 0;
-  transform: translateY(8px);
-}
-
-html.js .os-log .line.on { opacity: 1; transform: none; }
-.os-log .k { color: var(--gold); }
-.os-log .v { color: var(--text-2); }
 
 /* ---------- work / case studies ---------- */
 
@@ -929,14 +804,6 @@ html.js .os-log .line.on { opacity: 1; transform: none; }
   .orb-wrap { order: -1; justify-items: start; }
   .orb { width: clamp(190px, 44vw, 260px); }
 
-  .os-body { grid-template-columns: 1fr; }
-
-  .os-log {
-    padding: 20px 0 0;
-    border-left: 0;
-    border-top: 1px solid var(--line);
-  }
-
   .case-grid { grid-template-columns: 1fr; }
   .about-body { grid-template-columns: 1fr; }
 }
@@ -990,8 +857,6 @@ html.js .os-log .line.on { opacity: 1; transform: none; }
   /* 编号占左栏,标签与正文都落在右栏 */
   .step-k,
   .step-v { grid-column: 2; }
-
-  .meter { grid-template-columns: 92px minmax(0, 1fr) 46px; gap: 12px; }
 
   .contact-row { flex-direction: column; align-items: flex-start; gap: 6px; }
 
