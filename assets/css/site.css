@@ -895,3 +895,28 @@
 }
 
 /* (卡片顶边高光已移除:作品与笔记不再是同构卡片,不再需要统一的柔和阴影) */
+
+/* ---------- CJK tracking ----------
+   上面那些负字距(-.02 ~ -.045em)是为拉丁字母调的:拉丁字距天然松,收紧才利落。
+   中文本来就是方块字,逐字紧凑,再收负字距会把字挤在一起——页脚大字、引言
+   这类字号越大越明显。页面已经按语言写入 <html lang="zh-CN">,所以直接用
+   :lang(zh) 命中,不需要给每个元素挂 class。
+   注意只重置「负」字距:按钮/标签上的正字距(如 .btn 的 .04em)在中文里是留白,
+   是有意保留的,不动。 */
+
+:lang(zh) h1,
+:lang(zh) h2,
+:lang(zh) h3,
+:lang(zh) h4,
+:lang(zh) .hero-statement,
+:lang(zh) .quote,
+:lang(zh) .footer-big,
+:lang(zh) .page-head h1,
+:lang(zh) .article-head h1,
+:lang(zh) .notfound h1 {
+  letter-spacing: 0;
+}
+
+/* 例外:品牌标题永远是拉丁字母「HX STONE」,不随页面语言重置,
+   否则中文模式下它会丢掉原本的紧排。 */
+:lang(zh) .hero-title { letter-spacing: -.045em; }

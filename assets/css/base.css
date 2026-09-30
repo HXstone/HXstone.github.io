@@ -123,6 +123,12 @@ body {
   -webkit-tap-highlight-color: rgba(212, 175, 55, .14);
 }
 
+/* 中文排版:中日韩字符与拉丁字母/数字直接相邻时,由浏览器补出间距
+   (Chrome 129+ 支持 text-autospace)。文案里已经手写的空格不会被重复计算,
+   这里只负责补上「AI和技术」这类贴在一起的位置。
+   不支持的浏览器会忽略整条声明,不影响任何现有排版。 */
+:lang(zh) { text-autospace: normal; }
+
 /* 去掉移动端双击缩放的 300ms 点击延迟 */
 a,
 button { touch-action: manipulation; }
