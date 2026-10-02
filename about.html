@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title data-i18n="page.about.title">About · HX STONE</title>
 <meta name="description" content="About HX STONE — I build with curiosity, and AI is my creative partner.">
-<meta name="theme-color" content="#050505">
-<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
 <meta property="og:type" content="profile">
 <meta property="og:title" content="About · HX STONE">
 <meta property="og:description" content="I build with curiosity. AI is my creative partner.">
@@ -14,44 +14,19 @@
 <meta property="og:url" content="https://hxstone.github.io/about.html">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
-<script>
-(function () {
-  var d = document.documentElement;
-  d.classList.add("js");
-  if (location.protocol.indexOf("http") !== 0) return;
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  if ("startViewTransition" in document) return;
-  d.classList.add("veil-prep");
-})();
-</script>
-<link rel="preload" href="assets/fonts/plus-jakarta-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/misans-vf-4web@1.1.1/dist/result.css" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="assets/css/base.css">
-<link rel="stylesheet" href="assets/css/site.css">
-<script src="assets/js/vendor/gsap.min.js" defer></script>
-<script src="assets/js/vendor/ScrollTrigger.min.js" defer></script>
 <script src="assets/js/i18n.js" defer></script>
 <script src="assets/js/main.js" defer></script>
-<script src="assets/js/motion.js" defer></script>
-<script src="assets/js/background.js" defer></script>
-<script src="assets/js/cursor.js" defer></script>
-<script src="assets/js/orb.js" defer></script>
-<script src="assets/js/transition.js" defer></script>
 </head>
 <body>
 
 <a class="skip" href="#main">Skip to content</a>
 
-<div class="bg-grid" aria-hidden="true"></div>
-<canvas class="bg-canvas" aria-hidden="true"></canvas>
-<div class="page-veil" aria-hidden="true"></div>
-
 <header class="site-header">
-  <div class="wrap header-inner">
+  <div class="container header-inner">
     <a class="brand" href="index.html">
-      <img class="brand-avatar" src="assets/img/avatar.jpg" alt="" aria-hidden="true">
-      <span class="brand-text">HX STONE</span>
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span>HX STONE</span>
     </a>
     <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false">
       <span></span><span></span><span></span>
@@ -69,39 +44,38 @@
 
 <main id="main">
 
+  <header class="page-head">
+    <p class="label" data-i18n="about.label">About</p>
+    <h1 class="hero-statement" data-i18n-html="about.quote">I build with <em>curiosity</em>.<br>AI is my <em>creative partner</em>.</h1>
+  </header>
+
+  <section class="section section--plain">
+    <div class="container grid">
+      <div class="col-full md-col-3 lg-col-7">
+        <p data-i18n="about.p1">I'm a high-school student. Football and long-distance running keep me moving; AI is where my curiosity goes to work, alongside markets and world news.</p>
+        <p data-i18n="about.p2">I don't write code the way engineers do, so I work my own way: I decide what to build and what good looks like, use AI to get there, then test and refine until it holds up. Everything on this site came out of that loop.</p>
+      </div>
+
+      <figure class="col-full md-col-3 lg-col-4 hero-portrait">
+        <img src="assets/img/avatar.jpg" alt="Hexun (HX STONE)" width="768" height="768">
+        <figcaption>Hexun</figcaption>
+      </figure>
+    </div>
+  </section>
+
   <section class="section">
-    <div class="wrap">
-      <div class="about-hero">
-        <div>
-          <h1 class="quote reveal" data-i18n-html="about.quote">I build with <em>curiosity</em>.<br>AI is my <em>creative partner</em>.</h1>
-          <ul class="identity reveal">
-            <li class="pill" data-i18n="hero.p1">Student</li>
-            <li class="pill" data-i18n="hero.p4">Runner</li>
-            <li class="pill" data-i18n="hero.p2">AI Explorer</li>
-          </ul>
-        </div>
-        <img class="about-photo reveal" data-reveal="scale" src="assets/img/avatar.jpg" alt="Hexun" width="768" height="768">
+    <div class="container grid">
+      <div class="col-full md-col-3 lg-col-5">
+        <p class="label" data-i18n="about.contact.title">Contact</p>
+        <a class="link-arrow" href="mailto:hexun120716@outlook.com">
+          <span>hexun120716@outlook.com</span>
+          <span class="arrow" aria-hidden="true">→</span>
+        </a>
       </div>
 
-      <div class="about-body">
-        <p class="reveal" data-i18n="about.p1">I'm a high-school student in Huizhou, China. Football and long-distance running keep me moving; AI is where my curiosity goes to work, alongside markets and world news.</p>
-        <p class="reveal" data-i18n="about.p2">I don't write code the way engineers do, so I work my own way: I decide what to build and what good looks like, use AI to get there, then test and refine until it holds up. Everything on this site came out of that loop.</p>
-      </div>
-
-      <div class="about-body">
-        <div class="reveal">
-          <p class="meta-label" data-i18n="about.contact.title">Contact</p>
-          <div class="contact-list">
-            <div class="contact-row">
-              <span class="k">Email</span>
-              <a class="v" href="mailto:hexun120716@outlook.com">hexun120716@outlook.com</a>
-            </div>
-          </div>
-        </div>
-        <div class="reveal">
-          <p class="meta-label" data-i18n="about.sayhi">Say hello</p>
-          <p data-i18n="about.hello">Always happy to talk about AI, football or running.</p>
-        </div>
+      <div class="col-full md-col-3 lg-col-6">
+        <p class="label" data-i18n="about.sayhi">Say hello</p>
+        <p data-i18n="about.hello">Always happy to talk about AI, football or running.</p>
       </div>
     </div>
   </section>
@@ -109,10 +83,27 @@
 </main>
 
 <footer class="site-footer">
-  <div class="wrap">
-    <h2 class="footer-big reveal"><span data-i18n="footer.big.1">Let's build</span> <span class="accent" data-i18n="footer.big.2">something.</span></h2>
-    <div class="footer-meta">
-      <span>© <span data-year>2026</span> HX STONE · Built with curiosity &amp; AI</span>
+  <div class="container grid footer-grid">
+    <div class="col-full lg-col-7">
+      <p class="label label--on-dark" data-i18n="footer.label">Contact</p>
+      <h2 class="footer-big">
+        <span data-i18n="footer.big.1">Let's build</span>
+        <span class="accent" data-i18n="footer.big.2">something.</span>
+      </h2>
+      <p class="footer-note" data-i18n="footer.note">Always happy to talk about AI, football or running.</p>
+    </div>
+
+    <nav class="col-full md-col-3 lg-col-4 lg-col-start-9 footer-col" aria-label="Footer">
+      <p class="label" data-i18n="footer.nav">Index</p>
+      <div class="footer-links">
+        <a href="index.html" data-i18n="nav.home">Home</a>
+        <a href="projects.html" data-i18n="nav.projects">Projects</a>
+        <a href="notes.html" data-i18n="nav.notes">Notes</a>
+      </div>
+    </nav>
+
+    <div class="col-full footer-meta">
+      <span>© <span data-year>2026</span> HX STONE</span>
       <a href="mailto:hexun120716@outlook.com" data-i18n="footer.contact">Email me</a>
     </div>
   </div>

@@ -4,14 +4,20 @@
   Notes 文章模板 · 用法
   ------------------------------------------------------------
   1. 复制本文件,命名为 日期-英文短标题.html,例如:
-       2026-10-01-my-first-note.html
+        2026-10-01-my-first-note.html
   2. 修改 <title>、meta description、h1、日期、分类标签和正文
-  3. 到 ../notes.html 的列表里复制一张卡片,改成新文章的链接与摘要
+  3. 到 ../notes.html 的列表里复制一行,改成新文章的链接与摘要
      (data-cat 填分类:ai / science / learning / ideas)
   4. 如果它是最新一篇,可以顺手更新 ../index.html 的 Notes 区块
   5. 正文写在 <div class="prose"> 里,支持 h2 / h3 / p / ul / ol /
      blockquote / pre code / img / hr
-  6. 本文件不会被任何页面链接到,留着当模板即可
+  6. 需要中英对照时,给元素加 data-i18n="键名",并在
+     ../assets/js/i18n.js 的 zh 表里补上对应键
+  7. 本文件不会被任何页面链接到,留着当模板即可
+
+  风格约束(改样式前先读):
+    只用 assets/css/base.css 里已有的 class,不新增装饰性样式。
+    圆角、阴影、渐变、衬线字体一律不用;交互只改颜色和边框色。
   ============================================================
 -->
 <html lang="en">
@@ -21,47 +27,22 @@
 <title>Note title · HX STONE</title>
 <meta name="description" content="One-line summary.">
 <meta name="robots" content="noindex">
-<meta name="theme-color" content="#050505">
-<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
 <link rel="icon" type="image/svg+xml" href="../assets/img/favicon.svg">
-<script>
-(function () {
-  var d = document.documentElement;
-  d.classList.add("js");
-  if (location.protocol.indexOf("http") !== 0) return;
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  if ("startViewTransition" in document) return;
-  d.classList.add("veil-prep");
-})();
-</script>
-<link rel="preload" href="../assets/fonts/plus-jakarta-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/misans-vf-4web@1.1.1/dist/result.css" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="../assets/css/base.css">
-<link rel="stylesheet" href="../assets/css/site.css">
-<script src="../assets/js/vendor/gsap.min.js" defer></script>
-<script src="../assets/js/vendor/ScrollTrigger.min.js" defer></script>
 <script src="../assets/js/i18n.js" defer></script>
 <script src="../assets/js/main.js" defer></script>
-<script src="../assets/js/motion.js" defer></script>
-<script src="../assets/js/background.js" defer></script>
-<script src="../assets/js/cursor.js" defer></script>
-<script src="../assets/js/orb.js" defer></script>
-<script src="../assets/js/transition.js" defer></script>
 </head>
 <body>
 
 <a class="skip" href="#main">Skip to content</a>
 
-<div class="bg-grid" aria-hidden="true"></div>
-<canvas class="bg-canvas" aria-hidden="true"></canvas>
-<div class="page-veil" aria-hidden="true"></div>
-
 <header class="site-header">
-  <div class="wrap header-inner">
+  <div class="container header-inner">
     <a class="brand" href="../index.html">
-      <img class="brand-avatar" src="../assets/img/avatar.jpg" alt="" aria-hidden="true">
-      <span class="brand-text">HX STONE</span>
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span>HX STONE</span>
     </a>
     <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false">
       <span></span><span></span><span></span>
@@ -83,11 +64,11 @@
 
   <article>
     <header class="article-head">
+      <p class="label" data-i18n="notes.f.ideas">Ideas</p>
       <h1>Note title</h1>
       <div class="meta-row">
         <time datetime="2026-01-01">2026-01-01</time>
-        <span class="badge badge-plain">EN</span>
-        <span class="badge badge-plain">Ideas</span>
+        <span>中文 / EN</span>
       </div>
     </header>
 
@@ -104,16 +85,35 @@
       <blockquote>
         <p>A quote worth keeping.</p>
       </blockquote>
+
+      <pre><code>const example = "code block";</code></pre>
     </div>
   </article>
 
 </main>
 
 <footer class="site-footer">
-  <div class="wrap">
-    <h2 class="footer-big reveal"><span data-i18n="footer.big.1">Let's build</span> <span class="accent" data-i18n="footer.big.2">something.</span></h2>
-    <div class="footer-meta">
-      <span>© <span data-year>2026</span> HX STONE · Built with curiosity &amp; AI</span>
+  <div class="container grid footer-grid">
+    <div class="col-full lg-col-7">
+      <p class="label label--on-dark" data-i18n="footer.label">Contact</p>
+      <h2 class="footer-big">
+        <span data-i18n="footer.big.1">Let's build</span>
+        <span class="accent" data-i18n="footer.big.2">something.</span>
+      </h2>
+      <p class="footer-note" data-i18n="footer.note">Always happy to talk about AI, football or running.</p>
+    </div>
+
+    <nav class="col-full md-col-3 lg-col-4 lg-col-start-9 footer-col" aria-label="Footer">
+      <p class="label" data-i18n="footer.nav">Index</p>
+      <div class="footer-links">
+        <a href="../index.html" data-i18n="nav.home">Home</a>
+        <a href="../projects.html" data-i18n="nav.projects">Projects</a>
+        <a href="../about.html" data-i18n="nav.about">About</a>
+      </div>
+    </nav>
+
+    <div class="col-full footer-meta">
+      <span>© <span data-year>2026</span> HX STONE</span>
       <a href="mailto:hexun120716@outlook.com" data-i18n="footer.contact">Email me</a>
     </div>
   </div>

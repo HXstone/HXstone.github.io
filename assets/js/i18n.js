@@ -3,39 +3,52 @@
    ---------------------------------------------------------
    页面默认语言是【英文】,HTML 里直接写英文原文。
    这里只维护【中文】对照表;切回英文时用元素上缓存的
-   data-en(首次运行自动保存)。
+   data-en / data-en-html(首次运行自动保存)。
+   缺少的键保持英文,不会出现空白。
    ========================================================= */
 
 var I18N = {
   zh: {
+    /* ---- 导航 ---- */
     "nav.home": "首页",
     "nav.projects": "作品",
     "nav.notes": "笔记",
     "nav.about": "关于",
     "nav.games": "游戏",
 
-    "hero.statement": "用 AI 和技术，搭建我的未来。",
-    "hero.bio": "我把好奇心做成一个个小东西——游戏、笔记和实验；和 AI 一起实现，再反复测到满意。",
-    "hero.cta1": "看看作品",
-    "hero.cta2": "读读笔记",
+    /* ---- 首页 ---- */
+    "page.home.title": "HX STONE — 学生 × 跑者 × AI 探索者",
     "hero.p1": "学生",
     "hero.p4": "跑者",
     "hero.p2": "AI 探索者",
+    "hero.statement": "用 AI 和技术，搭建我的未来。",
+    "hero.srSummary": "HX STONE — 一名探索 AI 的高中生，做一些小游戏、笔记和实验。",
+    "hero.bio": "我把好奇心做成一个个小东西——游戏、笔记和实验；和 AI 一起实现，再反复测到满意。",
+    "hero.cta1": "看看作品",
+    "hero.cta2": "读读笔记",
+    "fact.projects": "作品",
+    "fact.notes": "笔记",
+    "fact.games": "可玩游戏",
+    "fact.deps": "外部依赖",
 
+    "work.label": "索引 01",
     "work.title": "作品",
     "work.link": "全部作品",
+    "work.lead": "四个真实做过的东西。每个都从问题开始，到能玩、能用为止。",
     "work.mine.title": "扫雷",
     "work.mine.desc": "经典扫雷：三档难度、计时器，第一下永远不会踩雷。",
     "work.dino.title": "恐龙快跑",
     "work.dino.desc": "带难度曲线的跑酷：昼夜循环，键盘和触屏都能玩。",
     "work.tank.title": "坦克大战",
     "work.tank.desc": "可破坏砖墙、敌方 AI 与本地最高分的街机坦克游戏。",
-    "work.case": "进入",
-    "work.play": "立即游玩",
     "work.2359.title": "23:59 ｜ 住宿生",
     "work.2359.desc": "扮演高中住宿生度过一个晚上：六小时、五项状态，每个选择都有代价。",
     "work.2359.index": "游戏",
+    "work.mine.index": "游戏",
+    "work.dino.index": "游戏",
+    "work.tank.index": "游戏",
 
+    "notes.label": "索引 02",
     "notes.title": "笔记",
     "notes.lead": "学习记录、折腾日志，和零碎的想法。",
     "notes.all": "全部笔记",
@@ -45,9 +58,24 @@ var I18N = {
     "notes.f.learning": "学习",
     "notes.f.ideas": "想法",
 
+    /* ---- 页脚 ---- */
+    "footer.label": "联系方式",
+    "footer.big.1": "一起做点",
+    "footer.big.2": "有意思的。",
+    "footer.note": "随时欢迎聊聊 AI、足球或跑步。",
+    "footer.nav": "索引",
+    "footer.contact": "写信给我",
+
+    /* ---- 作品页 ---- */
+    "page.projects.title": "作品 · HX STONE",
+    "projects.label": "索引",
     "projects.title": "作品",
     "projects.lead": "四个真实做过的东西。每个都从问题开始，到能玩、能用为止。",
     "case.play": "打开游戏",
+    "case.index": "案例 01",
+    "case.index2": "案例 02",
+    "case.index3": "案例 03",
+    "case.index4": "案例 04",
     "case.mine.lead": "把 90 年代的经典搬到自己的手机上：深色棋盘、更安全的第一下、三档难度。",
     "case.mine.problem": "原版棋盘在手机上好难点，而且第一下点错就直接结束。",
     "case.mine.thinking": "我想要的是「熟悉但更友好」：规则不变，但棋盘对新手宽容一点。",
@@ -66,8 +94,6 @@ var I18N = {
     "case.tank.solution": "驾驶、开火、利用掩体，在越来越密集的敌方巡逻中守住三条生命。",
     "case.tank.tech": "一个自适应 Canvas 游戏，音效和触屏操作都内置，不需要素材或第三方库。",
     "case.tank.result": "电脑和手机都能玩，并会把最高分保存在本地，下次回来还能继续挑战。",
-
-    "case.new": "新",
     "case.2359.lead": "一款终端风格的住宿生活模拟器：一个晚上、六个小时、五项状态，以及要撑过去的十四天。",
     "case.2359.problem": "我想做一个真正需要取舍的游戏，而不只是比反应——一个没办法什么都拿满的局。",
     "case.2359.thinking": "每个小时只能花一次。如果好好学习永远有回报，游戏就不成立了——张力来自代价。",
@@ -81,22 +107,26 @@ var I18N = {
     "step.technology": "技术",
     "step.result": "结果",
 
-    "about.title": "关于",
+    /* ---- 关于页 ---- */
+    "page.about.title": "关于 · HX STONE",
+    "about.label": "关于",
     "about.quote": "我用<em>好奇心</em>做东西。<br>AI 是我的<em>创造伙伴</em>。",
-    "about.p1": "我是惠州的一名高中生。足球和长跑让我保持状态；好奇心主要在 AI 上，也一直看市场和世界新闻。",
+    "about.p1": "我是一名高中生。足球和长跑让我保持状态；好奇心主要在 AI 上，也一直看市场和世界新闻。",
     "about.p2": "我不像工程师那样写代码，所以我有自己的做法：先定下做什么、什么叫好，借 AI 抵达，再反复测试打磨到站得住。这个网站就是这么来的。",
     "about.contact.title": "联系方式",
     "about.sayhi": "打个招呼",
     "about.hello": "随时欢迎聊聊 AI、足球或跑步。",
 
-    "footer.big.1": "一起做点",
-    "footer.big.2": "有意思的。",
-    "footer.contact": "写信给我",
+    /* ---- 笔记列表页 ---- */
+    "page.notes.title": "笔记 · HX STONE",
 
+    /* ---- 404 ---- */
+    "page.notfound.title": "页面走丢了 · HX STONE",
     "notfound.title": "这个页面走丢了",
     "notfound.desc": "你要找的页面不存在，或者已经被移走了。",
     "notfound.home": "回到首页",
 
+    /* ---- 文章 ---- */
     "article.back": "← 返回笔记",
 
     "note.helloWorld.title": "你好，世界：我的个人数字空间 · HX STONE",
@@ -127,17 +157,7 @@ var I18N = {
     "note.hello.p.how2": "这个网站就是这样一点点调出来的。所以如果你觉得哪里好看，功劳有一大半是 AI 的；如果哪里看着别扭，那多半是我没描述清楚 :)",
     "note.hello.quote": "把东西做出来，再把它放到一个能被看见的地方——这本身就是一种完成。",
     "note.hello.h.next": "接下来",
-    "note.hello.p.next": "之后会继续做新的小东西，也会在这里记录过程。如果有什么想聊的，欢迎发邮件给我。",
-
-    "page.home.title": "HX STONE — 学生 × 跑者 × AI 探索者",
-    "page.projects.title": "作品 · HX STONE",
-    "page.notes.title": "笔记 · HX STONE",
-    "page.about.title": "关于 · HX STONE",
-    "page.notfound.title": "页面走丢了 · HX STONE",
-
-    "work.dino.index": "游戏",
-    "work.tank.index": "游戏",
-    "work.mine.index": "游戏"
+    "note.hello.p.next": "之后会继续做新的小东西，也会在这里记录过程。如果有什么想聊的，欢迎发邮件给我。"
   }
 };
 
@@ -189,12 +209,3 @@ function applyLang(lang) {
     }
   });
 }
-
-/* 兜底:如果 main.js 没能运行(标记 data-enhanced 不出现),
-   3 秒后强制显示所有动效元素,避免页面空白。 */
-window.setTimeout(function () {
-  if (document.documentElement.getAttribute("data-enhanced")) return;
-  document.querySelectorAll(".reveal").forEach(function (el) {
-    el.classList.add("is-visible");
-  });
-}, 3000);

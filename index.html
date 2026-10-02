@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title data-i18n="page.home.title">HX STONE — Student × Runner × AI Explorer</title>
 <meta name="description" content="HX STONE — a high-school student exploring AI: small games, notes and experiments. Building my future with AI &amp; technology.">
-<meta name="theme-color" content="#050505">
-<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
 <meta property="og:type" content="website">
 <meta property="og:title" content="HX STONE — Student × Runner × AI Explorer">
 <meta property="og:description" content="Building my future with AI &amp; Technology.">
@@ -14,44 +14,19 @@
 <meta property="og:url" content="https://hxstone.github.io/">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
-<script>
-(function () {
-  var d = document.documentElement;
-  d.classList.add("js");
-  if (location.protocol.indexOf("http") !== 0) return;
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  if ("startViewTransition" in document) return;
-  d.classList.add("veil-prep");
-})();
-</script>
-<link rel="preload" href="assets/fonts/plus-jakarta-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/misans-vf-4web@1.1.1/dist/result.css" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="assets/css/base.css">
-<link rel="stylesheet" href="assets/css/site.css">
-<script src="assets/js/vendor/gsap.min.js" defer></script>
-<script src="assets/js/vendor/ScrollTrigger.min.js" defer></script>
 <script src="assets/js/i18n.js" defer></script>
 <script src="assets/js/main.js" defer></script>
-<script src="assets/js/motion.js" defer></script>
-<script src="assets/js/background.js" defer></script>
-<script src="assets/js/cursor.js" defer></script>
-<script src="assets/js/orb.js" defer></script>
-<script src="assets/js/transition.js" defer></script>
 </head>
 <body>
 
 <a class="skip" href="#main">Skip to content</a>
 
-<div class="bg-grid" aria-hidden="true"></div>
-<canvas class="bg-canvas" aria-hidden="true"></canvas>
-<div class="page-veil" aria-hidden="true"></div>
-
 <header class="site-header">
-  <div class="wrap header-inner">
+  <div class="container header-inner">
     <a class="brand" href="index.html">
-      <img class="brand-avatar" src="assets/img/avatar.jpg" alt="" aria-hidden="true">
-      <span class="brand-text">HX STONE</span>
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span>HX STONE</span>
     </a>
     <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false">
       <span></span><span></span><span></span>
@@ -71,152 +46,158 @@
 
   <!-- ============ HERO ============ -->
   <section class="hero">
-    <div class="wrap hero-grid">
-      <div class="hero-copy">
-        <h1 class="hero-title" data-split="chars">HX STONE</h1>
+    <div class="container grid">
+      <div class="col-full lg-col-7">
+        <p class="hero-meta">
+          <span data-i18n="hero.p1">Student</span>
+          <span aria-hidden="true">/</span>
+          <span data-i18n="hero.p4">Runner</span>
+          <span aria-hidden="true">/</span>
+          <span data-i18n="hero.p2">AI Explorer</span>
+        </p>
 
-        <p class="hero-statement" data-split="words" data-i18n="hero.statement">Building my future with AI &amp; Technology.</p>
+        <h1 class="hero-title">HX STONE</h1>
+        <p class="sr-only" data-i18n="hero.srSummary">HX STONE — a high-school student exploring AI, building small games, notes and experiments.</p>
 
-        <p class="hero-bio" data-intro data-i18n="hero.bio">I turn curiosity into small things — games, notes and experiments — building with AI, then testing until they feel right.</p>
+        <p class="hero-statement" data-i18n="hero.statement">Building my future with AI &amp; Technology.</p>
 
-        <ul class="identity" data-intro>
-          <li class="pill" data-i18n="hero.p1">Student</li>
-          <li class="pill" data-i18n="hero.p4">Runner</li>
-          <li class="pill" data-i18n="hero.p2">AI Explorer</li>
-        </ul>
+        <p class="hero-bio" data-i18n="hero.bio">I turn curiosity into small things — games, notes and experiments — building with AI, then testing until they feel right.</p>
 
-        <div class="hero-cta" data-intro>
-          <a class="btn btn-primary" href="projects.html" data-magnetic>
+        <div class="btn-row">
+          <a class="btn" href="projects.html">
             <span data-i18n="hero.cta1">View projects</span>
             <span class="arrow" aria-hidden="true">→</span>
           </a>
-          <a class="btn btn-ghost" href="notes.html" data-magnetic>
+          <a class="btn btn--ghost" href="notes.html">
             <span data-i18n="hero.cta2">Read notes</span>
+            <span class="arrow" aria-hidden="true">→</span>
           </a>
         </div>
       </div>
 
-      <div class="orb-wrap reveal" data-reveal="scale" data-intro-orb>
-        <div class="orb-parallax" data-parallax="0.05">
-          <div class="orb-lift">
-            <div class="orb" data-orb>
-              <span class="orb-halo" aria-hidden="true"></span>
-              <span class="orb-ring" aria-hidden="true"></span>
-              <img class="orb-photo" src="assets/img/avatar.jpg" alt="Hexun" width="768" height="768">
-              <span class="orb-glass" aria-hidden="true"></span>
-            </div>
-          </div>
+      <figure class="col-full md-col-3 lg-col-5 hero-portrait">
+        <img src="assets/img/avatar.jpg" alt="Hexun (HX STONE)" width="768" height="768">
+        <figcaption>Hexun</figcaption>
+      </figure>
+
+      <dl class="col-full facts">
+        <div>
+          <dt data-i18n="fact.projects">Projects</dt>
+          <dd>04</dd>
         </div>
-      </div>
+        <div>
+          <dt data-i18n="fact.notes">Notes</dt>
+          <dd>02</dd>
+        </div>
+        <div>
+          <dt data-i18n="fact.games">Games</dt>
+          <dd>04</dd>
+        </div>
+        <div>
+          <dt data-i18n="fact.deps">Dependencies</dt>
+          <dd>00</dd>
+        </div>
+      </dl>
     </div>
   </section>
 
-  <!-- ============ CASE STUDIES ============ -->
+  <!-- ============ PROJECTS ============ -->
   <section class="section" id="work">
-    <div class="wrap">
-      <div class="sec-head reveal">
-        <div>
-          <h2 data-i18n="work.title">Projects</h2>
+    <div class="container grid">
+      <div class="col-full lg-col-8">
+        <p class="label" data-i18n="work.label">Index 01</p>
+        <h2 class="hero-statement" data-i18n="work.title">Projects</h2>
+        <p class="lead" data-i18n="work.lead">Four real things I built. Each started with a problem and ended when it was playable or usable.</p>
+      </div>
+
+      <div class="col-full md-col-3 lg-col-4">
+        <a class="link-arrow" href="projects.html">
+          <span data-i18n="work.link">All projects</span>
+          <span class="arrow" aria-hidden="true">→</span>
+        </a>
+      </div>
+
+      <a class="card col-full md-col-3 lg-col-4 group" href="games/2359/index.html">
+        <span class="card-index" aria-hidden="true">01</span>
+        <span class="cat" data-i18n="work.2359.index">Game</span>
+        <h3 class="card-title" data-i18n="work.2359.title">23:59 | Boarding School Simulator</h3>
+        <p data-i18n="work.2359.desc">One evening as a boarding student: six hours, five stats, and every choice costs something.</p>
+        <div class="card-foot">
+          <span class="tags"><span>HTML</span><span>CSS</span><span>JavaScript</span></span>
+          <span class="arrow" aria-hidden="true">→</span>
         </div>
-        <a class="sec-link" href="projects.html" data-i18n="work.link">All projects</a>
-      </div>
+      </a>
 
-      <div class="work-list" data-stagger>
-        <a class="work reveal" href="games/2359/index.html">
-          <span class="work-no" aria-hidden="true">01</span>
-          <span class="work-thumb thumb-night" aria-hidden="true">🌙</span>
-          <div class="work-main">
-            <div class="case-title">
-              <h3 class="work-title" data-i18n="work.2359.title">23:59 | Boarding School Simulator</h3>
-              <span class="badge badge-new" data-i18n="case.new">New</span>
-            </div>
-            <p class="work-desc" data-i18n="work.2359.desc">One evening as a boarding student: six hours, five stats, and every choice costs something.</p>
-            <div class="work-tags">
-              <span class="badge" data-i18n="work.2359.index">Game</span>
-              <span class="badge">HTML</span>
-              <span class="badge">CSS</span>
-              <span class="badge">JavaScript</span>
-              <span class="badge badge-plain">Playable</span>
-            </div>
-          </div>
-          <span class="work-go"><span data-i18n="work.play">Play now</span><span class="arrow" aria-hidden="true">→</span></span>
-        </a>
+      <a class="card col-full md-col-3 lg-col-4 group" href="projects.html#minesweeper">
+        <span class="card-index" aria-hidden="true">02</span>
+        <span class="cat" data-i18n="work.mine.index">Game</span>
+        <h3 class="card-title" data-i18n="work.mine.title">Minesweeper</h3>
+        <p data-i18n="work.mine.desc">Classic Minesweeper with three difficulty levels, a timer, and a first tap that never blows up.</p>
+        <div class="card-foot">
+          <span class="tags"><span>HTML</span><span>CSS</span><span>JavaScript</span></span>
+          <span class="arrow" aria-hidden="true">→</span>
+        </div>
+      </a>
 
-        <a class="work reveal" href="projects.html#minesweeper">
-          <span class="work-no" aria-hidden="true">02</span>
-          <span class="work-thumb thumb-game" aria-hidden="true">💣</span>
-          <div class="work-main">
-            <h3 class="work-title" data-i18n="work.mine.title">Minesweeper</h3>
-            <p class="work-desc" data-i18n="work.mine.desc">Classic Minesweeper with three difficulty levels, a timer, and a first tap that never blows up.</p>
-            <div class="work-tags">
-              <span class="badge" data-i18n="work.mine.index">Game</span>
-              <span class="badge">HTML</span>
-              <span class="badge">CSS</span>
-              <span class="badge">JavaScript</span>
-              <span class="badge badge-plain">Playable</span>
-            </div>
-          </div>
-          <span class="work-go"><span data-i18n="work.case">Enter</span><span class="arrow" aria-hidden="true">→</span></span>
-        </a>
+      <a class="card col-full md-col-3 lg-col-4 group" href="projects.html#dino-run">
+        <span class="card-index" aria-hidden="true">03</span>
+        <span class="cat" data-i18n="work.dino.index">Game</span>
+        <h3 class="card-title" data-i18n="work.dino.title">Dino Run</h3>
+        <p data-i18n="work.dino.desc">A runner with a real difficulty curve, a day-night cycle, and controls for keyboard and touch.</p>
+        <div class="card-foot">
+          <span class="tags"><span>HTML</span><span>Canvas</span><span>JavaScript</span></span>
+          <span class="arrow" aria-hidden="true">→</span>
+        </div>
+      </a>
 
-        <a class="work reveal" href="projects.html#dino-run">
-          <span class="work-no" aria-hidden="true">03</span>
-          <span class="work-thumb thumb-run" aria-hidden="true">🦖</span>
-          <div class="work-main">
-            <h3 class="work-title" data-i18n="work.dino.title">Dino Run</h3>
-            <p class="work-desc" data-i18n="work.dino.desc">A runner with a real difficulty curve, a day-night cycle, and controls for keyboard and touch.</p>
-            <div class="work-tags">
-              <span class="badge" data-i18n="work.dino.index">Game</span>
-              <span class="badge">HTML</span>
-              <span class="badge">Canvas</span>
-              <span class="badge">JavaScript</span>
-              <span class="badge badge-plain">Playable</span>
-            </div>
-          </div>
-          <span class="work-go"><span data-i18n="work.case">Enter</span><span class="arrow" aria-hidden="true">→</span></span>
-        </a>
-
-        <a class="work reveal" href="projects.html#tank-battle">
-          <span class="work-no" aria-hidden="true">04</span>
-          <span class="work-thumb thumb-game" aria-hidden="true">🛡️</span>
-          <div class="work-main">
-            <h3 class="work-title" data-i18n="work.tank.title">Tank Battle</h3>
-            <p class="work-desc" data-i18n="work.tank.desc">A compact arcade tank battle with destructible walls, enemy AI and a local high score.</p>
-            <div class="work-tags"><span class="badge" data-i18n="work.tank.index">Game</span><span class="badge">Canvas</span><span class="badge">JavaScript</span><span class="badge badge-plain">Playable</span></div>
-          </div>
-          <span class="work-go"><span data-i18n="work.case">Enter</span><span class="arrow" aria-hidden="true">→</span></span>
-        </a>
-      </div>
+      <a class="card col-full md-col-3 lg-col-4 group" href="projects.html#tank-battle">
+        <span class="card-index" aria-hidden="true">04</span>
+        <span class="cat" data-i18n="work.tank.index">Game</span>
+        <h3 class="card-title" data-i18n="work.tank.title">Tank Battle</h3>
+        <p data-i18n="work.tank.desc">A compact arcade tank battle with destructible walls, enemy AI and a local high score.</p>
+        <div class="card-foot">
+          <span class="tags"><span>Canvas</span><span>JavaScript</span></span>
+          <span class="arrow" aria-hidden="true">→</span>
+        </div>
+      </a>
     </div>
   </section>
 
   <!-- ============ NOTES ============ -->
   <section class="section" id="notes">
-    <div class="wrap">
-      <div class="sec-head reveal">
-        <div>
-          <h2 data-i18n="notes.title">Notes</h2>
-        </div>
-        <a class="sec-link" href="notes.html" data-i18n="notes.all">All notes</a>
+    <div class="container grid">
+      <div class="col-full lg-col-8">
+        <p class="label" data-i18n="notes.label">Index 02</p>
+        <h2 class="hero-statement" data-i18n="notes.title">Notes</h2>
+        <p class="lead" data-i18n="notes.lead">Study logs, tinkering notes and half-formed ideas.</p>
       </div>
 
-      <div class="note-list" data-stagger>
-        <a class="note reveal" href="notes/2026-09-25-hello-world.html">
-          <span class="note-date">2026-09-25</span>
-          <div>
-            <h3 data-i18n="note.helloWorld.h1">Hello, World: My Personal Digital Space</h3>
-            <p data-i18n="note.helloWorld.card.desc">Recording growth, exploring technology — and leaving a voice of my own.</p>
+      <div class="col-full md-col-3 lg-col-4">
+        <a class="link-arrow" href="notes.html">
+          <span data-i18n="notes.all">All notes</span>
+          <span class="arrow" aria-hidden="true">→</span>
+        </a>
+      </div>
+
+      <div class="col-full row-list">
+        <a class="row group" href="notes/2026-09-25-hello-world.html">
+          <div class="row-head">
+            <span class="cat" data-i18n="notes.f.learning">Learning</span>
+            <time class="row-date" datetime="2026-09-25">2026-09-25</time>
           </div>
-          <span class="note-cat badge badge-plain" data-i18n="notes.f.learning">Learning</span>
+          <h3 class="row-title" data-i18n="note.helloWorld.h1">Hello, World: My Personal Digital Space</h3>
+          <p data-i18n="note.helloWorld.card.desc">Recording growth, exploring technology — and leaving a voice of my own.</p>
+          <span class="arrow" aria-hidden="true">→</span>
         </a>
 
-        <a class="note reveal" href="notes/2026-09-25-hello.html">
-          <span class="note-date">2026-09-25</span>
-          <div>
-            <h3 data-i18n="note.hello.h1">The Site Goes Live</h3>
-            <p data-i18n="note.hello.card.desc">Why I built this site, and how I made it.</p>
+        <a class="row group" href="notes/2026-09-25-hello.html">
+          <div class="row-head">
+            <span class="cat" data-i18n="notes.f.learning">Learning</span>
+            <time class="row-date" datetime="2026-09-25">2026-09-25</time>
           </div>
-          <span class="note-cat badge badge-plain" data-i18n="notes.f.learning">Learning</span>
+          <h3 class="row-title" data-i18n="note.hello.h1">The Site Goes Live</h3>
+          <p data-i18n="note.hello.card.desc">Why I built this site, and how I made it.</p>
+          <span class="arrow" aria-hidden="true">→</span>
         </a>
       </div>
     </div>
@@ -225,10 +206,27 @@
 </main>
 
 <footer class="site-footer">
-  <div class="wrap">
-    <h2 class="footer-big reveal"><span data-i18n="footer.big.1">Let's build</span> <span class="accent" data-i18n="footer.big.2">something.</span></h2>
-    <div class="footer-meta">
-      <span>© <span data-year>2026</span> HX STONE · Built with curiosity &amp; AI</span>
+  <div class="container grid footer-grid">
+    <div class="col-full lg-col-7">
+      <p class="label label--on-dark" data-i18n="footer.label">Contact</p>
+      <h2 class="footer-big">
+        <span data-i18n="footer.big.1">Let's build</span>
+        <span class="accent" data-i18n="footer.big.2">something.</span>
+      </h2>
+      <p class="footer-note" data-i18n="footer.note">Always happy to talk about AI, football or running.</p>
+    </div>
+
+    <nav class="col-full md-col-3 lg-col-4 lg-col-start-9 footer-col" aria-label="Footer">
+      <p class="label" data-i18n="footer.nav">Index</p>
+      <div class="footer-links">
+        <a href="projects.html" data-i18n="nav.projects">Projects</a>
+        <a href="notes.html" data-i18n="nav.notes">Notes</a>
+        <a href="about.html" data-i18n="nav.about">About</a>
+      </div>
+    </nav>
+
+    <div class="col-full footer-meta">
+      <span>© <span data-year>2026</span> HX STONE</span>
       <a href="mailto:hexun120716@outlook.com" data-i18n="footer.contact">Email me</a>
     </div>
   </div>

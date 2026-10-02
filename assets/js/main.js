@@ -1,26 +1,15 @@
 /* =========================================================
    HX STONE · main.js
-   语言切换 · 错峰延迟 · 手机菜单 · 年份 · 打印
-   (必须在 motion.js 之前执行,好让动效读到 --rd 延迟)
+   语言切换 · 手机菜单 · 笔记筛选 · 页脚年份
+   ---------------------------------------------------------
+   Swiss International Style:交互只做状态切换,不做位移/缩放/
+   阴影/入场动画,所以这里没有滚动动效代码。
    ========================================================= */
 
 (function () {
   "use strict";
 
   document.documentElement.setAttribute("data-enhanced", "1");
-
-  /* ---------- 错峰延迟 ---------- */
-
-  document.querySelectorAll("[data-stagger]").forEach(function (container) {
-    var i = 0;
-
-    Array.prototype.forEach.call(container.children, function (child) {
-      if (child.classList && child.classList.contains("reveal")) {
-        child.style.setProperty("--rd", i * 90 + "ms");
-        i++;
-      }
-    });
-  });
 
   /* ---------- 语言切换 ---------- */
 
@@ -43,6 +32,8 @@
       "aria-label",
       lang === "zh" ? "Switch to English" : "切换到中文"
     );
+    /* 语言按钮是切换控件,用 aria-pressed 表达当前状态(不靠颜色单独传递) */
+    langBtn.setAttribute("aria-pressed", lang === "zh" ? "true" : "false");
   }
 
   if (typeof cacheEnglishText === "function" && typeof applyLang === "function") {
@@ -63,11 +54,6 @@
 
       applyLang(lang);
       refreshLangButton();
-
-      /* Hero 的文字分裂由 motion.js 重建(否则逐字/逐词结构会被 textContent 覆盖) */
-      if (typeof window.__splitHero === "function") window.__splitHero();
-      /* 状态栏的区块名也要跟着换语言 */
-      if (typeof window.__railRefresh === "function") window.__railRefresh();
     });
   }
 
@@ -93,7 +79,7 @@
     });
 
     window.addEventListener("resize", function () {
-      if (window.innerWidth > 720) closeMenu();
+      if (window.innerWidth > 767) closeMenu();
     });
 
     document.addEventListener("keydown", function (e) {
@@ -108,8 +94,6 @@
 
   if (filters.length && notes.length) {
     filters.forEach(function (btn) {
-      btn.setAttribute("aria-pressed", btn.getAttribute("data-filter") === "all" ? "true" : "false");
-
       btn.addEventListener("click", function () {
         var want = btn.getAttribute("data-filter");
 
@@ -129,13 +113,5 @@
   var year = String(new Date().getFullYear());
   document.querySelectorAll("[data-year]").forEach(function (el) {
     el.textContent = year;
-  });
-
-  /* ---------- 打印 ---------- */
-
-  document.querySelectorAll("[data-print]").forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      window.print();
-    });
   });
 })();
