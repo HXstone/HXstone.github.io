@@ -270,6 +270,20 @@ hr {
   letter-spacing: -0.035em;
 }
 
+/* 首页品牌标题:独占一行,是整个页面最先被读到的元素。
+   上下留白把它和导航、正文分开 —— 靠间距建立层级,不加任何装饰。 */
+.brand-title {
+  margin: 16px 0 56px;
+  font-size: var(--fs-hero);
+  font-weight: 700;
+  line-height: 0.92;
+  letter-spacing: -0.035em;
+}
+
+@media (min-width: 1024px) {
+  .brand-title { margin: 40px 0 96px; }
+}
+
 .hero-statement {
   margin: 0;
   max-width: 24ch;
@@ -735,14 +749,18 @@ em {
 
 .hero-bio {
   margin: 32px 0 0;
-  max-width: 46ch;
+  /* 行宽上限:平板等中间断点下正文列会变宽,这里保证每行不超过约 75 字符 */
+  max-width: 34em;
   font-size: var(--fs-body);
   line-height: 1.75;
   color: var(--gray-600);
 }
 
+/* 首屏视觉:小屏居中且不占满宽度,平板起靠列对齐、右移 */
 .hero-portrait {
-  margin-top: 40px;
+  width: 100%;
+  max-width: 75%;
+  margin: 40px auto 0;
   filter: grayscale(1) contrast(1.05);
 }
 
@@ -763,8 +781,11 @@ em {
   color: var(--gray-400);
 }
 
-@media (min-width: 1024px) {
-  .hero-portrait { margin-top: 0; }
+@media (min-width: 768px) {
+  .hero-portrait {
+    max-width: none;
+    margin: 0;
+  }
 }
 
 /* 数据条：Hero 的客观信息层 */
