@@ -11,9 +11,45 @@ const STATE = {
   DEAD: 'dead',
 };
 
-const MAX_HEALTH = 100;
-const DETECT_RANGE = 27;
-const ATTACK_RANGE = 19;
+/**
+ * Tactical roles are intentionally small state-machine parameters, not new
+ * systems. Each role changes how the existing chase/attack loop uses space and
+ * how long its plasma charge is telegraphed.
+ */
+const ROLE_CONFIG = {
+  assault: {
+    health: 100, damageScale: 1, fireRateScale: 1, chaseSpeed: 2.85, patrolSpeed: 1.35,
+    attackRange: 19, detectRange: 27, preferred: 8, retreat: 4, advance: 0.95,
+    strafe: 0.85, chargeTime: 0.42, cooldown: [1.55, 2.25], scale: 1.04, visor: 0xff3345,
+  },
+  defender: {
+    health: 120, damageScale: 0.95, fireRateScale: 0.9, chaseSpeed: 2.3, patrolSpeed: 1.2,
+    attackRange: 19, detectRange: 28, preferred: 12, retreat: 7, advance: 0.4,
+    strafe: 0.58, chargeTime: 0.52, cooldown: [1.85, 2.55], scale: 1.06, visor: 0xffb15c,
+  },
+  marksman: {
+    health: 95, damageScale: 1.32, fireRateScale: 0.82, chaseSpeed: 2.4, patrolSpeed: 1.25,
+    attackRange: 29, detectRange: 36, preferred: 21, retreat: 12, advance: 0.3,
+    strafe: 0.32, chargeTime: 0.74, cooldown: [2.45, 3.15], scale: 1.02, visor: 0x59c7ff,
+  },
+  heavy: {
+    health: 155, damageScale: 1.16, fireRateScale: 0.88, chaseSpeed: 1.95, patrolSpeed: 1.05,
+    attackRange: 17, detectRange: 27, preferred: 7, retreat: 3.5, advance: 0.82,
+    strafe: 0.4, chargeTime: 0.6, cooldown: [1.95, 2.6], scale: 1.13, visor: 0xff7a3d,
+  },
+  elite: {
+    health: 140, damageScale: 1.08, fireRateScale: 1.16, chaseSpeed: 3.05, patrolSpeed: 1.45,
+    attackRange: 21, detectRange: 30, preferred: 10, retreat: 5, advance: 1.05,
+    strafe: 1.1, chargeTime: 0.36, cooldown: [1.4, 1.95], scale: 1.12, visor: 0xffb15c,
+  },
+  commander: {
+    health: 200, damageScale: 1.14, fireRateScale: 1.08, chaseSpeed: 2.6, patrolSpeed: 1.2,
+    attackRange: 22, detectRange: 31, preferred: 12, retreat: 5, advance: 0.72,
+    strafe: 0.78, chargeTime: 0.5, cooldown: [1.55, 2.05], scale: 1.2, visor: 0xff4d58,
+  },
+};
+
+const getRoleConfig = (role) => ROLE_CONFIG[role] || ROLE_CONFIG.assault;
 
 function makeAlertTexture() {
   const canvas = document.createElement('canvas');
@@ -153,8 +189,19 @@ export class Enemy {
     this.lastSeenAt = -100;
     this.raycaster = new THREE.Raycaster();
 
-    this.maxHealth = MAX_HEALTH;
-    this.health = MAX_HEALTH;
+    this.role = spawn.role || (spawn.elite ? 'elite' : 'assault');
+    this.floorY = Number(spawn.floorY) || 0;
+    this.roleConfig = getRoleConfig(this.role);
+    this.maxHealth = Number(spawn.health) || this.roleConfig.health;
+    this.health = this.maxHealth;
+    this.elite = Boolean(spawn.elite) || this.role === 'elite' || this.role === 'commander';
+    this.damageScale = Number(spawn.damageScale) || this.roleConfig.damageScale;
+    this.fireRateScale = Number(spawn.fireRateScale) || this.roleConfig.fireRateScale;
+    this.chaseSpeed = Number(spawn.chaseSpeed) || this.roleConfig.chaseSpeed;
+    this.patrolSpeed = Number(spawn.patrolSpeed) || this.roleConfig.patrolSpeed;
+    this.attackRange = Number(spawn.attackRange) || this.roleConfig.attackRange;
+    this.detectRange = Number(spawn.detectRange) || this.roleConfig.detectRange;
+    this.dormant = false;
     this.alive = true;
     this.state = STATE.PATROL;
     this.stateTime = 0;
@@ -169,7 +216,7 @@ export class Enemy {
     this.detectionTimer = Math.random() * 0.2;
     this.hasSight = false;
     this.lostSightTime = 0;
-    this.shootCooldown = randomRange(0.6, 1.8);
+    this.shootCooldown = randomRange(0.6, 1.8) / this.fireRateScale;
     this.chargeTimer = 0;
     this.charging = false;
     this.strafeDirection = Math.random() > 0.5 ? 1 : -1;
@@ -186,6 +233,8 @@ export class Enemy {
     // Materials that must flash independently per unit.
     this.visorMaterial = this.assets.red.clone();
     this.coreMaterial = this.assets.red.clone();
+    this.visorMaterial.emissive.setHex(this.roleConfig.visor);
+    this.coreMaterial.emissive.setHex(this.roleConfig.visor);
     this.muzzleMaterial = new THREE.SpriteMaterial({
       color: 0xffc28a,
       transparent: true,
@@ -230,7 +279,7 @@ export class Enemy {
     const { armor, armorLight, joint, polymer, cyan, gunmetal, geos } = this.assets;
     const root = new THREE.Group();
     root.name = `SENTINEL-${this.spawn.id}`;
-    root.scale.setScalar(1.04);
+    root.scale.setScalar(this.roleConfig.scale);
 
     const visual = new THREE.Group();
     root.add(visual);
@@ -447,10 +496,11 @@ export class Enemy {
   }
 
   reset() {
-    this.position.set(this.spawn.pos.x, 0, this.spawn.pos.z);
+    this.position.set(this.spawn.pos.x, this.floorY, this.spawn.pos.z);
     this.velocity.set(0, 0, 0);
     this.health = this.maxHealth;
     this.alive = true;
+    this.dormant = false;
     this.state = STATE.PATROL;
     this.stateTime = 0;
     this.path = [];
@@ -463,7 +513,7 @@ export class Enemy {
     );
     this.hasSight = false;
     this.lostSightTime = 0;
-    this.shootCooldown = randomRange(0.8, 2);
+    this.shootCooldown = randomRange(0.8, 2) / this.fireRateScale;
     this.chargeTimer = 0;
     this.charging = false;
     this.hitFlash = 0;
@@ -491,8 +541,35 @@ export class Enemy {
     return this.eye.set(this.position.x, this.position.y + 1.55, this.position.z);
   }
 
+  /**
+   * Safe-zone behavior: sentinels stay present and visibly idle, but they are
+   * not allowed to perceive, path toward, or fire on the player until the
+   * mission clock starts.
+   */
+  updatePassive(dt) {
+    if (!this.alive) return;
+    this.walkPhase += dt * 0.7;
+    this.visual.position.y = Math.sin(this.walkPhase) * 0.008;
+    const idle = Math.sin(this.walkPhase * 0.55 + this.index) * 0.025;
+    this.head.rotation.x = idle;
+    this.visorMaterial.emissiveIntensity = 2.4 + Math.sin(performance.now() * 0.002 + this.index) * 0.25;
+    this.coreMaterial.emissiveIntensity = 1.4 + Math.sin(performance.now() * 0.0018 + this.index) * 0.2;
+    this.muzzleFlash.material.opacity = 0;
+    this.root.position.copy(this.position);
+  }
+
   getMuzzleWorldPosition(target = new THREE.Vector3()) {
     return this.muzzle.getWorldPosition(target);
+  }
+
+  setDormant(dormant) {
+    this.dormant = Boolean(dormant);
+    this.root.visible = !this.dormant;
+    if (this.dormant) {
+      this.healthBarGroup.visible = false;
+      this.alertMarker.visible = false;
+    }
+    for (const mesh of this.hitMeshes) mesh.visible = true;
   }
 
   setState(state) {
@@ -576,7 +653,7 @@ export class Enemy {
     const dot = facing.dot(direction);
     const close = dist2d < 8.5;
     const inCone = dot > 0.28;
-    const visible = distance < DETECT_RANGE && (close || inCone);
+    const visible = distance < this.detectRange && (close || inCone);
 
     let blocked = true;
     if (visible) {
@@ -620,7 +697,7 @@ export class Enemy {
       }
     }
 
-    const arrived = this._followPath(dt, 1.35, null);
+    const arrived = this._followPath(dt, this.patrolSpeed, null);
     if (arrived) {
       this.path = [];
       this.waitTimer = randomRange(1.1, 2.6);
@@ -641,7 +718,7 @@ export class Enemy {
     this.healthBarGroup.visible = true;
     if (this.hasSight) {
       this._facePosition(player.position, dt, 9);
-      if (distance < ATTACK_RANGE) {
+      if (distance < this.attackRange) {
         this.setState(STATE.ATTACK);
         return;
       }
@@ -653,7 +730,7 @@ export class Enemy {
       this.path = this.nav.findPath(this.position, this.lastKnown.lengthSq() > 0 ? this.lastKnown : player.position);
     }
 
-    const arrived = this._followPath(dt, 2.85, allEnemies);
+    const arrived = this._followPath(dt, this.chaseSpeed, allEnemies);
     if (arrived && this.lostSightTime > 5.5) {
       this.setState(STATE.PATROL);
       this.path = [];
@@ -674,29 +751,31 @@ export class Enemy {
       }
     }
 
-    if (distance > ATTACK_RANGE) {
+    if (distance > this.attackRange) {
       this.setState(STATE.CHASE);
       return;
     }
 
-    // Light strafing keeps engagements dynamic without letting the unit
-    // phase through cover. Movement is validated per axis.
+    // Role-driven spacing: assault and heavy units close the gap, defenders
+    // hold a mid-range lane, marksmen back off and elite units orbit faster.
     this.strafeTimer -= dt;
     if (this.strafeTimer <= 0) {
       this.strafeDirection *= -1;
       this.strafeTimer = randomRange(1.3, 2.6);
     }
 
+    const config = this.roleConfig;
+    let radial = 0;
+    if (distance > config.preferred + 2) radial = config.advance;
+    else if (distance < config.retreat) radial = -0.8;
     const strafe = this._strafe.set(
       Math.cos(this.yaw) * this.strafeDirection,
       0,
       -Math.sin(this.yaw) * this.strafeDirection,
     );
-    const move = this._move.copy(strafe).multiplyScalar(distance < 9 ? 0.8 : 0.5);
-    if (distance > 15.5) {
-      move.x += -Math.sin(this.yaw) * 0.9;
-      move.z += -Math.cos(this.yaw) * 0.9;
-    }
+    const move = this._move.copy(strafe).multiplyScalar(config.strafe);
+    move.x += -Math.sin(this.yaw) * radial;
+    move.z += -Math.cos(this.yaw) * radial;
     this._moveWithCollision(move.x * dt, move.z * dt, allEnemies);
 
     // Keep shoot cooldown running only while sighted.
@@ -712,11 +791,11 @@ export class Enemy {
           this.audio.enemyShoot(this._panTo(player.position));
           this.muzzleFlash.material.opacity = 1;
         }
-        this.shootCooldown = randomRange(1.55, 2.25);
+        this.shootCooldown = randomRange(...this.roleConfig.cooldown) / this.fireRateScale;
       }
     } else if (this.shootCooldown <= 0 && this.hasSight) {
       this.charging = true;
-      this.chargeTimer = 0.42;
+      this.chargeTimer = this.roleConfig.chargeTime;
       this.muzzleFlash.material.opacity = 0.35;
     }
   }
@@ -750,9 +829,11 @@ export class Enemy {
 
   _moveWithCollision(dx, dz, allEnemies) {
     if (allEnemies) {
-      // Soft separation prevents sentinels from stacking in doorways.
+      // Soft separation prevents sentinels from stacking in doorways. Units on
+      // different decks must not push each other through the floor slab.
       for (const other of allEnemies) {
         if (other === this || !other.alive) continue;
+        if (Math.abs((other.floorY || 0) - this.floorY) > 1) continue;
         const ox = this.position.x - other.position.x;
         const oz = this.position.z - other.position.z;
         const distSq = ox * ox + oz * oz;
@@ -779,17 +860,22 @@ export class Enemy {
   }
 
   _canOccupy(x, z, radius) {
+    const bounds = this.nav?.bounds || this.world.navBounds;
     if (
-      x < this.world.navBounds.minX + radius ||
-      x > this.world.navBounds.maxX - radius ||
-      z < this.world.navBounds.minZ + radius ||
-      z > this.world.navBounds.maxZ - radius
+      x < bounds.minX + radius ||
+      x > bounds.maxX - radius ||
+      z < bounds.minZ + radius ||
+      z > bounds.maxZ - radius
     ) {
       return false;
     }
+    const bodyBottom = this.floorY + 0.38;
+    const bodyTop = this.floorY + 1.88;
     for (const collider of this.world.colliders) {
       const box = collider.box;
-      if (box.max.y < 0.35) continue;
+      if (collider.walkable) continue;
+      if (box.max.y <= bodyBottom) continue;
+      if (box.min.y >= bodyTop) continue;
       if (
         x + radius > box.min.x &&
         x - radius < box.max.x &&
@@ -812,7 +898,11 @@ export class Enemy {
 
   _updateAnimation(dt, playerDistance) {
     const moving = this.state === STATE.CHASE || this.state === STATE.PATROL;
-    const speed = this.state === STATE.CHASE ? 2.85 : this.state === STATE.PATROL ? 1.35 : 0;
+    const speed = this.state === STATE.CHASE
+      ? this.chaseSpeed
+      : this.state === STATE.PATROL
+        ? this.patrolSpeed
+        : 0;
     if (moving) this._walkPhaseUpdate(dt, speed);
 
     const stride = moving ? Math.sin(this.walkPhase) * (speed > 2 ? 0.62 : 0.42) : 0;
@@ -906,6 +996,18 @@ export class Enemy {
 
   dispose() {
     this.scene.remove(this.root);
+    // Most armor geometry is shared through createEnemyAssets, but a handful
+    // of small details are built per unit. Release those while leaving the
+    // shared set and Sprite's internal quad geometry alone.
+    const sharedGeometry = new Set([
+      ...Object.values(this.assets.geos || {}),
+      this.assets.blobGeometry,
+    ]);
+    this.root.traverse((object) => {
+      if (object.isMesh && object.geometry && !sharedGeometry.has(object.geometry)) {
+        object.geometry.dispose();
+      }
+    });
     this.visorMaterial.dispose();
     this.coreMaterial.dispose();
     this.muzzleMaterial.dispose();

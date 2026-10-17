@@ -7,15 +7,22 @@ import { MinHeap } from '../utils/math.js';
  * sentinels naturally keep clear of cover and walls.
  */
 export class NavigationGrid {
-  constructor(world, cellSize = 1.1, agentRadius = 0.46) {
+  /**
+   * A grid is built for one floor band. Ground agents ignore railings and deck
+   * slabs that sit above their heads; upper-floor agents ignore the floor
+   * beneath them but still respect railings and furniture at their own level.
+   * This keeps the existing 2D A* while making authored mezzanines playable.
+   */
+  constructor(world, cellSize = 1.1, agentRadius = 0.46, { floorY = 0, bounds = null } = {}) {
     this.world = world;
     this.cellSize = cellSize;
     this.agentRadius = agentRadius;
-    const bounds = world.navBounds;
-    this.minX = bounds.minX;
-    this.minZ = bounds.minZ;
-    this.cols = Math.max(1, Math.ceil((bounds.maxX - bounds.minX) / cellSize));
-    this.rows = Math.max(1, Math.ceil((bounds.maxZ - bounds.minZ) / cellSize));
+    this.floorY = floorY;
+    this.bounds = bounds || world.navBounds;
+    this.minX = this.bounds.minX;
+    this.minZ = this.bounds.minZ;
+    this.cols = Math.max(1, Math.ceil((this.bounds.maxX - this.bounds.minX) / cellSize));
+    this.rows = Math.max(1, Math.ceil((this.bounds.maxZ - this.bounds.minZ) / cellSize));
     this.total = this.cols * this.rows;
     this.blocked = new Uint8Array(this.total);
     this.gScore = new Float32Array(this.total);
@@ -25,7 +32,9 @@ export class NavigationGrid {
   }
 
   _build() {
-    const { cols, rows, cellSize, minX, minZ, agentRadius } = this;
+    const { cols, rows, cellSize, minX, minZ, agentRadius, floorY } = this;
+    const bodyBottom = floorY + 0.38;
+    const bodyTop = floorY + 1.88;
     for (let z = 0; z < rows; z += 1) {
       for (let x = 0; x < cols; x += 1) {
         const wx = minX + (x + 0.5) * cellSize;
@@ -34,8 +43,11 @@ export class NavigationGrid {
         let blocked = false;
 
         for (const collider of this.world.colliders) {
+          if (collider.walkable) continue;
           const box = collider.box;
-          if (box.max.y < 0.45) continue;
+          // Ignore things below the feet or above the agent's chest/head.
+          if (box.max.y <= bodyBottom) continue;
+          if (box.min.y >= bodyTop) continue;
           if (
             wx > box.min.x - agentRadius &&
             wx < box.max.x + agentRadius &&
@@ -61,7 +73,7 @@ export class NavigationGrid {
   cellToWorld(x, z) {
     return new THREE.Vector3(
       this.minX + (x + 0.5) * this.cellSize,
-      0,
+      this.floorY,
       this.minZ + (z + 0.5) * this.cellSize,
     );
   }

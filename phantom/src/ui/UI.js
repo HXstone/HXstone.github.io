@@ -1,7 +1,11 @@
 import { clamp, formatTime } from '../utils/math.js';
+import { DEFAULT_LEVEL_ID, LEVELS, getLevel, getNextLevel } from '../levels/catalog.js';
+import { getNarrative, getSpeaker } from '../campaign/narrative.js';
 
 const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])';
-const BEST_TIME_KEY = 'phantom.bestTime.v1';
+const LEGACY_BEST_TIME_KEY = 'phantom.bestTime.v1';
+const BEST_TIMES_KEY = 'phantom.bestTimes.v1';
+const COMPLETED_KEY = 'phantom.completed.v1';
 
 /**
  * DOM HUD and menu controller. All dynamic text goes through textContent,
@@ -20,13 +24,24 @@ export class UI {
     this._toastTimer = null;
     this._damageTimer = null;
     this._lastAmmo = null;
+    this._radioQueue = [];
+    this._radioActive = false;
+    this._radioTimer = null;
+    this._intelTimer = null;
+    this.intelOpen = false;
+    this.radioActive = false;
+    this.level = getLevel(DEFAULT_LEVEL_ID);
+    this.bestTimes = {};
+    this.completed = new Set();
 
     this._cache();
+    this._buildOperations();
     this._initCompass();
     this._bind();
-    this._readBestTime();
+    this._readProgress();
     this.syncSettings();
     this._applyMotionPreference();
+    this.setMission(this.level);
   }
 
   _cache() {
@@ -42,8 +57,16 @@ export class UI {
       damageFlash: $('damage-flash'),
       hitFlash: $('hit-flash'),
       timer: $('timer'),
+      timerLabel: $('timer-label'),
+      objectivePhase: $('objective-phase'),
+      objectiveSubLabel: $('objective-sub-label'),
+      missionNav: $('mission-nav'),
+      missionNavArrow: $('mission-nav-arrow'),
+      missionNavLabel: $('mission-nav-label'),
+      missionNavDistance: $('mission-nav-distance'),
       killCount: $('kill-count'),
       objectiveCount: $('objective-count'),
+      objectiveTitle: $('objective-title'),
       objectiveFill: $('objective-fill'),
       healthValue: $('health-value'),
       healthFill: $('health-fill'),
@@ -66,6 +89,18 @@ export class UI {
       toast: $('toast'),
       reloadPrompt: $('reload-prompt'),
       pickupPrompt: $('pickup-prompt'),
+      intelPrompt: $('intel-prompt'),
+      intelPromptLabel: $('intel-prompt-label'),
+      intelPromptAction: $('intel-prompt-action'),
+      intelCard: $('intel-card'),
+      intelKicker: $('intel-kicker'),
+      intelTitle: $('intel-title'),
+      intelBody: $('intel-body'),
+      intelSpeaker: $('intel-speaker'),
+      radio: $('radio'),
+      radioSpeaker: $('radio-speaker'),
+      radioRole: $('radio-role'),
+      radioText: $('radio-text'),
       compassDeg: $('compass-deg'),
       compassTicks: $('compass-ticks'),
       pauseTime: $('pause-time'),
@@ -75,6 +110,7 @@ export class UI {
       endTitle: $('end-title'),
       endTitleAccent: $('end-title-accent'),
       endCopy: $('end-copy'),
+      endDebrief: $('end-debrief'),
       endGrade: $('end-grade'),
       endRating: $('end-rating'),
       endScore: $('end-score'),
@@ -84,7 +120,28 @@ export class UI {
       endHeadshots: $('end-headshots'),
       endDamage: $('end-damage'),
       endStreak: $('end-streak'),
+      endNext: $('end-next'),
       bestTime: $('best-time'),
+      menuLocation: $('menu-location'),
+      heroCopy: $('hero-copy'),
+      activeMission: $('active-mission'),
+      activeReadout: $('active-readout'),
+      dossierIndex: $('dossier-index'),
+      dossierTitle: $('dossier-title'),
+      dossierCopy: $('dossier-copy'),
+      dossierObjective: $('dossier-objective'),
+      dossierHostiles: $('dossier-hostiles'),
+      dossierThreat: $('dossier-threat'),
+      dossierExfil: $('dossier-exfil'),
+      dossierCoords: $('dossier-coords'),
+      diagramMain: $('diagram-main'),
+      diagramAccent: $('diagram-accent'),
+      diagramLabel: $('diagram-label'),
+      diagramScale: $('diagram-scale'),
+      operationsGrid: $('operations-grid'),
+      operationsStatus: $('operations-status'),
+      operationsBrief: $('operations-brief-text'),
+      operationsBriefSpeaker: $('operations-brief-speaker'),
       sensitivity: $('sensitivity'),
       sensitivityValue: $('sensitivity-value'),
       fov: $('fov'),
@@ -112,6 +169,45 @@ export class UI {
       mark.textContent = cardinals[angle] || (angle % 30 === 0 ? String(angle) : '');
       this.el.compassTicks.appendChild(mark);
       this.compassMarks.push({ angle, mark });
+    }
+  }
+
+  _buildOperations() {
+    if (!this.el.operationsGrid) return;
+    this.operationCards = new Map();
+    for (const level of LEVELS) {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'operation-card';
+      card.dataset.level = level.id;
+      card.style.setProperty('--op-accent', level.accent);
+      card.setAttribute('aria-pressed', 'false');
+
+      const index = document.createElement('span');
+      index.className = 'operation-card__index mono';
+      index.textContent = level.index;
+
+      const body = document.createElement('span');
+      body.className = 'operation-card__body';
+      const meta = document.createElement('span');
+      meta.className = 'operation-card__meta mono';
+      meta.textContent = `${level.code.replace('OP / ', '')} // ${level.biome}`;
+      const name = document.createElement('strong');
+      name.className = 'operation-card__name';
+      name.textContent = level.name;
+      const readout = document.createElement('span');
+      readout.className = 'operation-card__readout mono';
+      readout.textContent = `${level.readout} // ${String(level.hostiles).padStart(2, '0')} HOSTILES`;
+      body.append(meta, name, readout);
+
+      const state = document.createElement('span');
+      state.className = 'operation-card__state mono';
+      state.textContent = 'READY';
+
+      card.append(index, body, state);
+      card.setAttribute('aria-label', `${level.index}. ${level.name}, ${level.location}, ${level.hostiles} hostiles, threat ${level.threat}`);
+      this.el.operationsGrid.appendChild(card);
+      this.operationCards.set(level.id, { card, state });
     }
   }
 
@@ -151,6 +247,20 @@ export class UI {
     document.getElementById('end-menu')?.addEventListener('click', () => {
       click();
       if (this.callbacks.onAbort) this.callbacks.onAbort();
+    });
+
+    this.el.endNext?.addEventListener('click', () => {
+      click();
+      if (this.callbacks.onNext) this.callbacks.onNext();
+    });
+
+    this.el.operationsGrid?.addEventListener('click', (event) => {
+      const card = event.target.closest('[data-level]');
+      if (!card) return;
+      const level = getLevel(card.dataset.level);
+      click();
+      this.closeModal(true);
+      if (this.callbacks.onLevelSelect) this.callbacks.onLevelSelect(level.id);
     });
 
     // Modal triggers and closers.
@@ -329,6 +439,75 @@ export class UI {
   /* Screen state                                                       */
   /* ------------------------------------------------------------------ */
 
+  setMission(levelOrId) {
+    const level = typeof levelOrId === 'string' ? getLevel(levelOrId) : levelOrId;
+    if (!level) return;
+    this.level = level;
+
+    if (this.el.heroCopy) this.el.heroCopy.textContent = level.hero;
+    if (this.el.menuLocation) this.el.menuLocation.textContent = `${level.locationShort} / ${level.coords}`;
+    if (this.el.activeMission) this.el.activeMission.textContent = `${level.index} / ${level.name}`;
+    if (this.el.activeReadout) this.el.activeReadout.textContent = level.readout;
+    if (this.el.dossierIndex) this.el.dossierIndex.textContent = level.code;
+    if (this.el.dossierTitle) this.el.dossierTitle.textContent = level.dossierTitle;
+    if (this.el.dossierCopy) this.el.dossierCopy.textContent = level.brief;
+    if (this.el.dossierObjective) this.el.dossierObjective.textContent = level.objective;
+    if (this.el.dossierHostiles) {
+      this.el.dossierHostiles.textContent = `${String(level.hostiles).padStart(2, '0')} // ${this.completed.has(level.id) ? 'CLEARED' : 'ACTIVE'}`;
+    }
+    if (this.el.dossierThreat) this.el.dossierThreat.textContent = level.threat;
+    if (this.el.dossierExfil) this.el.dossierExfil.textContent = level.exfilLabel ? `MANUAL // ${level.exfilLabel}` : 'MANUAL';
+    if (this.el.dossierCoords) this.el.dossierCoords.textContent = level.coords;
+    if (this.el.objectiveTitle) this.el.objectiveTitle.textContent = level.objective;
+    if (this.el.diagramMain) this.el.diagramMain.setAttribute('d', level.diagram.main);
+    if (this.el.diagramAccent) {
+      this.el.diagramAccent.setAttribute('d', level.diagram.accent);
+      this.el.diagramAccent.setAttribute('stroke', level.accent);
+    }
+    if (this.el.diagramLabel) this.el.diagramLabel.textContent = `${level.locationShort} // GRID ${level.index}`;
+    if (this.el.diagramScale) this.el.diagramScale.textContent = `THREAT ${level.threat}`;
+    const briefLine = getNarrative(level.id).intro?.[0];
+    if (this.el.operationsBrief && briefLine) {
+      this.el.operationsBrief.textContent = briefLine.text;
+      if (this.el.operationsBriefSpeaker) {
+        this.el.operationsBriefSpeaker.textContent = `${getSpeaker(briefLine.speaker).name} // MISSION COMMAND`;
+      }
+    }
+    const startIndex = this.el.startButton?.querySelector('.btn__index');
+    if (startIndex) startIndex.textContent = level.index;
+
+    this._refreshOperationStates();
+    this._renderBestTime();
+  }
+
+  _refreshOperationStates() {
+    if (!this.operationCards) return;
+    for (const level of LEVELS) {
+      const entry = this.operationCards.get(level.id);
+      if (!entry) continue;
+      const active = level.id === this.level.id;
+      const cleared = this.completed.has(level.id);
+      entry.card.classList.toggle('is-active', active);
+      entry.card.classList.toggle('is-cleared', cleared);
+      entry.card.setAttribute('aria-pressed', String(active));
+      entry.state.textContent = active ? 'ACTIVE' : cleared ? 'CLEARED' : 'READY';
+    }
+    if (this.el.operationsStatus) {
+      this.el.operationsStatus.textContent = `${String(LEVELS.length).padStart(2, '0')} OPERATIONS // ${String(this.completed.size).padStart(2, '0')} CLEARED`;
+    }
+    if (this.el.dossierHostiles) {
+      this.el.dossierHostiles.textContent = `${String(this.level.hostiles).padStart(2, '0')} // ${this.completed.has(this.level.id) ? 'CLEARED' : 'ACTIVE'}`;
+    }
+  }
+
+  _renderBestTime() {
+    const time = this.bestTimes[this.level.id] ?? null;
+    this.bestTime = time;
+    if (this.el.bestTime) {
+      this.el.bestTime.textContent = time ? `BEST TIME ${formatTime(time)}` : 'BEST TIME —:—';
+    }
+  }
+
   showMenu() {
     this.el.menu.hidden = false;
     this.el.menu.classList.remove('is-leaving');
@@ -341,6 +520,10 @@ export class UI {
     this.el.toast.classList.remove('is-visible');
     this.el.reloadPrompt.classList.remove('is-visible');
     this.el.pickupPrompt.classList.remove('is-visible');
+    this.setIntelPrompt(false);
+    this.updateNavigation({ active: false });
+    this.hideRadio();
+    this.hideIntel();
     this.closeModal(true);
     this.syncSettings();
   }
@@ -353,11 +536,12 @@ export class UI {
     this.el.end.hidden = true;
     this.el.damageFlash.classList.remove('is-active');
     this.el.hitFlash.classList.remove('is-active');
+    this.setIntelPrompt(false);
   }
 
   showPause(stats = {}) {
     this.el.pause.hidden = false;
-    this.el.pauseTime.textContent = formatTime(stats.elapsed || 0);
+    this.el.pauseTime.textContent = formatTime(stats.remainingTime ?? stats.elapsed ?? 0);
     this.el.pauseRemaining.textContent = String(stats.remaining ?? 0).padStart(2, '0');
     this.el.pauseKills.textContent = String(stats.kills ?? 0).padStart(2, '0');
     const first = this.el.pause.querySelector(FOCUSABLE);
@@ -368,10 +552,15 @@ export class UI {
     this.el.pause.hidden = true;
   }
 
-  showEnd({ victory, stats }) {
+  showEnd({ victory, stats, level = this.level, failureReason = null }) {
+    this.level = level;
+    const timedOut = !victory && failureReason === 'timeout';
     this.el.hud.classList.add('is-hidden');
     this.el.pause.hidden = true;
     this.el.end.hidden = false;
+    this.setIntelPrompt(false);
+    this.hideRadio();
+    this.hideIntel();
     this.closeModal(true);
     this.el.end.classList.toggle('is-defeat', !victory);
 
@@ -407,13 +596,23 @@ export class UI {
       rating = 'SIGNAL LOST';
     }
 
-    this.el.endKicker.textContent = victory ? 'OPERATION COMPLETE // SITE-09 SECURED' : 'OPERATIVE DOWN // MISSION FAILED';
-    this.el.endTitle.setAttribute('aria-label', victory ? 'Mission complete' : 'Signal lost');
-    this.el.endTitle.childNodes[0].nodeValue = victory ? 'MISSION' : 'SIGNAL';
-    this.el.endTitleAccent.textContent = victory ? 'COMPLETE' : 'LOST';
+    this.el.endKicker.textContent = victory
+      ? `OPERATION COMPLETE // ${level.locationShort} SECURED`
+      : timedOut
+        ? `EXFIL WINDOW CLOSED // ${level.locationShort} NOT SECURED`
+        : `OPERATIVE DOWN // ${level.locationShort} LOST`;
+    this.el.endTitle.setAttribute('aria-label', victory ? 'Mission complete' : timedOut ? 'Exfil failed' : 'Signal lost');
+    this.el.endTitle.childNodes[0].nodeValue = victory ? 'MISSION' : timedOut ? 'EXFIL' : 'SIGNAL';
+    this.el.endTitleAccent.textContent = victory ? 'COMPLETE' : timedOut ? 'FAILED' : 'LOST';
     this.el.endCopy.textContent = victory
-      ? 'All hostile signals neutralized. The facility is dark again — and nothing followed you out.'
-      : 'Biometric signal terminated. The sentinels remain active inside SITE-09. Regroup and redeploy.';
+      ? level.victoryCopy
+      : timedOut
+        ? level.timeoutCopy || 'The extraction window closed before you reached the pad. The mission is not complete.'
+        : level.defeatCopy;
+    if (this.el.endDebrief) {
+      this.el.endDebrief.textContent = victory ? stats.debrief || '' : '';
+      this.el.endDebrief.hidden = !victory || !stats.debrief;
+    }
     this.el.endGrade.textContent = grade;
     this.el.endRating.textContent = rating;
     this.el.endScore.textContent = `SCORE ${String(score).padStart(6, '0')}`;
@@ -425,8 +624,14 @@ export class UI {
     this.el.endStreak.textContent = String(stats.bestStreak || 0).padStart(2, '0');
 
     if (victory) this._maybeSaveBestTime(time);
+    const next = victory ? getNextLevel(level.id) : null;
+    if (this.el.endNext) {
+      this.el.endNext.hidden = !next;
+      this.el.endNext.title = next ? `Continue to ${next.name}` : '';
+    }
+    this.el.end.classList.toggle('has-next', Boolean(next));
 
-    const first = this.el.end.querySelector(FOCUSABLE);
+    const first = Array.from(this.el.end.querySelectorAll(FOCUSABLE)).find((node) => node.offsetParent !== null);
     if (first) requestAnimationFrame(() => first.focus({ preventScroll: true }));
   }
 
@@ -511,6 +716,72 @@ export class UI {
 
   updateTimer(seconds) {
     this.el.timer.textContent = formatTime(seconds);
+  }
+
+  setTimer(seconds, { frozen = false, label = null } = {}) {
+    this.el.timer.textContent = formatTime(Math.max(0, seconds));
+    this.el.timer.classList.toggle('is-frozen', Boolean(frozen));
+    this.el.timer.classList.toggle('is-critical', !frozen && seconds <= 60);
+    this.el.timer.parentElement?.classList.toggle('is-critical', !frozen && seconds <= 60);
+    if (label && this.el.timerLabel) this.el.timerLabel.textContent = label;
+  }
+
+  markTimerCritical(critical) {
+    this.el.timer.classList.toggle('is-critical', Boolean(critical));
+    this.el.timer.parentElement?.classList.toggle('is-critical', Boolean(critical));
+  }
+
+  setMissionPhase(phase, {
+    objective = null,
+    extraction = 'EXTRACTION',
+    frozen = false,
+  } = {}) {
+    const kicker = {
+      SAFE_ZONE: 'SAFE ZONE // CLOCK HOLD',
+      MISSION_ACTIVE: 'ACTIVE DIRECTIVE',
+      OBJECTIVE_COMPLETED: 'OBJECTIVE COMPLETE',
+      EXTRACTION_ACTIVE: 'EXTRACTION ACTIVE',
+      MISSION_SUCCESS: 'EXFIL COMPLETE',
+      MISSION_FAILED: 'MISSION FAILED',
+    }[phase] || 'ACTIVE DIRECTIVE';
+    if (this.el.objectivePhase) this.el.objectivePhase.textContent = kicker;
+    if (objective && this.el.objectiveTitle) this.el.objectiveTitle.textContent = objective;
+    if (this.el.objectiveSubLabel) {
+      this.el.objectiveSubLabel.textContent =
+        phase === 'EXTRACTION_ACTIVE' ? 'HOSTILES ACTIVE' : 'HOSTILES REMAINING';
+    }
+    if (this.el.timerLabel) {
+      this.el.timerLabel.textContent = frozen ? 'EXFIL WINDOW' : 'TIME TO EXFIL';
+    }
+    if (this.el.timer) this.el.timer.classList.toggle('is-frozen', Boolean(frozen));
+    this.el.hud?.classList.toggle('is-exfil', phase === 'EXTRACTION_ACTIVE');
+    if (phase === 'EXTRACTION_ACTIVE' && extraction) {
+      this.el.objectiveTitle?.setAttribute('data-extraction', extraction);
+    }
+  }
+
+  updateNavigation({
+    active = false,
+    label = '',
+    distance = 0,
+    bearing = 0,
+    extraction = false,
+    floor = 1,
+  } = {}) {
+    if (!this.el.missionNav) return;
+    this.el.missionNav.classList.toggle('is-visible', Boolean(active));
+    this.el.missionNav.classList.toggle('is-extraction', Boolean(extraction));
+    this.el.missionNav.setAttribute('aria-hidden', String(!active));
+    if (!active) return;
+    if (this.el.missionNavLabel) {
+      this.el.missionNavLabel.textContent = floor > 1 ? `${label} // L${floor}` : label;
+    }
+    if (this.el.missionNavDistance) {
+      this.el.missionNavDistance.textContent = `${String(Math.max(0, Math.round(distance))).padStart(3, '0')} M`;
+    }
+    if (this.el.missionNavArrow) {
+      this.el.missionNavArrow.style.transform = `rotate(${(bearing * 180) / Math.PI}deg)`;
+    }
   }
 
   updateCompass(yaw) {
@@ -607,6 +878,73 @@ export class UI {
     this._timers.add(timeout);
   }
 
+  setObjective(title) {
+    if (this.el.objectiveTitle && title) this.el.objectiveTitle.textContent = title;
+  }
+
+  setIntelPrompt(visible, { label = 'ARCHIVE NODE', action = 'READ' } = {}) {
+    if (!this.el.intelPrompt) return;
+    if (this.el.intelPromptLabel) this.el.intelPromptLabel.textContent = label;
+    if (this.el.intelPromptAction) this.el.intelPromptAction.textContent = action;
+    this.el.intelPrompt.classList.toggle('is-visible', Boolean(visible));
+  }
+
+  showIntel({ kicker = 'ARCHIVE RECOVERED', title, body, speaker }) {
+    if (!this.el.intelCard) return;
+    this.intelOpen = true;
+    if (this.el.intelKicker) this.el.intelKicker.textContent = kicker;
+    if (this.el.intelTitle) this.el.intelTitle.textContent = title;
+    if (this.el.intelBody) this.el.intelBody.textContent = body;
+    if (this.el.intelSpeaker) this.el.intelSpeaker.textContent = speaker;
+    this.el.intelCard.classList.add('is-visible');
+    clearTimeout(this._intelTimer);
+    this._intelTimer = setTimeout(() => this.hideIntel(), 14000);
+  }
+
+  hideIntel() {
+    this.intelOpen = false;
+    clearTimeout(this._intelTimer);
+    this.el.intelCard?.classList.remove('is-visible');
+  }
+
+  showRadio({ speaker, text }) {
+    if (!text) return;
+    this._radioQueue.push({ speaker, text });
+    if (!this._radioActive) this._playNextRadio();
+  }
+
+  _playNextRadio() {
+    const line = this._radioQueue.shift();
+    if (!line) {
+      this._radioActive = false;
+      this.radioActive = false;
+      return;
+    }
+    this._radioActive = true;
+    this.radioActive = true;
+    this.el.radioSpeaker.textContent = line.speaker?.name || 'COMMAND';
+    this.el.radioRole.textContent = line.speaker?.role || 'MISSION CHANNEL';
+    this.el.radioText.textContent = line.text;
+    this.el.radio.style.setProperty('--radio-accent', line.speaker?.accent || '#6be7ff');
+    this.el.radio.classList.add('is-visible');
+    const duration = clamp(2400 + line.text.length * 38, 3200, 7600);
+    clearTimeout(this._radioTimer);
+    this._radioTimer = setTimeout(() => {
+      this.el.radio.classList.remove('is-visible');
+      this._radioActive = false;
+      this.radioActive = false;
+      this._radioTimer = setTimeout(() => this._playNextRadio(), 180);
+    }, duration);
+  }
+
+  hideRadio() {
+    clearTimeout(this._radioTimer);
+    this._radioQueue = [];
+    this._radioActive = false;
+    this.radioActive = false;
+    this.el.radio?.classList.remove('is-visible');
+  }
+
   showToast(message, duration = 1800) {
     this.el.toast.textContent = message;
     this.el.toast.classList.add('is-visible');
@@ -631,31 +969,60 @@ export class UI {
     this.el.pickupPrompt.classList.remove('is-visible');
     this.el.damageFlash.classList.remove('is-active');
     this.el.hitFlash.classList.remove('is-active');
+    this.setIntelPrompt(false);
+    this.hideRadio();
+    this.hideIntel();
   }
 
-  _readBestTime() {
-    let best = null;
+  _readProgress() {
+    this.bestTimes = {};
+    this.completed = new Set();
     try {
-      const value = Number(localStorage.getItem(BEST_TIME_KEY));
-      if (Number.isFinite(value) && value > 0) best = value;
+      const raw = localStorage.getItem(BEST_TIMES_KEY);
+      const parsed = raw ? JSON.parse(raw) : null;
+      if (parsed && typeof parsed === 'object') {
+        for (const level of LEVELS) {
+          const value = Number(parsed[level.id]);
+          if (Number.isFinite(value) && value > 0) this.bestTimes[level.id] = value;
+        }
+      }
+      // Preserve the original single-mission best time from v1.0 builds.
+      if (this.bestTimes['site-09'] === undefined) {
+        const legacy = Number(localStorage.getItem(LEGACY_BEST_TIME_KEY));
+        if (Number.isFinite(legacy) && legacy > 0) this.bestTimes['site-09'] = legacy;
+      }
+      const completed = JSON.parse(localStorage.getItem(COMPLETED_KEY) || '[]');
+      if (Array.isArray(completed)) {
+        for (const id of completed) {
+          if (LEVELS.some((level) => level.id === id)) this.completed.add(id);
+        }
+      }
     } catch {
-      best = null;
+      // Progress is optional; the campaign remains fully playable in private
+      // browsing contexts where storage is unavailable.
     }
-    this.bestTime = best;
-    if (this.el.bestTime) {
-      this.el.bestTime.textContent = best ? `BEST TIME ${formatTime(best)}` : 'BEST TIME —:—';
+    this._renderBestTime();
+    this._refreshOperationStates();
+  }
+
+  _saveProgress() {
+    try {
+      localStorage.setItem(BEST_TIMES_KEY, JSON.stringify(this.bestTimes));
+      localStorage.setItem(COMPLETED_KEY, JSON.stringify([...this.completed]));
+    } catch {
+      // Scoring still works without persistence.
     }
   }
 
   _maybeSaveBestTime(time) {
     if (!Number.isFinite(time) || time <= 0) return;
-    if (this.bestTime !== null && time >= this.bestTime) return;
-    this.bestTime = time;
-    try {
-      localStorage.setItem(BEST_TIME_KEY, String(time));
-    } catch {
-      // Scoring still works without persistence.
+    const current = this.bestTimes[this.level.id];
+    if (current === undefined || time < current) {
+      this.bestTimes[this.level.id] = time;
     }
-    if (this.el.bestTime) this.el.bestTime.textContent = `BEST TIME ${formatTime(time)}`;
+    this.completed.add(this.level.id);
+    this._saveProgress();
+    this._renderBestTime();
+    this._refreshOperationStates();
   }
 }

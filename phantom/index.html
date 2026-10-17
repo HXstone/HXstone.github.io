@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#05070a" />
   <meta name="color-scheme" content="dark" />
   <title>PROJECT: PHANTOM — Tactical FPS</title>
-  <meta name="description" content="PROJECT: PHANTOM is a playable tactical sci-fi first-person shooter set inside the abandoned SITE-09 black facility. Built with Three.js." />
+  <meta name="description" content="PROJECT: PHANTOM is a playable tactical sci-fi FPS campaign: eight authored blacksite operations, a connected story, vertical firefights and a single extraction countdown. Built with Three.js." />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2306090c'/%3E%3Cpath d='M17 17h13c11 0 18 6 18 15S41 47 30 47H17V17Zm9 8v14h4c6 0 9-2.4 9-7s-3-7-9-7h-4Z' fill='%236be7ff'/%3E%3C/svg%3E" />
 </head>
 <body>
@@ -28,14 +28,20 @@
         <div class="objective-block">
           <div class="objective-block__kicker">
             <span class="status-dot"></span>
-            <span>ACTIVE DIRECTIVE</span>
+            <span id="objective-phase">SAFE ZONE</span>
           </div>
-          <div class="objective-block__title">PURGE SITE-09</div>
+          <div class="objective-block__title" id="objective-title">RECOVER CROWN KEY</div>
           <div class="objective-block__sub">
-            <span>HOSTILES REMAINING</span>
+            <span id="objective-sub-label">HOSTILES REMAINING</span>
             <span id="objective-count" class="mono">08</span>
           </div>
           <div class="objective-block__track"><span id="objective-fill"></span></div>
+        </div>
+
+        <div id="mission-nav" class="mission-nav" aria-hidden="true">
+          <span id="mission-nav-arrow" class="mission-nav__arrow" aria-hidden="true"></span>
+          <span id="mission-nav-label" class="mission-nav__label">OBJECTIVE // COMMAND DECK</span>
+          <span id="mission-nav-distance" class="mission-nav__distance mono">-- M</span>
         </div>
 
         <div class="compass" aria-label="Compass heading">
@@ -47,8 +53,8 @@
 
         <div class="mission-stats">
           <div class="mission-stats__cell">
-            <span class="k">MISSION TIME</span>
-            <strong id="timer" class="mono">00:00.0</strong>
+            <span class="k" id="timer-label">EXFIL WINDOW</span>
+            <strong id="timer" class="mono">12:00.0</strong>
           </div>
           <div class="mission-stats__cell">
             <span class="k">ELIMINATIONS</span>
@@ -127,8 +133,26 @@
 
       <div id="killfeed" class="killfeed" aria-live="polite"></div>
       <div id="toast" class="toast" role="status" aria-live="polite"></div>
+      <div id="radio" class="radio" role="status" aria-live="polite">
+        <div class="radio__head">
+          <span id="radio-speaker" class="radio__speaker mono">KITE</span>
+          <span id="radio-role" class="radio__role mono">SIGNALS / SUPPORT</span>
+          <span class="radio__signal" aria-hidden="true"><i></i><i></i><i></i></span>
+        </div>
+        <p id="radio-text" class="radio__text"></p>
+      </div>
+      <aside id="intel-card" class="intel-card" aria-live="polite">
+        <div class="intel-card__head">
+          <span id="intel-kicker" class="mono">ARCHIVE RECOVERED</span>
+          <span class="intel-card__close mono">F // CLOSE</span>
+        </div>
+        <h3 id="intel-title">CROWN // WITNESS LOG</h3>
+        <p id="intel-body"></p>
+        <div class="intel-card__foot mono"><span id="intel-speaker">DR. SERA VALE</span><span>ARCHIVE SEALED</span></div>
+      </aside>
       <div id="reload-prompt" class="reload-prompt"><span class="mono">MAG EMPTY</span><kbd>R</kbd><span>RELOAD</span></div>
       <div id="pickup-prompt" class="pickup-prompt"><span class="mono">BIOCELL</span><span>PRESS F TO COLLECT</span></div>
+      <div id="intel-prompt" class="intel-prompt"><span id="intel-prompt-label" class="mono">ARCHIVE NODE</span><span id="intel-prompt-action">READ</span><kbd>F</kbd></div>
       <div class="hud__corner hud__corner--tl" aria-hidden="true"></div>
       <div class="hud__corner hud__corner--tr" aria-hidden="true"></div>
       <div class="hud__corner hud__corner--bl" aria-hidden="true"></div>
@@ -150,8 +174,8 @@
         </a>
         <div class="menu__meta mono">
           <span><i class="status-dot"></i>SIMULATION LIVE</span>
-          <span>SITE-09 / 04:17 N</span>
-          <span>BUILD 1.0.4</span>
+          <span id="menu-location">SITE-09 / 04:17 N</span>
+          <span>BUILD 1.3.0</span>
         </div>
       </header>
 
@@ -163,9 +187,10 @@
             <span class="hero-title__name">PHANTOM</span>
           </h1>
           <div class="hero-rule"><span></span><i></i></div>
-          <p class="hero-copy">
-            SITE-09 has gone dark. Eight autonomous sentinels are still active beneath the surface.
-            Breach the facility, sever the signal, and leave nothing online.
+          <p class="hero-copy" id="hero-copy">
+            Six hours ago SITE-09 stopped answering. Eight autonomous sentinels hold the command deck,
+            and the CROWN archive is still inside. Breach the blacksite, recover the key, and reach the
+            service lift before Command seals it.
           </p>
 
           <div class="menu__actions">
@@ -176,12 +201,22 @@
                 <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
               </span>
             </button>
+            <button class="btn btn--ghost" type="button" data-open="operations-modal">
+              <span class="btn__label">MISSION INDEX</span>
+            </button>
             <button class="btn btn--ghost" type="button" data-open="controls-modal">
               <span class="btn__label">CONTROLS</span>
             </button>
             <button class="btn btn--ghost" type="button" data-open="settings-modal">
               <span class="btn__label">SETTINGS</span>
             </button>
+          </div>
+
+          <div class="menu__active-op mono">
+            <span class="status-dot"></span>
+            <span>ACTIVE OPERATION</span>
+            <b id="active-mission">01 / BLACKOUT PROTOCOL</b>
+            <span class="menu__active-op-readout" id="active-readout">CLOSE–MID // VERTICAL CORE</span>
           </div>
 
           <div class="menu__requirements mono">
@@ -197,34 +232,34 @@
             <span class="dossier__stamp mono">CLASSIFIED</span>
           </div>
           <div class="dossier__body">
-            <div class="dossier__index mono">OP / BLACKOUT-09</div>
-            <h2>BLACKOUT<br />PROTOCOL</h2>
-            <p>
+            <div class="dossier__index mono" id="dossier-index">OP / BLACKOUT-09</div>
+            <h2 id="dossier-title">BLACKOUT<br />PROTOCOL</h2>
+            <p id="dossier-copy">
               An unregistered research cell beneath the Kestrel industrial complex.
-              Last transmission: <em>“It is already inside the walls.”</em>
+              The last transmission is countersigned by a scientist Command says is dead.
             </p>
             <dl class="dossier__facts">
-              <div><dt>OBJECTIVE</dt><dd>PURGE ALL HOSTILES</dd></div>
-              <div><dt>HOSTILES</dt><dd class="mono">08 // ACTIVE</dd></div>
-              <div><dt>THREAT</dt><dd class="danger">CRITICAL</dd></div>
-              <div><dt>EXFIL</dt><dd>AUTOMATIC</dd></div>
+              <div><dt>OBJECTIVE</dt><dd id="dossier-objective">RECOVER CROWN KEY</dd></div>
+              <div><dt>HOSTILES</dt><dd class="mono" id="dossier-hostiles">08 // ACTIVE</dd></div>
+              <div><dt>THREAT</dt><dd class="danger" id="dossier-threat">CRITICAL</dd></div>
+              <div><dt>EXFIL</dt><dd id="dossier-exfil">MANUAL // SERVICE LIFT</dd></div>
             </dl>
             <div class="dossier__diagram" aria-hidden="true">
               <svg viewBox="0 0 420 140" fill="none">
-                <path d="M8 110h84V36h62v74h58V56h80v54h56V22h64v88" stroke="currentColor" stroke-opacity=".3"/>
-                <path d="M8 110h84V36h62v74h58V56h80v54h56V22h64v88" stroke="#6be7ff" stroke-opacity=".65" stroke-dasharray="5 7"/>
+                <path id="diagram-main" d="M8 110h84V36h62v74h58V56h80v54h56V22h64v88" stroke="currentColor" stroke-opacity=".3"/>
+                <path id="diagram-accent" d="M8 110h84V36h62v74h58V56h80v54h56V22h64v88" stroke="#6be7ff" stroke-opacity=".65" stroke-dasharray="5 7"/>
                 <circle cx="210" cy="70" r="4" fill="#6be7ff"/>
                 <circle cx="210" cy="70" r="13" stroke="#6be7ff" stroke-opacity=".35"/>
                 <circle cx="210" cy="70" r="25" stroke="#6be7ff" stroke-opacity=".12"/>
                 <path d="M20 128h60M80 123v10M340 128h60M340 123v10" stroke="currentColor" stroke-opacity=".35"/>
-                <text x="12" y="16" fill="currentColor" fill-opacity=".45" font-size="9" font-family="monospace">SUBLEVEL 04 // GRID 09</text>
-                <text x="316" y="136" fill="currentColor" fill-opacity=".45" font-size="9" font-family="monospace">SCALE 1:400</text>
+                <text id="diagram-label" x="12" y="16" fill="currentColor" fill-opacity=".45" font-size="9" font-family="monospace">SUBLEVEL 04 // GRID 09</text>
+                <text id="diagram-scale" x="316" y="136" fill="currentColor" fill-opacity=".45" font-size="9" font-family="monospace">SCALE 1:400</text>
               </svg>
             </div>
           </div>
           <div class="dossier__foot mono">
             <span><i class="status-dot status-dot--danger"></i>THREAT SIGNAL DETECTED</span>
-            <span>09° 14' 22" N</span>
+            <span id="dossier-coords">09° 14' 22" N</span>
           </div>
         </aside>
       </div>
@@ -244,7 +279,7 @@
         <h2 id="pause-title" class="panel__title">PAUSED<span>//</span></h2>
         <p class="panel__copy">Tactical feed is frozen. Hostile AI and mission timers are offline.</p>
         <div class="pause-panel__stats mono">
-          <div><span>TIME</span><b id="pause-time">00:00.0</b></div>
+          <div><span>TIME TO EXFIL</span><b id="pause-time">12:00.0</b></div>
           <div><span>HOSTILES</span><b id="pause-remaining">08</b></div>
           <div><span>ELIMINATED</span><b id="pause-kills">00</b></div>
         </div>
@@ -265,6 +300,7 @@
         <div class="end-kicker mono" id="end-kicker">OPERATION COMPLETE</div>
         <h2 id="end-title" class="end-title">MISSION<br /><span id="end-title-accent">COMPLETE</span></h2>
         <p class="end-copy" id="end-copy">All hostile signals neutralized. Site-09 is dark again.</p>
+        <p class="end-debrief" id="end-debrief"></p>
 
         <div class="end-grade">
           <div class="end-grade__ring"><span id="end-grade">S</span></div>
@@ -285,12 +321,45 @@
         </dl>
 
         <div class="panel__actions end-actions">
+          <button id="end-next" class="btn btn--primary" type="button" hidden><span class="btn__label">NEXT OPERATION</span><span class="btn__icon">→</span></button>
           <button id="end-restart" class="btn btn--primary" type="button"><span class="btn__label">REDEPLOY</span><span class="btn__icon">↻</span></button>
           <button id="end-menu" class="btn btn--ghost" type="button"><span class="btn__label">RETURN TO MENU</span></button>
         </div>
         <p class="end-hint mono">PRESS <kbd>R</kbd> TO REDEPLOY</p>
       </div>
     </section>
+
+    <!-- ================= OPERATIONS MODAL ================= -->
+    <div id="operations-modal" class="modal" hidden>
+      <div class="modal__scrim" data-close></div>
+      <div class="modal__panel modal__panel--operations" role="dialog" aria-modal="true" aria-labelledby="operations-title">
+        <div class="modal__head">
+          <div>
+            <span class="mono modal__kicker">CAMPAIGN INDEX / 01</span>
+            <h2 id="operations-title">OPERATIONS</h2>
+          </div>
+          <button class="icon-btn" type="button" data-close aria-label="Close mission index">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+          </button>
+        </div>
+        <p class="operations-copy">
+          Eight blacksite operations. Select an entry to load its tactical feed; every operation is playable
+          from the same loadout and returns to this index after debrief.
+        </p>
+        <div class="operations-brief">
+          <div class="operations-brief__head mono">
+            <span>ACTIVE BRIEFING</span>
+            <span id="operations-brief-speaker">CDR. VOSS // MISSION COMMAND</span>
+          </div>
+          <p id="operations-brief-text">Awaiting operation selection.</p>
+        </div>
+        <div id="operations-grid" class="operations-grid" aria-label="Select operation"></div>
+        <div class="modal__foot">
+          <span class="mono" id="operations-status">08 OPERATIONS // 00 CLEARED</span>
+          <button class="btn btn--small btn--primary" type="button" data-close><span class="btn__label">CLOSE</span></button>
+        </div>
+      </div>
+    </div>
 
     <!-- ================= CONTROLS MODAL ================= -->
     <div id="controls-modal" class="modal" hidden>
@@ -323,7 +392,7 @@
           <div class="controls-col">
             <h3 class="mono">SYSTEM</h3>
             <div class="control-row"><span>Pause / release cursor</span><span class="keys"><kbd>ESC</kbd></span></div>
-            <div class="control-row"><span>Interact / collect</span><span class="keys"><kbd>F</kbd></span></div>
+            <div class="control-row"><span>Interact / objective / collect</span><span class="keys"><kbd>F</kbd></span></div>
             <div class="control-row"><span>Redeploy after mission</span><span class="keys"><kbd>R</kbd></span></div>
           </div>
         </div>

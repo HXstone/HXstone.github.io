@@ -1,8 +1,8 @@
 {
   "name": "project-phantom",
   "private": true,
-  "version": "1.0.0",
-  "description": "PROJECT: PHANTOM — a browser-based tactical sci-fi FPS built with Three.js.",
+  "version": "1.3.0",
+  "description": "PROJECT: PHANTOM — an eight-operation tactical sci-fi FPS campaign built with Three.js.",
   "type": "module",
   "engines": {
     "node": ">=20.19"

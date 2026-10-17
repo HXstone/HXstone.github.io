@@ -81,6 +81,7 @@ export class Player {
     this.shield = this.maxShield;
     this.grounded = true;
     this.dead = false;
+    this.invulnerable = false;
     this.sprinting = false;
     this.aiming = false;
     this.lastDamageAt = -100;
@@ -380,7 +381,7 @@ export class Player {
   }
 
   takeDamage(amount, sourcePosition = null) {
-    if (this.dead || amount <= 0) return 0;
+    if (this.dead || this.invulnerable || amount <= 0) return 0;
 
     const shieldBefore = this.shield;
     let remaining = amount;

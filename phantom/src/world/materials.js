@@ -74,6 +74,82 @@ export function createMaterials(renderer) {
     metalness: 0.32,
   });
 
+  // Level-specific palettes stay within the same industrial value range so
+  // new operations read as different places, not a different game.
+  const containerRust = new THREE.MeshStandardMaterial({
+    color: 0x4b342b,
+    roughness: 0.74,
+    metalness: 0.38,
+  });
+
+  const containerBlue = new THREE.MeshStandardMaterial({
+    color: 0x233843,
+    roughness: 0.7,
+    metalness: 0.44,
+  });
+
+  const containerOlive = new THREE.MeshStandardMaterial({
+    color: 0x384137,
+    roughness: 0.76,
+    metalness: 0.34,
+  });
+
+  const concreteLight = new THREE.MeshStandardMaterial({
+    map: concrete.map,
+    bumpMap: concrete.bumpMap,
+    bumpScale: 0.035,
+    color: 0x8d9699,
+    roughness: 0.86,
+    metalness: 0.08,
+  });
+
+  const sand = new THREE.MeshStandardMaterial({
+    color: 0x8b7558,
+    roughness: 0.96,
+    metalness: 0.02,
+  });
+
+  const sandbag = new THREE.MeshStandardMaterial({
+    color: 0x65573f,
+    roughness: 0.95,
+    metalness: 0.02,
+  });
+
+  const snow = new THREE.MeshStandardMaterial({
+    color: 0xc6d7db,
+    roughness: 0.92,
+    metalness: 0.03,
+  });
+
+  const ice = new THREE.MeshStandardMaterial({
+    color: 0x7fa8b0,
+    roughness: 0.32,
+    metalness: 0.16,
+    transparent: true,
+    opacity: 0.48,
+  });
+
+  const labPanel = new THREE.MeshStandardMaterial({
+    color: 0x9eadaf,
+    roughness: 0.5,
+    metalness: 0.32,
+  });
+
+  const labFloor = new THREE.MeshStandardMaterial({
+    map: concrete.map,
+    bumpMap: concrete.bumpMap,
+    bumpScale: 0.025,
+    color: 0x7d8c8e,
+    roughness: 0.7,
+    metalness: 0.18,
+  });
+
+  const water = new THREE.MeshStandardMaterial({
+    color: 0x06141c,
+    roughness: 0.24,
+    metalness: 0.68,
+  });
+
   const rubber = new THREE.MeshStandardMaterial({
     color: 0x0b0e11,
     roughness: 0.92,
@@ -223,6 +299,17 @@ export function createMaterials(renderer) {
     steel,
     blackMetal,
     darkPanel,
+    containerRust,
+    containerBlue,
+    containerOlive,
+    concreteLight,
+    sand,
+    sandbag,
+    snow,
+    ice,
+    labPanel,
+    labFloor,
+    water,
     rubber,
     grate,
     hazardStripe,

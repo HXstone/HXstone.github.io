@@ -340,6 +340,19 @@ export class WeaponSystem {
     const enemyDistance = bestEnemy ? bestEnemy.distance : Infinity;
     const worldDistance = bestWorld ? bestWorld.distance : Infinity;
 
+    if (import.meta.env.DEV) {
+      this.lastDebugShot = {
+        origin: this._origin.toArray(),
+        direction: this._direction.toArray(),
+        enemyDistance,
+        worldDistance,
+        enemyId: bestEnemy?.object?.userData?.enemy?.spawn?.id || null,
+        enemyName: bestEnemy?.object?.name || null,
+        worldName: bestWorld?.object?.name || null,
+        worldPoint: bestWorld?.point?.toArray() || null,
+      };
+    }
+
     this._end
       .copy(this._origin)
       .addScaledVector(this._direction, Math.min(Math.min(enemyDistance, worldDistance), weapon.range));

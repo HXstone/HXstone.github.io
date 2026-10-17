@@ -8,7 +8,7 @@ Student × Runner × AI Explorer.
 ## 关于
 
 - 主站是纯静态站点：手写 HTML / CSS / JavaScript，零构建步骤，托管在 GitHub Pages
-- 内容：作品、笔记、关于，以及可以直接在浏览器里玩的小游戏，包括 **PROJECT: PHANTOM** 3D FPS
+- 内容：作品、笔记、关于，以及可以直接在浏览器里玩的小游戏，包括 8 个手工关卡、完整战役剧情、真实二层空间、战术敌人分工、单一撤离倒计时与三波最终防线的 **PROJECT: PHANTOM** 3D FPS
 - 双语：默认英文，可切换中文（用 `data-i18n` 键，见 `assets/js/i18n.js`）
 - 没有账号系统、统计脚本或第三方追踪
 - 主站零外部依赖：字体、图标、样式、脚本全部本地或系统自带，不请求任何 CDN

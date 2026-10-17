@@ -19,10 +19,18 @@ export class EnemyManager {
 
     this.assets = createEnemyAssets();
     this.nav = new NavigationGrid(world);
+    this.navs = new Map([['ground', this.nav]]);
     this.enemies = [];
     this.projectiles = [];
+    this.combatEnabled = true;
     this.missionCompleteFired = false;
+    this.deferred = new Set();
+    this.deferTimer = 0;
+    this.playerReference = null;
     this.totalEnemies = world.enemySpawns.length;
+    this.waves = [...new Set(world.enemySpawns.map((spawn) => spawn.wave || 1))].sort((a, b) => a - b);
+    this.currentWave = this.waves[0] || 1;
+    this.maxWave = this.waves[this.waves.length - 1] || 1;
 
     this._raycaster = new THREE.Raycaster();
     this._tmp = new THREE.Vector3();
@@ -34,6 +42,23 @@ export class EnemyManager {
     this._createProjectiles();
   }
 
+  _getNavForSpawn(spawn) {
+    if (!spawn.floorY && !spawn.navBounds) return this.nav;
+    const key = spawn.navBounds
+      ? `${spawn.floorY}:${spawn.navBounds.minX},${spawn.navBounds.minZ},${spawn.navBounds.maxX},${spawn.navBounds.maxZ}`
+      : `floor:${spawn.floorY}`;
+    if (!this.navs.has(key)) {
+      this.navs.set(
+        key,
+        new NavigationGrid(this.world, 1.1, 0.46, {
+          floorY: spawn.floorY || 0,
+          bounds: spawn.navBounds || null,
+        }),
+      );
+    }
+    return this.navs.get(key);
+  }
+
   _createEnemies() {
     this.world.enemySpawns.forEach((spawn, index) => {
       const enemy = new Enemy({
@@ -41,12 +66,13 @@ export class EnemyManager {
         spawn,
         assets: this.assets,
         world: this.world,
-        nav: this.nav,
+        nav: this._getNavForSpawn(spawn),
         effects: this.effects,
         audio: this.audio,
         manager: this,
         index,
       });
+      if ((spawn.wave || 1) > this.currentWave) enemy.setDormant(true);
       this.enemies.push(enemy);
     });
     this._refreshHitMeshes();
@@ -106,22 +132,49 @@ export class EnemyManager {
   _refreshHitMeshes() {
     this.hitMeshes = [];
     for (const enemy of this.enemies) {
-      if (!enemy.alive) continue;
+      if (!enemy.alive || enemy.dormant) continue;
       this.hitMeshes.push(...enemy.hitMeshes);
     }
   }
 
+  /** Hostiles currently deployed; later waves stay dormant until called in. */
   get remaining() {
+    return this.enemies.reduce((count, enemy) => count + (enemy.alive && !enemy.dormant ? 1 : 0), 0);
+  }
+
+  /** Every hostile still alive, including unreleased waves. */
+  get totalRemaining() {
     return this.enemies.reduce((count, enemy) => count + (enemy.alive ? 1 : 0), 0);
   }
 
   get killed() {
-    return this.totalEnemies - this.remaining;
+    return this.totalEnemies - this.totalRemaining;
+  }
+
+  setCombatEnabled(enabled) {
+    this.combatEnabled = Boolean(enabled);
+    if (!this.combatEnabled) {
+      for (const projectile of this.projectiles) {
+        projectile.active = false;
+        projectile.group.visible = false;
+      }
+    }
   }
 
   update(dt, player) {
-    if (this.remaining > 0) {
+    this.playerReference = player;
+    this._processDeferred(dt);
+    if (!this.combatEnabled) {
       for (const enemy of this.enemies) {
+        if (!enemy.alive || enemy.dormant) continue;
+        enemy.updatePassive(dt);
+      }
+      return;
+    }
+
+    if (this.totalRemaining > 0) {
+      for (const enemy of this.enemies) {
+        if (enemy.dormant) continue;
         enemy.update(dt, player, this.enemies);
       }
     } else {
@@ -135,7 +188,7 @@ export class EnemyManager {
 
   alertNearby(position, radius) {
     for (const enemy of this.enemies) {
-      if (!enemy.alive) continue;
+      if (!enemy.alive || enemy.dormant) continue;
       if (enemy.state === ENEMY_STATE.PATROL) {
         const distance = enemy.position.distanceTo(position);
         if (distance < radius) {
@@ -157,7 +210,8 @@ export class EnemyManager {
     const direction = new THREE.Vector3().subVectors(target, origin);
     const distance = direction.length();
     direction.normalize();
-    const spread = 0.022 + (player.sprinting ? 0.018 : 0);
+    const roleSpread = enemy.role === 'marksman' ? 0.01 : enemy.role === 'elite' || enemy.role === 'commander' ? 0.017 : 0.024;
+    const spread = roleSpread + (player.sprinting ? 0.018 : 0);
     direction.x += randomRange(-spread, spread);
     direction.y += randomRange(-spread, spread);
     direction.z += randomRange(-spread, spread);
@@ -167,7 +221,7 @@ export class EnemyManager {
     projectile.group.visible = true;
     projectile.active = true;
     projectile.life = 4.5;
-    projectile.damage = randomRange(7.5, 11.5);
+    projectile.damage = randomRange(7.5, 11.5) * (enemy.damageScale || 1);
     projectile.velocity.copy(direction).multiplyScalar(25);
     projectile.origin.copy(origin);
     projectile.pulse = Math.random() * Math.PI * 2;
@@ -264,17 +318,126 @@ export class EnemyManager {
       });
     }
 
-    if (this.remaining === 0 && !this.missionCompleteFired) {
+    if (this.totalRemaining === 0 && !this.missionCompleteFired) {
       this.missionCompleteFired = true;
       if (this.callbacks.onMissionComplete) {
         this.callbacks.onMissionComplete();
       }
+    } else if (this.remaining === 0 && this.currentWave < this.maxWave) {
+      this._activateNextWave();
+    }
+  }
+
+  /**
+   * Story-triggered deployment. Unlike the automatic clear-to-clear wave
+   * transition, this can call in a reserve while the player is still fighting.
+   * It deliberately does not emit onWave; the campaign director owns that line.
+   */
+  /**
+   * Release an authored reserve. If its spawn point is too close to the
+   * player, it stays deferred until the player has moved away instead of
+   * popping into view at arm's length.
+   */
+  _releaseReserve(enemy) {
+    const player = this.playerReference;
+    if (player) {
+      const distance = enemy.position.distanceTo(player.position);
+      // Do not pop a dormant sentinel in at arm's length, or in an unobstructed
+      // line of sight inside normal engagement range.
+      let visible = false;
+      if (distance < 30) {
+        const eye = player.getEyePosition(new THREE.Vector3());
+        visible = !this.world.isLineBlocked(eye, enemy.eyePosition, this._raycaster);
+      }
+      if (distance < 13 || visible) {
+        this.deferred.add(enemy);
+        return false;
+      }
+    }
+    this.deferred.delete(enemy);
+    enemy.setDormant(false);
+    enemy.path = [];
+    enemy.waitTimer = 0.3;
+    return true;
+  }
+
+  _processDeferred(dt) {
+    if (this.deferred.size === 0) return;
+    this.deferTimer -= dt;
+    if (this.deferTimer > 0) return;
+    this.deferTimer = 0.65;
+    const player = this.playerReference;
+    if (!player) return;
+    for (const enemy of [...this.deferred]) {
+      if (!enemy.alive) {
+        this.deferred.delete(enemy);
+        continue;
+      }
+      if (enemy.position.distanceTo(player.position) < 13) continue;
+      this._releaseReserve(enemy);
+    }
+    this._refreshHitMeshes();
+  }
+
+  deployWave(waveNumber) {
+    if (!this.waves.includes(waveNumber) || waveNumber <= this.currentWave) return 0;
+    this.currentWave = waveNumber;
+    let deployed = 0;
+    for (const enemy of this.enemies) {
+      if (!enemy.alive || !enemy.dormant || (enemy.spawn.wave || 1) !== waveNumber) continue;
+      if (this._releaseReserve(enemy)) deployed += 1;
+    }
+    this._refreshHitMeshes();
+    return deployed;
+  }
+
+  /** Called when the primary objective is secured and the escape begins. */
+  deployRemainingReserves() {
+    let deployed = 0;
+    for (const enemy of this.enemies) {
+      if (!enemy.alive || !enemy.dormant) continue;
+      if (this._releaseReserve(enemy)) deployed += 1;
+      enemy.waitTimer = 0.35 + Math.random() * 0.6;
+    }
+    this.currentWave = this.maxWave;
+    this._refreshHitMeshes();
+    return deployed;
+  }
+
+  _activateNextWave() {
+    const nextWave = this.waves.find((wave) => wave > this.currentWave);
+    if (nextWave === undefined) return;
+    this.currentWave = nextWave;
+    let deployed = 0;
+    for (const enemy of this.enemies) {
+      if (!enemy.alive || (enemy.spawn.wave || 1) !== nextWave) continue;
+      enemy.setDormant(false);
+      enemy.path = [];
+      enemy.waitTimer = 0.35;
+      deployed += 1;
+    }
+    this._refreshHitMeshes();
+    if (this.callbacks.onWave) {
+      this.callbacks.onWave({
+        wave: this.currentWave,
+        totalWaves: this.waves.length,
+        deployed,
+        remaining: this.remaining,
+        total: this.totalEnemies,
+      });
     }
   }
 
   reset() {
     this.missionCompleteFired = false;
-    for (const enemy of this.enemies) enemy.reset();
+    this.combatEnabled = false;
+    this.deferred.clear();
+    this.deferTimer = 0;
+    this.currentWave = this.waves[0] || 1;
+    for (const enemy of this.enemies) {
+      enemy.reset();
+      if ((enemy.spawn.wave || 1) > this.currentWave) enemy.setDormant(true);
+    }
     for (const projectile of this.projectiles) {
       projectile.active = false;
       projectile.group.visible = false;
@@ -284,12 +447,37 @@ export class EnemyManager {
 
   dispose() {
     for (const enemy of this.enemies) enemy.dispose();
+
+    const disposedMaterials = new Set();
     for (const projectile of this.projectiles) {
       projectile.group.traverse((object) => {
         if (object.geometry) object.geometry.dispose();
-        if (object.material) object.material.dispose();
+        if (object.material && !disposedMaterials.has(object.material)) {
+          disposedMaterials.add(object.material);
+          object.material.map?.dispose();
+          object.material.dispose();
+        }
       });
       this.scene.remove(projectile.group);
     }
+
+    // Sentinel geometry and armor materials are shared across the whole
+    // squad, so they can only be released once the manager is torn down.
+    for (const geometry of Object.values(this.assets.geos || {})) geometry.dispose();
+    for (const material of [
+      this.assets.armor,
+      this.assets.armorLight,
+      this.assets.joint,
+      this.assets.polymer,
+      this.assets.red,
+      this.assets.cyan,
+      this.assets.gunmetal,
+      this.assets.blobMaterial,
+    ]) {
+      material?.dispose();
+    }
+    this.assets.alertMaterial?.map?.dispose();
+    this.assets.alertMaterial?.dispose();
+    this.assets.blobGeometry?.dispose();
   }
 }

@@ -2,43 +2,83 @@ import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { randomRange } from '../utils/math.js';
-import { createGlowTexture } from './TextureFactory.js';
+import { getLevel } from '../levels/catalog.js';
+import { buildLevelLayout } from '../levels/layouts.js';
+import { getNarrativeTerminals } from '../campaign/narrative.js';
+import { createGlowTexture, createSignTexture } from './TextureFactory.js';
 
 const UP = new THREE.Vector3(0, 1, 0);
 
 /**
- * SITE-09 is assembled from three connected volumes:
- *   south insertion bay → reactor hall → north command deck,
- * with two service corridors flanking the reactor.
+ * Every operation is assembled from the same kit of parts:
+ * shell → rooms/corridors → cover → landmarks → light → atmosphere → spawns.
+ *
+ * SITE-09 keeps its original hand-built construction path untouched. The
+ * additional operations are authored in levels/layouts.js against the same
+ * primitive and collision helpers, so player movement, AI navigation and
+ * hit-scanning behave identically across the campaign.
  *
  * Every solid prop registers an axis-aligned collider. The same meshes are
  * used for hit-scanning and line-of-sight tests, so what the player sees is
  * what the simulation collides with.
  */
 export class World {
-  constructor(scene, renderer, materials, quality = 'high') {
+  constructor(scene, renderer, materials, quality = 'high', levelId = 'site-09') {
     this.scene = scene;
     this.renderer = renderer;
     this.materials = materials;
     this.quality = quality;
+    this.levelId = levelId;
+    this.level = getLevel(levelId);
     this.root = new THREE.Group();
-    this.root.name = 'SITE-09';
+    this.root.name = this.level.locationShort;
     this.scene.add(this.root);
 
     this.colliders = [];
     this.collisionMeshes = [];
     this.medkits = [];
+    this.terminals = [];
     this.enemySpawns = [];
+    this.sceneLights = [];
+    this.dynamicGroups = [];
+    this.animators = [];
+    this.decks = [];
+    this.stairways = [];
+    this.walkableSurfaces = [];
+    this.ownedAssets = [];
+    this.missionLayout = null;
+    this.objectiveConsole = null;
+    this.extractionZone = null;
     this.time = 0;
-    this.animated = [];
     this._dust = null;
     this._dustData = null;
+    this._particleField = null;
     this._tempV = new THREE.Vector3();
+    this.menuCamera = null;
+    this.menuTarget = null;
 
     this.playerSpawn = new THREE.Vector3(0, 0, 23.2);
     this.playerYaw = 0;
     this.navBounds = { minX: -27.2, maxX: 27.2, minZ: -31.4, maxZ: 26.6 };
 
+    if (this.levelId === 'site-09') {
+      this._buildSite09();
+    } else {
+      buildLevelLayout(this, this.level);
+    }
+    this._buildNarrativeProps();
+    this._buildMissionProps();
+
+    const camera = this.level.menuCamera || { position: [0, 3.35, 20.25], target: [0, 2.15, -1.65] };
+    this.menuCamera = new THREE.Vector3(...camera.position);
+    this.menuTarget = new THREE.Vector3(...camera.target);
+
+    this._batchStaticGeometry();
+
+    if (quality === 'low') this.setShadows(false);
+  }
+
+  _buildSite09() {
     this._buildShell();
     this._buildSouthBay();
     this._buildReactorHall();
@@ -49,9 +89,20 @@ export class World {
     this._buildAtmosphere();
     this._buildMedkits();
     this._defineSpawns();
-    this._batchStaticGeometry();
-
-    if (quality === 'low') this.setShadows(false);
+    this.setMissionLayout({
+      timeLimit: 660,
+      safeZone: { x: 0, z: 23.2, w: 18, d: 6.0, label: 'INSERTION BAY' },
+      objective: {
+        x: 10.2,
+        z: -21.0,
+        rotation: 0,
+        hudTitle: 'RECOVER CROWN KEY',
+        promptLabel: 'CROWN ARCHIVE',
+        action: 'RECOVER',
+        zoneLabel: 'COMMAND DECK',
+      },
+      extraction: { x: 26.0, z: -6.0, w: 3.2, d: 6.2, label: 'SERVICE LIFT' },
+    });
   }
 
   /**
@@ -76,6 +127,7 @@ export class World {
     };
     ignoreTree(this._reactorCage);
     ignoreTree(this._holoGroup);
+    for (const group of this.dynamicGroups) ignoreTree(group);
     for (const medkit of this.medkits) ignoreTree(medkit.group);
 
     const groups = new Map();
@@ -286,6 +338,235 @@ export class World {
     mesh.position.set(x, y, z);
     this.root.add(mesh);
     return mesh;
+  }
+
+  /**
+   * Adds a scene-level light and remembers it so switching operations can
+   * remove the previous lighting rig without leaking Three.js objects.
+   */
+  addSceneLight(light, target = null) {
+    this.scene.add(light);
+    this.sceneLights.push(light);
+    if (target) {
+      this.scene.add(target);
+      this.sceneLights.push(target);
+    }
+    return light;
+  }
+
+  addGlowSprite(x, y, z, scale, color = 0x7fe9ff, opacity = 0.35) {
+    if (!this._glowTexture) this._glowTexture = createGlowTexture();
+    const material = new THREE.SpriteMaterial({
+      map: this._glowTexture,
+      color,
+      transparent: true,
+      opacity,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      toneMapped: false,
+    });
+    const sprite = new THREE.Sprite(material);
+    sprite.position.set(x, y, z);
+    sprite.scale.set(scale, scale, 1);
+    this.root.add(sprite);
+    return sprite;
+  }
+
+  addContainer(x, z, w, d, h, material, rotation = 0, y = 0, bodyMaterial = null) {
+    return this._buildContainer(x, z, w, d, h, material, rotation, y, bodyMaterial);
+  }
+
+  addRoof(x, z, w, d, y, material = this.materials.darkPanel, thickness = 0.3) {
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, thickness, d), material);
+    mesh.position.set(x, y, z);
+    mesh.castShadow = false;
+    mesh.receiveShadow = false;
+    this.root.add(mesh);
+    return mesh;
+  }
+
+  /**
+   * Layered sandbags: low enough to vault with a jump, high enough to break
+   * a firing line. Collision stays a single clean AABB.
+   */
+  addSandbagWall(x, z, width, rotation = 0) {
+    const group = new THREE.Group();
+    group.position.set(x, 0, z);
+    group.rotation.y = rotation;
+    this.root.add(group);
+
+    const bagW = 0.72;
+    const count = Math.max(2, Math.ceil(width / bagW));
+    const step = width / count;
+    for (let row = 0; row < 2; row += 1) {
+      const offset = row % 2 === 0 ? 0 : step * 0.5;
+      for (let i = 0; i < count; i += 1) {
+        const bag = new THREE.Mesh(new RoundedBoxGeometry(step * 1.04, 0.33, 0.5, 1, 0.09), this.materials.sandbag);
+        bag.position.set(-width / 2 + step * (i + 0.5) + offset, 0.18 + row * 0.31, (i % 2 === 0 ? 0.03 : -0.03));
+        bag.rotation.y = (i % 3 - 1) * 0.035;
+        bag.castShadow = true;
+        bag.receiveShadow = true;
+        group.add(bag);
+      }
+    }
+    const base = new THREE.Mesh(new THREE.BoxGeometry(width, 0.08, 0.72), this.materials.sand);
+    base.position.y = 0.04;
+    base.receiveShadow = true;
+    group.add(base);
+
+    const cos = Math.abs(Math.cos(rotation));
+    const sin = Math.abs(Math.sin(rotation));
+    const w = width * cos + 0.72 * sin;
+    const d = width * sin + 0.72 * cos;
+    // An invisible axis-aligned proxy keeps hitscan and line-of-sight honest
+    // without raycasting every individual bag.
+    const proxy = new THREE.Mesh(new THREE.BoxGeometry(w, 0.82, d), this.materials.sandbag);
+    proxy.position.set(x, 0.41, z);
+    proxy.visible = false;
+    this.root.add(proxy);
+    this.colliders.push({
+      box: new THREE.Box3(new THREE.Vector3(x - w / 2, 0, z - d / 2), new THREE.Vector3(x + w / 2, 0.82, z + d / 2)),
+      mesh: proxy,
+      name: 'sandbag wall',
+    });
+    this.collisionMeshes.push(proxy);
+    return group;
+  }
+
+  addServerRack(x, z, rotation) {
+    return this._addServerRack(x, z, rotation);
+  }
+
+  /**
+   * Shared atmospheric setup for the additional operations. SITE-09 keeps
+   * its bespoke reactor haze, but every other map uses this helper so the
+   * fog, background and particle budgets stay consistent.
+   */
+  setAtmosphere({
+    background = 0x04070a,
+    fogColor = 0x05090c,
+    fogDensity = 0.016,
+    particles = null,
+  } = {}) {
+    this.scene.background = new THREE.Color(background);
+    this.scene.fog = new THREE.FogExp2(fogColor, fogDensity);
+
+    if (!particles) return;
+    const count = Math.round((this.quality === 'low' ? 0.45 : 1) * (particles.count || 500));
+    const positions = new Float32Array(count * 3);
+    const seeds = new Float32Array(count * 2);
+    const bounds = particles.bounds;
+    for (let i = 0; i < count; i += 1) {
+      positions[i * 3] = randomRange(bounds.minX, bounds.maxX);
+      positions[i * 3 + 1] = randomRange(bounds.minY, bounds.maxY);
+      positions[i * 3 + 2] = randomRange(bounds.minZ, bounds.maxZ);
+      seeds[i * 2] = randomRange(0, Math.PI * 2);
+      seeds[i * 2 + 1] = randomRange(0.2, 0.9);
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const material = new THREE.PointsMaterial({
+      color: particles.color || 0xabdfe9,
+      size: particles.size || 0.035,
+      transparent: true,
+      opacity: particles.opacity ?? 0.3,
+      depthWrite: false,
+      blending: particles.additive === false ? THREE.NormalBlending : THREE.AdditiveBlending,
+      sizeAttenuation: true,
+    });
+    const points = new THREE.Points(geometry, material);
+    points.frustumCulled = false;
+    this.root.add(points);
+    this._particleField = {
+      points,
+      positions,
+      seeds,
+      count,
+      bounds,
+      fall: particles.fall || 0,
+      drift: particles.drift ?? 0.03,
+      flutter: particles.flutter ?? 0.035,
+    };
+  }
+
+  /**
+   * One compact lighting rig shared by the new operations. Individual maps
+   * supply the colour temperature and accent lights that define their mood.
+   */
+  addLightRig({
+    ambientColor = 0x3b5662,
+    ambientIntensity = 0.5,
+    hemiSky = 0x7ea4b2,
+    hemiGround = 0x030506,
+    hemiIntensity = 0.44,
+    directionalColor = 0x91b4c1,
+    directionalIntensity = 0.6,
+    directionalPosition = [11, 19, 9],
+    shadowSpan = 36,
+    shadowFar = 58,
+    spotlights = [],
+    points = [],
+    glows = [],
+  }) {
+    this.ambient = new THREE.AmbientLight(ambientColor, ambientIntensity);
+    this.addSceneLight(this.ambient);
+    this.hemi = new THREE.HemisphereLight(hemiSky, hemiGround, hemiIntensity);
+    this.addSceneLight(this.hemi);
+
+    this.directional = new THREE.DirectionalLight(directionalColor, directionalIntensity);
+    this.directional.position.set(...directionalPosition);
+    this.directional.castShadow = this.quality !== 'low';
+    const shadowMap = this.quality === 'high' ? 1024 : 512;
+    this.directional.shadow.mapSize.set(shadowMap, shadowMap);
+    this.directional.shadow.camera.left = -shadowSpan;
+    this.directional.shadow.camera.right = shadowSpan;
+    this.directional.shadow.camera.top = shadowSpan;
+    this.directional.shadow.camera.bottom = -shadowSpan;
+    this.directional.shadow.camera.near = 1;
+    this.directional.shadow.camera.far = shadowFar;
+    this.directional.shadow.bias = -0.0007;
+    this.directional.shadow.normalBias = 0.035;
+    this.addSceneLight(this.directional);
+
+    this.mainSpot = null;
+    for (let i = 0; i < spotlights.length; i += 1) {
+      const config = spotlights[i];
+      const spot = new THREE.SpotLight(
+        config.color ?? 0xb9e4ed,
+        config.intensity ?? 450,
+        config.distance ?? 38,
+        config.angle ?? 0.8,
+        config.penumbra ?? 0.68,
+        config.decay ?? 1.45,
+      );
+      spot.position.set(...config.position);
+      spot.target.position.set(...config.target);
+      spot.castShadow = Boolean(config.shadow) && this.quality !== 'low';
+      spot.shadow.mapSize.set(shadowMap, shadowMap);
+      spot.shadow.bias = -0.001;
+      spot.shadow.normalBias = 0.025;
+      this.addSceneLight(spot, spot.target);
+      if (!this.mainSpot) this.mainSpot = spot;
+    }
+
+    for (const config of points) {
+      const light = new THREE.PointLight(
+        config.color ?? 0x5edcf2,
+        config.intensity ?? 30,
+        config.distance ?? 16,
+        config.decay ?? 1.8,
+      );
+      light.position.set(...config.position);
+      this.addSceneLight(light);
+      if (config.pulse) this.animators.push((dt, elapsed) => {
+        light.intensity = config.intensity * (0.72 + Math.sin(elapsed * config.pulse + (config.phase || 0)) * 0.22);
+      });
+    }
+
+    for (const glow of glows) {
+      this.addGlowSprite(...glow);
+    }
   }
 
   /* ------------------------------------------------------------------ */
@@ -537,7 +818,7 @@ export class World {
     // Reactor warning light.
     this.reactorLight = new THREE.PointLight(0x54dff5, 68, 25, 1.6);
     this.reactorLight.position.set(0, 3.1, -1.4);
-    this.scene.add(this.reactorLight);
+    this.addSceneLight(this.reactorLight);
 
     // Overhead cable run from reactor toward command deck.
     this._addCableCurve([
@@ -700,7 +981,7 @@ export class World {
     // A red emergency beacon deep in the east corridor.
     this.emergencyLight = new THREE.PointLight(0xff3345, 28, 12, 1.8);
     this.emergencyLight.position.set(26.2, 3.4, -7.6);
-    this.scene.add(this.emergencyLight);
+    this.addSceneLight(this.emergencyLight);
     const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.12, 10, 8), m.red);
     beacon.position.set(26.2, 4.6, -7.6);
     this.root.add(beacon);
@@ -767,10 +1048,10 @@ export class World {
 
   _buildLighting() {
     this.ambient = new THREE.AmbientLight(0x3b5662, 0.54);
-    this.scene.add(this.ambient);
+    this.addSceneLight(this.ambient);
 
     this.hemi = new THREE.HemisphereLight(0x7ea4b2, 0x030506, 0.46);
-    this.scene.add(this.hemi);
+    this.addSceneLight(this.hemi);
 
     this.directional = new THREE.DirectionalLight(0x91b4c1, 0.58);
     this.directional.position.set(11, 19, 9);
@@ -784,7 +1065,7 @@ export class World {
     this.directional.shadow.camera.far = 55;
     this.directional.shadow.bias = -0.0007;
     this.directional.shadow.normalBias = 0.035;
-    this.scene.add(this.directional);
+    this.addSceneLight(this.directional);
 
     const makeSpot = (x, y, z, tx, tz, color, intensity, angle, shadow = false) => {
       const spot = new THREE.SpotLight(color, intensity, 32, angle, 0.68, 1.45);
@@ -794,8 +1075,7 @@ export class World {
       spot.shadow.mapSize.set(this.quality === 'high' ? 1024 : 512, this.quality === 'high' ? 1024 : 512);
       spot.shadow.bias = -0.001;
       spot.shadow.normalBias = 0.025;
-      this.scene.add(spot);
-      this.scene.add(spot.target);
+      this.addSceneLight(spot, spot.target);
       return spot;
     };
 
@@ -804,12 +1084,12 @@ export class World {
     this.commandSpot = makeSpot(0, 7.9, -22, 0, -25, 0x8ebcff, 450, 0.75, false);
     this.westLight = new THREE.PointLight(0x5edcf2, 34, 18, 1.8);
     this.westLight.position.set(-20, 3.2, -2);
-    this.scene.add(this.westLight);
+    this.addSceneLight(this.westLight);
 
     // Red accents only where danger information is useful.
     this.warningLight = new THREE.PointLight(0xff2f3e, 18, 14, 2);
     this.warningLight.position.set(0, 1.2, 6.6);
-    this.scene.add(this.warningLight);
+    this.addSceneLight(this.warningLight);
 
     // Glow sprites reinforce the emissive fixtures without extra real lights.
     const glowTexture = createGlowTexture();
@@ -887,69 +1167,1078 @@ export class World {
     this.root.add(haze);
   }
 
-  _buildMedkits() {
-    const positions = [
-      new THREE.Vector3(-24.8, 0.18, 18.2),
-      new THREE.Vector3(25.2, 0.18, -4.2),
-      new THREE.Vector3(-18.8, 0.18, -26.8),
-    ];
-
-    for (const position of positions) {
-      const group = new THREE.Group();
-      group.position.copy(position);
-      this.root.add(group);
-
-      const caseMesh = new THREE.Mesh(new RoundedBoxGeometry(0.62, 0.3, 0.46, 2, 0.045), this.materials.darkPanel);
-      caseMesh.castShadow = true;
-      group.add(caseMesh);
-
-      const glow = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.015, 0.13), this.materials.cyan);
-      glow.position.y = 0.158;
-      group.add(glow);
-      const glowB = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.015, 0.36), this.materials.cyan);
-      glowB.position.y = 0.158;
-      group.add(glowB);
-
-      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.012, 6, 32), this.materials.cyanSoft);
-      ring.rotation.x = Math.PI / 2;
-      ring.position.y = -0.16;
-      group.add(ring);
-
-      const beam = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.12, 0.5, 1.6, 16, 1, true),
-        new THREE.MeshBasicMaterial({
-          color: 0x64eaff,
-          transparent: true,
-          opacity: 0.06,
-          side: THREE.DoubleSide,
-          depthWrite: false,
-          blending: THREE.AdditiveBlending,
-        }),
-      );
-      beam.position.y = 0.8;
-      group.add(beam);
-
-      this.medkits.push({
-        group,
-        baseY: position.y,
-        active: true,
-        position: position.clone(),
-        phase: Math.random() * Math.PI * 2,
-      });
+  _buildNarrativeProps() {
+    for (const definition of getNarrativeTerminals(this.levelId)) {
+      this.addIntelTerminal(definition);
     }
   }
 
+  /* ------------------------------------------------------------------ */
+  /* Mission layout, vertical circulation and environmental evidence    */
+  /* ------------------------------------------------------------------ */
+
+  /**
+   * Every operation declares its safe zone, primary objective and extraction
+   * pad next to the geometry that supports them. All three are authored data,
+   * never a random placement, and the MissionDirector treats this object as the
+   * only spatial source of truth for the countdown flow.
+   */
+  setMissionLayout(layout) {
+    const safeZone = layout.safeZone || {
+      x: this.playerSpawn.x,
+      z: this.playerSpawn.z,
+      w: 12,
+      d: 6,
+    };
+    this.missionLayout = {
+      timeLimit: layout.timeLimit || this.level.timeLimit || 12 * 60,
+      safeZone: {
+        ...safeZone,
+        label: safeZone.label || 'INSERTION BAY',
+        signRotation: safeZone.signRotation ?? Math.PI,
+      },
+      objective: {
+        y: 0,
+        rotation: 0,
+        promptLabel: 'CROWN ARCHIVE',
+        action: 'ACCESS',
+        ...layout.objective,
+      },
+      extraction: {
+        w: 5,
+        d: 5,
+        y: 0,
+        label: 'EXTRACTION',
+        ...layout.extraction,
+      },
+    };
+  }
+
+  _buildMissionProps() {
+    if (!this.missionLayout) {
+      this.setMissionLayout({
+        safeZone: { x: this.playerSpawn.x, z: this.playerSpawn.z, w: 10, d: 5 },
+        objective: {
+          x: this.playerSpawn.x,
+          z: Math.max(this.navBounds.minZ + 3, this.playerSpawn.z - 18),
+          hudTitle: this.level.objective,
+          label: this.level.objective,
+        },
+        extraction: { x: this.playerSpawn.x, z: this.playerSpawn.z + 1, label: 'EXTRACTION' },
+      });
+    }
+
+    this._buildSafeZone(this.missionLayout.safeZone);
+    this._buildObjectiveConsole(this.missionLayout.objective);
+    this._buildExtractionPad(this.missionLayout.extraction);
+  }
+
+  /**
+   * Adds an authored, in-world label using the same thin industrial signage
+   * language as the existing menus. These materials are owned by World because
+   * each label has a unique canvas texture.
+   */
+  addLabel(lines, {
+    x,
+    y,
+    z,
+    w = 3.2,
+    h = 1.0,
+    rotation = 0,
+    accent = '#6be7ff',
+    align = 'left',
+    flat = false,
+    sub = null,
+    detail = null,
+  }) {
+    const texture = createSignTexture(
+      Array.isArray(lines) ? lines : [lines, sub || '', detail || ''],
+      { accent, align },
+      this.materials.anisotropy,
+    );
+    const material = new THREE.MeshBasicMaterial({
+      map: texture,
+      transparent: true,
+      depthWrite: false,
+      toneMapped: false,
+      side: THREE.FrontSide,
+    });
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), material);
+    mesh.position.set(x, y, z);
+    mesh.rotation.y = flat ? 0 : rotation;
+    if (flat) mesh.rotation.set(-Math.PI / 2, 0, rotation);
+    this.root.add(mesh);
+    this.ownedAssets.push({ material, texture });
+    return mesh;
+  }
+
+  _buildSafeZone(zone) {
+    const m = this.materials;
+    const tint = new THREE.MeshBasicMaterial({
+      color: 0x4cd6e8,
+      transparent: true,
+      opacity: 0.035,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    });
+    const pad = new THREE.Mesh(new THREE.PlaneGeometry(zone.w, zone.d), tint);
+    pad.rotation.x = -Math.PI / 2;
+    pad.position.set(zone.x, 0.018, zone.z);
+    pad.renderOrder = 1;
+    this.root.add(pad);
+    this.ownedAssets.push({ material: tint, texture: null });
+
+    // A broken/perimeter line makes the exact safe-zone threshold readable
+    // without placing a collider the player has to negotiate.
+    const y = 0.026;
+    for (const x of [zone.x - zone.w / 2, zone.x + zone.w / 2]) {
+      this.addEmissiveStrip(x, y, zone.z, 0.055, 0.012, zone.d, m.cyanSoft);
+    }
+    for (const z of [zone.z - zone.d / 2, zone.z + zone.d / 2]) {
+      this.addEmissiveStrip(zone.x, y, z, zone.w, 0.012, 0.055, m.cyanSoft);
+    }
+    for (const sx of [-1, 1]) {
+      for (const sz of [-1, 1]) {
+        this.addEmissiveStrip(
+          zone.x + sx * (zone.w / 2 - 0.4),
+          0.06,
+          zone.z + sz * (zone.d / 2 - 0.4),
+          0.5,
+          0.018,
+          0.08,
+          m.cyan,
+        );
+      }
+    }
+
+    this.addLabel(['SAFE ZONE', 'MISSION CLOCK HOLDS UNTIL YOU LEAVE', zone.label], {
+      x: zone.x,
+      y: 2.35,
+      z: zone.z + zone.d / 2 - 0.08,
+      w: 4.4,
+      h: 1.16,
+      rotation: zone.signRotation,
+      accent: '#6be7ff',
+      align: 'center',
+    });
+    this.addLabel(['SAFE ZONE'], {
+      x: zone.x,
+      y: 0.035,
+      z: zone.z - zone.d / 2 + 1.0,
+      w: 3.2,
+      h: 0.72,
+      flat: true,
+      rotation: 0,
+      accent: '#6be7ff',
+      align: 'center',
+    });
+  }
+
+  _buildObjectiveConsole(definition) {
+    const m = this.materials;
+    const group = new THREE.Group();
+    group.position.set(definition.x, definition.y || 0, definition.z);
+    group.rotation.y = definition.rotation || 0;
+    this.root.add(group);
+    this.dynamicGroups.push(group);
+
+    const plinth = new THREE.Mesh(new RoundedBoxGeometry(1.72, 1.08, 0.74, 2, 0.05), m.blackMetal);
+    plinth.position.y = 0.54;
+    plinth.castShadow = true;
+    plinth.receiveShadow = true;
+    group.add(plinth);
+
+    const apron = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.06, 0.9), m.steel);
+    apron.position.y = 1.08;
+    group.add(apron);
+
+    const screen = new THREE.Mesh(new THREE.PlaneGeometry(1.32, 0.62), m.screens[2]);
+    screen.position.set(0, 1.46, 0.25);
+    screen.rotation.x = -0.22;
+    group.add(screen);
+
+    const frame = new THREE.Mesh(new RoundedBoxGeometry(1.52, 0.82, 0.14, 2, 0.03), m.steel);
+    frame.position.set(0, 1.45, 0.17);
+    frame.rotation.x = -0.22;
+    group.add(frame);
+
+    const accent = new THREE.Mesh(new THREE.BoxGeometry(1.36, 0.035, 0.03), m.amber);
+    accent.position.set(0, 1.15, 0.4);
+    group.add(accent);
+    const status = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 0.02), m.amber);
+    status.position.set(0.68, 1.63, 0.31);
+    group.add(status);
+
+    const arch = new THREE.Group();
+    for (const side of [-1, 1]) {
+      const post = new THREE.Mesh(new THREE.BoxGeometry(0.08, 2.3, 0.08), m.steel);
+      post.position.set(side * 0.92, 1.15, 0);
+      group.add(post);
+    }
+    const header = new THREE.Mesh(new THREE.BoxGeometry(1.95, 0.08, 0.08), m.steel);
+    header.position.y = 2.3;
+    group.add(header);
+    const headerLight = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.025, 0.02), m.amber);
+    headerLight.position.set(0, 2.25, 0.05);
+    group.add(headerLight);
+
+    const label = this.addLabel(
+      ['CROWN INTERFACE', definition.promptLabel || 'PRIMARY OBJECTIVE', definition.zoneLabel || ''],
+      {
+        x: definition.x + Math.sin(definition.rotation || 0) * 0.02,
+        y: (definition.y || 0) + 2.68,
+        z: definition.z + Math.cos(definition.rotation || 0) * 0.06,
+        w: 2.0,
+        h: 0.56,
+        rotation: definition.rotation || 0,
+        accent: '#ffb15c',
+        align: 'center',
+      },
+    );
+    label.position.y = (definition.y || 0) + 2.68;
+    // The overhead label should stay legible against the dark wall behind it.
+    label.renderOrder = 3;
+
+    const horizontal = Math.abs(Math.cos(definition.rotation || 0));
+    const vertical = Math.abs(Math.sin(definition.rotation || 0));
+    const bw = 1.9 * horizontal + 1.0 * vertical;
+    const bd = 1.9 * vertical + 1.0 * horizontal;
+    this.colliders.push({
+      box: new THREE.Box3(
+        new THREE.Vector3(
+          definition.x - bw / 2,
+          (definition.y || 0),
+          definition.z - bd / 2,
+        ),
+        new THREE.Vector3(
+          definition.x + bw / 2,
+          (definition.y || 0) + 2.42,
+          definition.z + bd / 2,
+        ),
+      ),
+      mesh: plinth,
+      name: 'primary objective console',
+    });
+    this.collisionMeshes.push(plinth);
+
+    this.objectiveConsole = {
+      ...definition,
+      y: definition.y || 0,
+      group,
+      position: new THREE.Vector3(definition.x, definition.y || 0, definition.z),
+      active: false,
+      complete: false,
+      accent,
+      status,
+      screen,
+      arch,
+    };
+    this.setObjectiveState(definition.requiresClear ? 'locked' : 'available');
+  }
+
+  _buildExtractionPad(definition) {
+    const m = this.materials;
+    const group = new THREE.Group();
+    group.position.set(definition.x, 0, definition.z);
+    this.root.add(group);
+    this.dynamicGroups.push(group);
+
+    const padMaterial = new THREE.MeshBasicMaterial({
+      color: 0x8f5526,
+      transparent: true,
+      opacity: 0.3,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+      toneMapped: false,
+    });
+    const pad = new THREE.Mesh(new THREE.CircleGeometry(Math.min(definition.w, definition.d) * 0.48, 42), padMaterial);
+    pad.rotation.x = -Math.PI / 2;
+    pad.position.y = 0.026;
+    group.add(pad);
+
+    const ringMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffa53d,
+      transparent: true,
+      opacity: 0.72,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+      toneMapped: false,
+    });
+    const ring = new THREE.Mesh(
+      new THREE.RingGeometry(
+        Math.min(definition.w, definition.d) * 0.48,
+        Math.min(definition.w, definition.d) * 0.5,
+        48,
+      ),
+      ringMaterial,
+    );
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.y = 0.035;
+    group.add(ring);
+
+    const beaconMaterial = new THREE.MeshBasicMaterial({
+      color: 0xff8a38,
+      transparent: true,
+      opacity: 0.012,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide,
+      toneMapped: false,
+    });
+    const beacon = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.62, 5.5, 16, 1, true), beaconMaterial);
+    beacon.position.y = 2.75;
+    group.add(beacon);
+
+    const pylons = [];
+    for (const sx of [-1, 1]) {
+      for (const sz of [-1, 1]) {
+        const pylon = new THREE.Group();
+        pylon.position.set(
+          sx * definition.w * 0.38,
+          0,
+          sz * definition.d * 0.38,
+        );
+        const post = new THREE.Mesh(new THREE.BoxGeometry(0.16, 1.35, 0.16), m.blackMetal);
+        post.position.y = 0.68;
+        post.castShadow = true;
+        pylon.add(post);
+        const lamp = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.2, 0.22), m.amber);
+        lamp.position.y = 1.42;
+        pylon.add(lamp);
+        const glow = this.addGlowSprite(
+          definition.x + pylon.position.x,
+          1.42,
+          definition.z + pylon.position.z,
+          1.8,
+          0xffa53d,
+          0.13,
+        );
+        this.dynamicGroups.push(glow);
+        pylons.push({ pylon, lamp, post });
+        group.add(pylon);
+      }
+    }
+
+    this.addLabel(
+      ['EXTRACTION', definition.label, 'REACH THE PAD BEFORE THE CLOCK ENDS'],
+      {
+        x: definition.x,
+        y: 2.65,
+        z: definition.z + definition.d * 0.38 + 0.1,
+        w: 4.2,
+        h: 1.12,
+        // The sign sits on the south edge and faces back into the extraction
+        // approach. FrontSide prevents mirrored text when seen from behind.
+        rotation: Math.PI,
+        accent: '#ffb15c',
+        align: 'center',
+      },
+    );
+
+    this.extractionZone = {
+      ...definition,
+      position: new THREE.Vector3(definition.x, 0, definition.z),
+      group,
+      pad,
+      padMaterial,
+      ring,
+      ringMaterial,
+      beacon,
+      beaconMaterial,
+      pylons,
+      active: false,
+    };
+    this.ownedAssets.push(
+      { material: padMaterial, texture: null },
+      { material: ringMaterial, texture: null },
+      { material: beaconMaterial, texture: null },
+    );
+    this.animators.push((dt, elapsed) => {
+      if (!this.extractionZone) return;
+      const active = this.extractionZone.active;
+      const pulse = 0.72 + Math.sin(elapsed * (active ? 5.2 : 1.5)) * 0.24;
+      this.extractionZone.ringMaterial.opacity = active ? 0.55 + pulse * 0.25 : 0.3;
+      this.extractionZone.padMaterial.opacity = active ? 0.12 : 0.055;
+      this.extractionZone.beaconMaterial.opacity = active ? 0.035 + pulse * 0.03 : 0.01;
+      this.extractionZone.ring.rotation.z += dt * (active ? 0.65 : 0.12);
+      for (const { pylon, lamp } of this.extractionZone.pylons) {
+        pylon.scale.y = active ? 1 + Math.sin(elapsed * 4 + pylon.position.x) * 0.035 : 1;
+        lamp.visible = active;
+      }
+    });
+  }
+
+  setObjectiveState(state) {
+    if (!this.objectiveConsole) return;
+    const objective = this.objectiveConsole;
+    objective.active = state === 'available' || state === 'complete';
+    objective.locked = state === 'locked';
+    if (state !== 'complete') objective.complete = false;
+    const blocked = state === 'locked';
+    objective.accent.material = blocked ? this.materials.red : this.materials.cyan;
+    objective.status.material = blocked ? this.materials.red : this.materials.cyan;
+    objective.screen.material = blocked ? this.materials.screens[2] : this.materials.screens[0];
+  }
+
+  activateObjective() {
+    if (!this.objectiveConsole) return;
+    this.objectiveConsole.complete = true;
+    this.objectiveConsole.active = false;
+    this.objectiveConsole.locked = false;
+    this.objectiveConsole.accent.material = this.materials.cyan;
+    this.objectiveConsole.status.material = this.materials.cyan;
+    this.objectiveConsole.screen.material = this.materials.screens[0];
+    this.objectiveConsole.arch.rotation.z = 0;
+  }
+
+  setExtractionActive(active) {
+    if (!this.extractionZone) return;
+    this.extractionZone.active = Boolean(active);
+    const color = active ? 0x6be7ff : 0xffa53d;
+    this.extractionZone.ringMaterial.color.setHex(color);
+    this.extractionZone.padMaterial.color.setHex(color);
+    this.extractionZone.beaconMaterial.color.setHex(color);
+    for (const { lamp } of this.extractionZone.pylons) {
+      lamp.material = active ? this.materials.cyan : this.materials.amber;
+    }
+  }
+
+  addDeck({
+    x,
+    z,
+    w,
+    d,
+    y = 4,
+    material = this.materials.grate,
+    name = 'upper deck',
+    railGaps = {},
+    edgeLights = true,
+  }) {
+    const slab = new THREE.Mesh(new THREE.BoxGeometry(w, 0.34, d), material);
+    slab.position.set(x, y - 0.17, z);
+    slab.castShadow = true;
+    slab.receiveShadow = true;
+    this.root.add(slab);
+
+    const box = new THREE.Box3(
+      new THREE.Vector3(x - w / 2, y - 0.34, z - d / 2),
+      new THREE.Vector3(x + w / 2, y, z + d / 2),
+    );
+    this.colliders.push({ box, mesh: slab, name, walkable: true });
+    this.collisionMeshes.push(slab);
+    this.walkableSurfaces.push({ box, y });
+
+    for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+      const support = new THREE.Mesh(new THREE.BoxGeometry(0.18, y - 0.34, 0.18), this.materials.steel);
+      support.position.set(x + sx * (w / 2 - 0.45), (y - 0.34) / 2, z + sz * (d / 2 - 0.45));
+      support.castShadow = true;
+      this.root.add(support);
+    }
+
+    const deck = {
+      x,
+      z,
+      w,
+      d,
+      y,
+      navBounds: {
+        minX: x - w / 2 + 0.56,
+        maxX: x + w / 2 - 0.56,
+        minZ: z - d / 2 + 0.56,
+        maxZ: z + d / 2 - 0.56,
+      },
+      name,
+    };
+    this.decks.push(deck);
+
+    this._addDeckRail({ x, z, w, d, y, side: 'north', gaps: railGaps.north || [] });
+    this._addDeckRail({ x, z, w, d, y, side: 'south', gaps: railGaps.south || [] });
+    this._addDeckRail({ x, z, w, d, y, side: 'west', gaps: railGaps.west || [] });
+    this._addDeckRail({ x, z, w, d, y, side: 'east', gaps: railGaps.east || [] });
+
+    if (edgeLights) {
+      this.addEmissiveStrip(x, y + 0.018, z + d / 2 - 0.12, w - 0.5, 0.015, 0.045, this.materials.cyanSoft);
+      this.addEmissiveStrip(x, y + 0.018, z - d / 2 + 0.12, w - 0.5, 0.015, 0.045, this.materials.cyanSoft);
+    }
+
+    // Callers place one authored nameplate at a readable wall/landmark. An
+    // automatic full-width deck label here would compete with that sign and
+    // with the objective console header in close-quarters fights.
+    return deck;
+  }
+
+  _addDeckRail({ x, z, w, d, y, side, gaps }) {
+    const thickness = 0.11;
+    const railH = 1.06;
+    const segments = [];
+    if (side === 'north' || side === 'south') {
+      const edgeZ = z + (side === 'south' ? d / 2 : -d / 2);
+      const half = w / 2;
+      const blocked = [...gaps].sort((a, b) => a.offset - b.offset);
+      let cursor = -half;
+      for (const gap of blocked) {
+        const start = Math.max(-half, gap.offset - gap.width / 2);
+        const end = Math.min(half, gap.offset + gap.width / 2);
+        if (start > cursor) segments.push([cursor, start]);
+        cursor = Math.max(cursor, end);
+      }
+      if (cursor < half) segments.push([cursor, half]);
+      for (const [start, end] of segments) {
+        const length = end - start;
+        if (length < 0.18) continue;
+        this.addBox({
+          x: x + (start + end) / 2,
+          z: edgeZ,
+          w: length,
+          d: thickness,
+          h: railH,
+          y,
+          material: this.materials.steel,
+          collide: true,
+          name: 'deck rail',
+        });
+        this.addEmissiveStrip(
+          x + (start + end) / 2,
+          y + railH + 0.015,
+          edgeZ,
+          length,
+          0.02,
+          0.02,
+          this.materials.cyanSoft,
+        );
+      }
+    } else {
+      const edgeX = x + (side === 'east' ? w / 2 : -w / 2);
+      const half = d / 2;
+      const blocked = [...gaps].sort((a, b) => a.offset - b.offset);
+      let cursor = -half;
+      for (const gap of blocked) {
+        const start = Math.max(-half, gap.offset - gap.width / 2);
+        const end = Math.min(half, gap.offset + gap.width / 2);
+        if (start > cursor) segments.push([cursor, start]);
+        cursor = Math.max(cursor, end);
+      }
+      if (cursor < half) segments.push([cursor, half]);
+      for (const [start, end] of segments) {
+        const length = end - start;
+        if (length < 0.18) continue;
+        this.addBox({
+          x: edgeX,
+          z: z + (start + end) / 2,
+          w: thickness,
+          d: length,
+          h: railH,
+          y,
+          material: this.materials.steel,
+          collide: true,
+          name: 'deck rail',
+        });
+        this.addEmissiveStrip(
+          edgeX,
+          y + railH + 0.015,
+          z + (start + end) / 2,
+          0.02,
+          0.02,
+          length,
+          this.materials.cyanSoft,
+        );
+      }
+    }
+  }
+
+  /**
+   * Stepped stair built from solid risers so the existing step-up controller
+   * works unchanged. The top of the run meets an authored deck edge.
+   */
+  addStairs({
+    x,
+    z,
+    width = 2.8,
+    height = 4,
+    run = 7.2,
+    direction = 'north',
+    name = 'deck stairs',
+  }) {
+    const vectors = {
+      north: [0, -1],
+      south: [0, 1],
+      east: [1, 0],
+      west: [-1, 0],
+    };
+    const [dx, dz] = vectors[direction] || vectors.north;
+    const steps = Math.max(8, Math.ceil(height / 0.31));
+    const rise = height / steps;
+    const stepRun = run / steps;
+    const stepW = direction === 'north' || direction === 'south' ? width : stepRun;
+    const stepD = direction === 'north' || direction === 'south' ? stepRun : width;
+
+    for (let i = 0; i < steps; i += 1) {
+      const top = rise * (i + 1);
+      const cx = x + dx * (i + 0.5) * stepRun;
+      const cz = z + dz * (i + 0.5) * stepRun;
+      this.addBox({
+        x: cx,
+        z: cz,
+        w: stepW,
+        d: stepD,
+        h: top,
+        y: 0,
+        material: this.materials.steel,
+        collide: true,
+        name: `${name} step ${i + 1}`,
+      });
+    }
+
+    // Open side rails are visual only; the stair core remains traversable.
+    for (const side of [-1, 1]) {
+      const railX = x + (direction === 'north' || direction === 'south' ? side * (width / 2 + 0.08) : 0);
+      const railZ = z + (direction === 'north' || direction === 'south' ? 0 : side * (width / 2 + 0.08));
+      const length = direction === 'north' || direction === 'south' ? run : run;
+      const rail = new THREE.Mesh(
+        new THREE.BoxGeometry(
+          direction === 'north' || direction === 'south' ? 0.06 : length,
+          0.06,
+          direction === 'north' || direction === 'south' ? length : 0.06,
+        ),
+        this.materials.steel,
+      );
+      rail.position.set(
+        railX + (direction === 'north' || direction === 'south' ? 0 : dx * run * 0.5),
+        height * 0.55 + 0.55,
+        railZ + (direction === 'north' || direction === 'south' ? dz * run * 0.5 : 0),
+      );
+      rail.rotation.x = direction === 'north' || direction === 'south' ? (dz > 0 ? -0.48 : 0.48) : 0;
+      rail.rotation.z = direction === 'east' || direction === 'west' ? (dx > 0 ? 0.48 : -0.48) : 0;
+      this.root.add(rail);
+    }
+
+    const stair = {
+      bottom: new THREE.Vector3(x, 0, z),
+      top: new THREE.Vector3(x + dx * run, height, z + dz * run),
+      direction,
+      width,
+      height,
+      run,
+      name,
+    };
+    this.stairways.push(stair);
+    return stair;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Environmental evidence props                                       */
+  /* ------------------------------------------------------------------ */
+
+  addCryoPod(x, z, { rotation = 0, open = false, label = 'CROWN TRANSFER POD', index = null } = {}) {
+    const m = this.materials;
+    const group = new THREE.Group();
+    group.position.set(x, 0, z);
+    group.rotation.y = rotation;
+    this.root.add(group);
+
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.82, 0.92, 0.32, 18), m.blackMetal);
+    base.position.y = 0.16;
+    base.castShadow = true;
+    group.add(base);
+
+    const shellMaterial = new THREE.MeshStandardMaterial({
+      color: 0x5f7d84,
+      roughness: 0.2,
+      metalness: 0.55,
+      transparent: true,
+      opacity: open ? 0.12 : 0.36,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    });
+    const shell = new THREE.Mesh(new THREE.CylinderGeometry(0.66, 0.78, 2.25, 20, 1, true), shellMaterial);
+    shell.position.y = 1.45;
+    group.add(shell);
+    this.ownedAssets.push({ material: shellMaterial, texture: null });
+
+    const inner = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.34, 0.42, 1.75, 14),
+      new THREE.MeshBasicMaterial({
+        color: open ? 0x3b2c20 : 0x6fddeb,
+        transparent: true,
+        opacity: open ? 0.1 : 0.18,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      }),
+    );
+    inner.position.y = 1.35;
+    group.add(inner);
+
+    const collar = new THREE.Mesh(new THREE.TorusGeometry(0.82, 0.035, 6, 24), m.steel);
+    collar.rotation.x = Math.PI / 2;
+    collar.position.y = 0.34;
+    group.add(collar);
+    const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.82, 0.7, 0.2, 18), m.blackMetal);
+    cap.position.y = 2.63;
+    group.add(cap);
+
+    const status = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.045, 0.03), open ? m.amber : m.cyanSoft);
+    status.position.set(0, 2.35, 0.57);
+    group.add(status);
+
+    if (open) {
+      const door = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1.8, 0.08), m.darkPanel);
+      door.position.set(0.75, 1.3, 0.36);
+      door.rotation.y = -0.82;
+      door.castShadow = true;
+      group.add(door);
+    }
+
+    this.addColliderOnly(x, 0, z, 1.5, 2.8, 1.5, 'cryo pod');
+    this.addLabel(
+      [label, index !== null ? `POD ${String(index).padStart(2, '0')} / ${open ? 'SEAL BROKEN' : 'SEALED'}` : 'CROWN LOGISTICS'],
+      {
+        x: x + Math.sin(rotation) * 0.73,
+        y: 1.55,
+        z: z + Math.cos(rotation) * 0.73,
+        w: 1.35,
+        h: 0.44,
+        rotation,
+        accent: open ? '#ffb15c' : '#6be7ff',
+        align: 'center',
+      },
+    );
+    return group;
+  }
+
+  addChassisRack(x, z, rotation = 0, count = 3) {
+    const m = this.materials;
+    const group = new THREE.Group();
+    group.position.set(x, 0, z);
+    group.rotation.y = rotation;
+    this.root.add(group);
+
+    const frame = new THREE.Group();
+    for (const side of [-1, 1]) {
+      const post = new THREE.Mesh(new THREE.BoxGeometry(0.12, 3.2, 0.12), m.steel);
+      post.position.set(side * 1.85, 1.6, 0);
+      frame.add(post);
+    }
+    const top = new THREE.Mesh(new THREE.BoxGeometry(3.9, 0.1, 0.16), m.steel);
+    top.position.y = 3.15;
+    frame.add(top);
+    for (let i = 0; i < count; i += 1) {
+      const px = -1.4 + i * 1.4;
+      const body = new THREE.Mesh(new RoundedBoxGeometry(0.5, 1.25, 0.32, 2, 0.04), m.darkPanel);
+      body.position.set(px, 1.35, 0);
+      body.castShadow = true;
+      frame.add(body);
+      const skull = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.28, 0.3), m.blackMetal);
+      skull.position.set(px, 2.12, 0);
+      frame.add(skull);
+      const visor = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.03, 0.02), m.red);
+      visor.position.set(px, 2.13, 0.17);
+      frame.add(visor);
+      const hanger = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.9, 0.04), m.steel);
+      hanger.position.set(px, 2.7, 0);
+      frame.add(hanger);
+    }
+    group.add(frame);
+    this.addColliderOnly(x, 0, z, 4.1, 3.2, 0.9, 'chassis rack');
+    this.addLabel(['ITERATION LINE', `CHASSIS ${String(count).padStart(2, '0')} / HALTED`], {
+      x: x + Math.sin(rotation) * 0.5,
+      y: 2.55,
+      z: z + Math.cos(rotation) * 0.5,
+      w: 2.8,
+      h: 0.8,
+      rotation,
+      accent: '#ffb15c',
+      align: 'center',
+    });
+    return group;
+  }
+
+  addPayloadCradle(x, z) {
+    const m = this.materials;
+    const group = new THREE.Group();
+    group.position.set(x, 0, z);
+    this.root.add(group);
+
+    const cradle = new THREE.Mesh(new THREE.TorusGeometry(2.5, 0.18, 8, 36), m.blackMetal);
+    cradle.rotation.x = Math.PI / 2;
+    cradle.position.y = 0.56;
+    group.add(cradle);
+    for (let i = 0; i < 4; i += 1) {
+      const angle = (i / 4) * Math.PI * 2;
+      const clamp = new THREE.Mesh(new THREE.BoxGeometry(0.35, 2.2, 0.7), m.steel);
+      clamp.position.set(Math.cos(angle) * 2.25, 1.1, Math.sin(angle) * 2.25);
+      clamp.rotation.y = -angle;
+      clamp.castShadow = true;
+      group.add(clamp);
+    }
+    const empty = new THREE.Mesh(
+      new THREE.CircleGeometry(1.8, 36),
+      new THREE.MeshBasicMaterial({ color: 0x02070a, transparent: true, opacity: 0.74, side: THREE.DoubleSide }),
+    );
+    empty.rotation.x = -Math.PI / 2;
+    empty.position.y = 0.03;
+    group.add(empty);
+    this.addColliderOnly(x, 0, z, 5.2, 2.2, 5.2, 'empty payload cradle');
+    this.addLabel(['PAYLOAD CRADLE', 'CROWN / TRANSFER COMPLETE', 'ONE SUBJECT UNACCOUNTED'], {
+      x,
+      y: 2.2,
+      z: z + 2.9,
+      w: 3.4,
+      h: 0.9,
+      rotation: 0,
+      accent: '#ffb15c',
+      align: 'center',
+    });
+    return group;
+  }
+
+  addArchiveRack(x, z, rotation = 0, width = 8) {
+    const m = this.materials;
+    const group = new THREE.Group();
+    group.position.set(x, 0, z);
+    group.rotation.y = rotation;
+    this.root.add(group);
+    const body = new THREE.Mesh(new RoundedBoxGeometry(width, 2.8, 0.9, 2, 0.06), m.blackMetal);
+    body.position.y = 1.4;
+    body.castShadow = true;
+    group.add(body);
+    const rows = Math.max(2, Math.floor(width / 1.1));
+    for (let i = 0; i < rows; i += 1) {
+      const screen = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 0.42), m.screens[i % 3]);
+      screen.position.set(-width / 2 + 0.75 + i * (width / rows), 1.75, 0.47);
+      group.add(screen);
+      const light = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.02, 0.02), i % 4 === 0 ? m.red : m.cyanSoft);
+      light.position.set(screen.position.x, 1.16, 0.47);
+      group.add(light);
+    }
+    this.addColliderOnly(x, 0, z, width * Math.abs(Math.cos(rotation)) + 0.9 * Math.abs(Math.sin(rotation)), 2.8, width * Math.abs(Math.sin(rotation)) + 0.9 * Math.abs(Math.cos(rotation)), 'CROWN archive rack');
+    this.addLabel(['CROWN ARCHIVE', 'RECORDS / COMMAND ORDERS', 'REPLICATION ACTIVE'], {
+      x: x + Math.sin(rotation) * 0.55,
+      y: 2.45,
+      z: z + Math.cos(rotation) * 0.55,
+      w: 3.4,
+      h: 0.9,
+      rotation,
+      accent: '#6be7ff',
+      align: 'center',
+    });
+    return group;
+  }
+
+  /**
+   * A diegetic terminal. The screen is a shared material, the frame stays a
+   * separate dynamic group so it remains visible after static batching, and
+   * the collider is small enough to sit against a wall without sealing a lane.
+   */
+  addIntelTerminal(definition) {
+    const m = this.materials;
+    const group = new THREE.Group();
+    group.position.set(definition.x, 0, definition.z);
+    group.rotation.y = definition.rotation || 0;
+    this.root.add(group);
+    this.dynamicGroups.push(group);
+
+    const plinth = new THREE.Mesh(new RoundedBoxGeometry(0.92, 1.02, 0.52, 2, 0.045), m.blackMetal);
+    plinth.position.y = 0.51;
+    plinth.castShadow = true;
+    plinth.receiveShadow = true;
+    group.add(plinth);
+
+    const bezel = new THREE.Mesh(new RoundedBoxGeometry(1.04, 0.58, 0.12, 2, 0.025), m.steel);
+    bezel.position.set(0, 1.33, 0.12);
+    bezel.rotation.x = -0.16;
+    group.add(bezel);
+
+    const screenMaterial = definition.kind === 'finale' ? m.red : m.screens[0];
+    const screen = new THREE.Mesh(new THREE.PlaneGeometry(0.82, 0.42), screenMaterial);
+    screen.position.set(0, 1.34, 0.19);
+    screen.rotation.x = -0.16;
+    group.add(screen);
+
+    const baseLight = new THREE.Mesh(new THREE.BoxGeometry(0.54, 0.025, 0.03), definition.kind === 'finale' ? m.red : m.cyan);
+    baseLight.position.set(0, 1.03, 0.28);
+    group.add(baseLight);
+
+    const status = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 0.02), definition.kind === 'finale' ? m.red : m.cyanSoft);
+    status.position.set(0.4, 1.58, 0.19);
+    group.add(status);
+
+    this.addGlowSprite(
+      definition.x,
+      1.5,
+      definition.z,
+      definition.kind === 'finale' ? 3.2 : 1.9,
+      definition.kind === 'finale' ? 0xff4d58 : 0x6be7ff,
+      definition.kind === 'finale' ? 0.2 : 0.12,
+    );
+
+    const horizontal = Math.abs(Math.cos(definition.rotation || 0));
+    const vertical = Math.abs(Math.sin(definition.rotation || 0));
+    const bw = 1.08 * horizontal + 0.62 * vertical;
+    const bd = 1.08 * vertical + 0.62 * horizontal;
+    this.colliders.push({
+      box: new THREE.Box3(
+        new THREE.Vector3(definition.x - bw / 2, 0, definition.z - bd / 2),
+        new THREE.Vector3(definition.x + bw / 2, 1.45, definition.z + bd / 2),
+      ),
+      mesh: plinth,
+      name: 'archive terminal',
+    });
+    this.collisionMeshes.push(plinth);
+
+    this.terminals.push({
+      ...definition,
+      group,
+      position: new THREE.Vector3(definition.x, 0, definition.z),
+      read: false,
+      active: true,
+      kind: definition.kind || 'intel',
+    });
+  }
+
+  resetTerminals() {
+    for (const terminal of this.terminals) {
+      terminal.read = false;
+      terminal.active = true;
+      terminal.group.visible = true;
+    }
+    this.setAlarm(false);
+  }
+
+  setAlarm(active) {
+    if (!this._alarmBase) {
+      this._alarmBase = {
+        ambient: this.ambient?.color.clone() || null,
+        hemi: this.hemi?.color.clone() || null,
+        fog: this.scene.fog?.color.clone() || null,
+      };
+    }
+
+    this._alarmActive = Boolean(active);
+    if (this._alarmActive && !this._alarmLight && this.scene) {
+      this._alarmLight = new THREE.PointLight(0xff3345, 0, 64, 1.6);
+      this._alarmLight.position.set(0, 5.2, 0);
+      this.addSceneLight(this._alarmLight);
+      this.animators.push((dt, elapsed) => {
+        if (!this._alarmActive) {
+          this._alarmLight.intensity = 0;
+          return;
+        }
+        this._alarmLight.intensity = 34 + (Math.sin(elapsed * 4.2) + 1) * 14;
+      });
+    }
+    if (!this._alarmBase.ambient) return;
+
+    if (this._alarmActive) {
+      this.ambient?.color.copy(this._alarmBase.ambient).lerp(new THREE.Color(0x6b2029), 0.62);
+      this.hemi?.color.copy(this._alarmBase.hemi).lerp(new THREE.Color(0x8c3c46), 0.42);
+      if (this.scene.fog?.color && this._alarmBase.fog) {
+        this.scene.fog.color.copy(this._alarmBase.fog).lerp(new THREE.Color(0x3a1118), 0.5);
+      }
+    } else {
+      this.ambient?.color.copy(this._alarmBase.ambient);
+      this.hemi?.color.copy(this._alarmBase.hemi);
+      if (this.scene.fog?.color && this._alarmBase.fog) {
+        this.scene.fog.color.copy(this._alarmBase.fog);
+      }
+      if (this._alarmLight) this._alarmLight.intensity = 0;
+    }
+  }
+
+  addMedkit(x, z, y = 0.18) {
+    const position = new THREE.Vector3(x, y, z);
+    const group = new THREE.Group();
+    group.position.copy(position);
+    this.root.add(group);
+
+    const caseMesh = new THREE.Mesh(new RoundedBoxGeometry(0.62, 0.3, 0.46, 2, 0.045), this.materials.darkPanel);
+    caseMesh.castShadow = true;
+    group.add(caseMesh);
+
+    const glow = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.015, 0.13), this.materials.cyan);
+    glow.position.y = 0.158;
+    group.add(glow);
+    const glowB = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.015, 0.36), this.materials.cyan);
+    glowB.position.y = 0.158;
+    group.add(glowB);
+
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.012, 6, 32), this.materials.cyanSoft);
+    ring.rotation.x = Math.PI / 2;
+    ring.position.y = -0.16;
+    group.add(ring);
+
+    const beam = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.12, 0.5, 1.6, 16, 1, true),
+      new THREE.MeshBasicMaterial({
+        color: 0x64eaff,
+        transparent: true,
+        opacity: 0.06,
+        side: THREE.DoubleSide,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      }),
+    );
+    beam.position.y = 0.8;
+    group.add(beam);
+
+    this.medkits.push({
+      group,
+      baseY: position.y,
+      active: true,
+      position: position.clone(),
+      phase: Math.random() * Math.PI * 2,
+    });
+  }
+
+  _buildMedkits() {
+    this.addMedkit(-24.8, 18.2);
+    this.addMedkit(25.2, -4.2);
+    this.addMedkit(-18.8, -26.8);
+  }
+
   _defineSpawns() {
-    this.enemySpawns = [
-      { id: 'S-01', pos: new THREE.Vector3(-16.2, 0, 13.8), route: [new THREE.Vector3(-17.5, 0, 14), new THREE.Vector3(-10.3, 0, 14.4), new THREE.Vector3(-11.2, 0, 22)] },
-      { id: 'S-02', pos: new THREE.Vector3(15.8, 0, 14.8), route: [new THREE.Vector3(18.4, 0, 13.2), new THREE.Vector3(12.2, 0, 12.4), new THREE.Vector3(9, 0, 21)] },
-      { id: 'S-03', pos: new THREE.Vector3(-18.2, 0, 1.6), route: [new THREE.Vector3(-16.4, 0, -7.4), new THREE.Vector3(-14.2, 0, -5.2), new THREE.Vector3(-16.8, 0, 2.4)] },
-      { id: 'S-04', pos: new THREE.Vector3(17.2, 0, 4.8), route: [new THREE.Vector3(20, 0, -2.6), new THREE.Vector3(14.2, 0, -3.8), new THREE.Vector3(17.5, 0, 5.2)] },
-      { id: 'S-05', pos: new THREE.Vector3(0, 0, -8.4), route: [new THREE.Vector3(-7.4, 0, -7.8), new THREE.Vector3(7.4, 0, -7.8), new THREE.Vector3(0, 0, -9.6)] },
-      { id: 'S-06', pos: new THREE.Vector3(26.2, 0, 5.4), route: [new THREE.Vector3(26.2, 0, -7.2), new THREE.Vector3(26.2, 0, 0.8), new THREE.Vector3(26.2, 0, 6)] },
-      { id: 'S-07', pos: new THREE.Vector3(-13.2, 0, -20.8), route: [new THREE.Vector3(-17.6, 0, -20.2), new THREE.Vector3(-19.2, 0, -26.2), new THREE.Vector3(-10.8, 0, -25.5)] },
-      { id: 'S-08', pos: new THREE.Vector3(14.8, 0, -22.2), route: [new THREE.Vector3(18.2, 0, -25.4), new THREE.Vector3(7.8, 0, -25.4), new THREE.Vector3(7.2, 0, -20.8)] },
+    this.setSpawns([
+      { id: 'S-01', pos: [-16.2, 13.8], route: [[-17.5, 14], [-10.3, 14.4], [-11.2, 22]] },
+      { id: 'S-02', pos: [15.8, 14.8], route: [[18.4, 13.2], [12.2, 12.4], [9, 21]] },
+      { id: 'S-03', pos: [-18.2, 1.6], route: [[-16.4, -7.4], [-14.2, -5.2], [-16.8, 2.4]] },
+      { id: 'S-04', pos: [17.2, 4.8], route: [[20, -2.6], [14.2, -3.8], [17.5, 5.2]] },
+      { id: 'S-05', pos: [0, -8.4], route: [[-7.4, -7.8], [7.4, -7.8], [0, -9.6]] },
+      { id: 'S-06', pos: [26.2, 5.4], route: [[26.2, -7.2], [26.2, 0.8], [26.2, 6]] },
+      {
+        id: 'S-07',
+        pos: [-13.2, -20.8],
+        route: [[-17.6, -20.2], [-19.2, -26.2], [-10.8, -25.5]],
+        wave: 2,
+        role: 'heavy',
+      },
+      {
+        id: 'S-08',
+        pos: [14.8, -22.2],
+        route: [[18.2, -25.4], [7.8, -25.4], [7.2, -20.8]],
+        wave: 2,
+        role: 'commander',
+        health: 190,
+        elite: true,
+      },
+    ]);
+  }
+
+  setSpawns(spawns) {
+    // Stable role composition gives every operation a mix of pressure,
+    // holding and ranged units without turning the roster into noise.
+    const roleCycle = [
+      'assault', 'marksman', 'defender', 'assault', 'heavy',
+      'marksman', 'defender', 'assault', 'marksman', 'heavy',
+      'defender', 'assault', 'marksman', 'heavy', 'elite',
     ];
+    this.enemySpawns = spawns.map((spawn, index) => ({
+      ...spawn,
+      pos: new THREE.Vector3(spawn.pos[0], spawn.floorY || 0, spawn.pos[1]),
+      route: spawn.route.map(([x, z]) => new THREE.Vector3(x, spawn.floorY || 0, z)),
+      floorY: spawn.floorY || 0,
+      navBounds: spawn.navBounds || null,
+      wave: spawn.wave || 1,
+      role: spawn.role || (spawn.elite ? 'elite' : roleCycle[index % roleCycle.length]),
+    }));
   }
 
   /* ------------------------------------------------------------------ */
@@ -1075,15 +2364,15 @@ export class World {
     this.collisionMeshes.push(shaft);
   }
 
-  _buildContainer(x, z, w, d, h, material, rotation = 0) {
+  _buildContainer(x, z, w, d, h, material, rotation = 0, y = 0, bodyMaterial = null) {
     const group = new THREE.Group();
-    group.position.set(x, 0, z);
+    group.position.set(x, y, z);
     group.rotation.y = rotation;
     this.root.add(group);
 
     const body = new THREE.Mesh(
       new THREE.BoxGeometry(w, h, d),
-      new THREE.MeshStandardMaterial({ color: 0x2a3136, roughness: 0.66, metalness: 0.52 }),
+      bodyMaterial || new THREE.MeshStandardMaterial({ color: 0x2a3136, roughness: 0.66, metalness: 0.52 }),
     );
     body.position.y = h / 2;
     body.castShadow = true;
@@ -1113,7 +2402,10 @@ export class World {
     const bw = w * cos + d * sin;
     const bd = w * sin + d * cos;
     this.colliders.push({
-      box: new THREE.Box3(new THREE.Vector3(x - bw / 2, 0, z - bd / 2), new THREE.Vector3(x + bw / 2, h, z + bd / 2)),
+      box: new THREE.Box3(
+        new THREE.Vector3(x - bw / 2, y, z - bd / 2),
+        new THREE.Vector3(x + bw / 2, y + h, z + bd / 2),
+      ),
       mesh: body,
       name: 'container',
     });
@@ -1286,6 +2578,8 @@ export class World {
   update(dt, elapsed) {
     this.time += dt;
 
+    for (const animate of this.animators) animate(dt, elapsed);
+
     if (this._reactorCage) {
       this._reactorCage.rotation.y += dt * 0.055;
       for (let i = 0; i < this._reactorRings.length; i += 1) {
@@ -1329,6 +2623,35 @@ export class World {
         if (positions[idx + 1] < 0.3) positions[idx + 1] = 8.2;
       }
       this._dust.geometry.attributes.position.needsUpdate = true;
+    }
+
+    if (this._particleField) {
+      const {
+        positions, seeds, count, bounds, fall, drift, flutter, points,
+      } = this._particleField;
+      for (let i = 0; i < count; i += 1) {
+        const idx = i * 3;
+        const phase = seeds[i * 2];
+        positions[idx] += Math.sin(elapsed * 0.22 + phase) * dt * drift;
+        positions[idx + 2] += Math.cos(elapsed * 0.18 + phase) * dt * drift * 0.7;
+        if (fall > 0) {
+          positions[idx + 1] -= fall * dt * (0.65 + seeds[i * 2 + 1] * 0.8);
+          if (positions[idx + 1] < bounds.minY) {
+            positions[idx + 1] = bounds.maxY;
+            positions[idx] = randomRange(bounds.minX, bounds.maxX);
+            positions[idx + 2] = randomRange(bounds.minZ, bounds.maxZ);
+          }
+        } else {
+          positions[idx + 1] += Math.sin(elapsed * 0.17 + seeds[i * 2 + 1]) * dt * flutter;
+          if (positions[idx + 1] > bounds.maxY) positions[idx + 1] = bounds.minY;
+          if (positions[idx + 1] < bounds.minY) positions[idx + 1] = bounds.maxY;
+        }
+        if (positions[idx] > bounds.maxX) positions[idx] = bounds.minX;
+        if (positions[idx] < bounds.minX) positions[idx] = bounds.maxX;
+        if (positions[idx + 2] > bounds.maxZ) positions[idx + 2] = bounds.minZ;
+        if (positions[idx + 2] < bounds.minZ) positions[idx + 2] = bounds.maxZ;
+      }
+      points.geometry.attributes.position.needsUpdate = true;
     }
   }
 
@@ -1378,16 +2701,22 @@ export class World {
   }
 
   dispose() {
+    // Materials are owned by Game and shared by every operation, so swapping
+    // a level must release geometry and scene lights — never the palette.
     this.scene.remove(this.root);
     this.root.traverse((object) => {
       if (object.geometry) object.geometry.dispose();
-      if (object.material) {
-        const materials = Array.isArray(object.material) ? object.material : [object.material];
-        for (const material of materials) {
-          if (material.map && !material.map.userData?.shared) material.dispose();
-          material.dispose();
-        }
-      }
     });
+    for (const light of this.sceneLights) this.scene.remove(light);
+    this.sceneLights.length = 0;
+    for (const { material, texture } of this.ownedAssets) {
+      texture?.dispose();
+      material?.dispose();
+    }
+    this.ownedAssets.length = 0;
+    this.scene.fog = null;
+    this.scene.background = null;
+    this._glowTexture?.dispose();
+    this._glowTexture = null;
   }
 }
