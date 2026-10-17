@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#05070a" />
+  <meta name="color-scheme" content="dark" />
+  <title>PROJECT: PHANTOM — Tactical FPS</title>
+  <meta name="description" content="PROJECT: PHANTOM is a playable tactical sci-fi first-person shooter set inside the abandoned SITE-09 black facility. Built with Three.js." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2306090c'/%3E%3Cpath d='M17 17h13c11 0 18 6 18 15S41 47 30 47H17V17Zm9 8v14h4c6 0 9-2.4 9-7s-3-7-9-7h-4Z' fill='%236be7ff'/%3E%3C/svg%3E" />
+  <script type="module" crossorigin src="./assets/index-D6OlHmvr.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-MysAtVUh.css">
+</head>
+<body>
+  <div id="app">
+    <canvas id="scene" aria-label="PROJECT PHANTOM game viewport"></canvas>
+
+    <div class="screen-fx" aria-hidden="true">
+      <div class="screen-fx__grain"></div>
+      <div class="screen-fx__scan"></div>
+      <div class="screen-fx__vignette"></div>
+    </div>
+
+    <div id="damage-flash" aria-hidden="true"></div>
+    <div id="hit-flash" aria-hidden="true"></div>
+
+    <!-- ================= HUD ================= -->
+    <section id="hud" class="hud" aria-label="Combat heads-up display" aria-hidden="true">
+      <div class="hud__top">
+        <div class="objective-block">
+          <div class="objective-block__kicker">
+            <span class="status-dot"></span>
+            <span>ACTIVE DIRECTIVE</span>
+          </div>
+          <div class="objective-block__title">PURGE SITE-09</div>
+          <div class="objective-block__sub">
+            <span>NEUTRALIZE HOSTILE SIGNALS</span>
+            <span id="objective-count" class="mono">00 / 08</span>
+          </div>
+          <div class="objective-block__track"><span id="objective-fill"></span></div>
+        </div>
+
+        <div class="compass" aria-label="Compass heading">
+          <div class="compass__ticks" id="compass-ticks" aria-hidden="true"></div>
+          <div class="compass__mask"></div>
+          <div class="compass__needle" aria-hidden="true"></div>
+          <div class="compass__heading mono"><span id="compass-deg">000</span><small>DEG</small></div>
+        </div>
+
+        <div class="mission-stats">
+          <div class="mission-stats__cell">
+            <span class="k">MISSION TIME</span>
+            <strong id="timer" class="mono">00:00.0</strong>
+          </div>
+          <div class="mission-stats__cell">
+            <span class="k">ELIMINATIONS</span>
+            <strong id="kill-count" class="mono">00<span>/08</span></strong>
+          </div>
+          <div class="mission-stats__cell mission-stats__cell--signal">
+            <span class="k">SIGNAL</span>
+            <strong class="mono"><i></i>STABLE</strong>
+          </div>
+        </div>
+      </div>
+
+      <div id="crosshair" class="crosshair" aria-hidden="true">
+        <span class="crosshair__line crosshair__line--t"></span>
+        <span class="crosshair__line crosshair__line--r"></span>
+        <span class="crosshair__line crosshair__line--b"></span>
+        <span class="crosshair__line crosshair__line--l"></span>
+        <span class="crosshair__dot"></span>
+        <span id="hitmarker" class="hitmarker">
+          <i></i><i></i><i></i><i></i>
+        </span>
+      </div>
+
+      <div id="damage-direction" class="damage-direction" aria-hidden="true"></div>
+
+      <div class="hud__bottom">
+        <div class="vitals">
+          <div class="vitals__id">
+            <span class="vitals__label">OPERATIVE</span>
+            <span class="vitals__name">PHANTOM-1</span>
+          </div>
+          <div class="vitals__bars">
+            <div class="vital vital--health">
+              <div class="vital__head">
+                <span>INTEGRITY</span>
+                <strong><span id="health-value">100</span><small>%</small></strong>
+              </div>
+              <div class="vital__track"><span id="health-fill"></span></div>
+            </div>
+            <div class="vital vital--shield">
+              <div class="vital__head">
+                <span>BARRIER</span>
+                <strong><span id="shield-value">50</span><small>%</small></strong>
+              </div>
+              <div class="vital__track"><span id="shield-fill"></span></div>
+            </div>
+          </div>
+          <div id="low-health" class="vitals__warning">CRITICAL // SEEK COVER</div>
+        </div>
+
+        <div class="combat-tips">
+          <span><kbd>R</kbd> RELOAD</span>
+          <span><kbd>Q</kbd> SWITCH</span>
+          <span><kbd>SHIFT</kbd> SPRINT</span>
+          <span><kbd>RMB</kbd> AIM</span>
+        </div>
+
+        <div class="weapon-panel">
+          <div class="weapon-panel__top">
+            <span id="weapon-mode" class="mono">FULL AUTO</span>
+            <span class="weapon-panel__slot"><b>01</b> / PRIMARY</span>
+          </div>
+          <div class="weapon-panel__name" id="weapon-name">VK-7 SPECTER</div>
+          <div class="ammo">
+            <strong id="ammo-current">30</strong>
+            <span class="ammo__divider"></span>
+            <span id="ammo-reserve" class="ammo__reserve">210</span>
+          </div>
+          <div class="ammo-bar"><span id="ammo-fill"></span></div>
+          <div class="weapon-panel__bottom">
+            <span id="weapon-class">PULSE RIFLE</span>
+            <span id="reload-state" class="mono"></span>
+          </div>
+        </div>
+      </div>
+
+      <div id="killfeed" class="killfeed" aria-live="polite"></div>
+      <div id="toast" class="toast" role="status" aria-live="polite"></div>
+      <div id="reload-prompt" class="reload-prompt"><span class="mono">MAG EMPTY</span><kbd>R</kbd><span>RELOAD</span></div>
+      <div id="pickup-prompt" class="pickup-prompt"><span class="mono">BIOCELL</span><span>PRESS F TO COLLECT</span></div>
+      <div class="hud__corner hud__corner--tl" aria-hidden="true"></div>
+      <div class="hud__corner hud__corner--tr" aria-hidden="true"></div>
+      <div class="hud__corner hud__corner--bl" aria-hidden="true"></div>
+      <div class="hud__corner hud__corner--br" aria-hidden="true"></div>
+    </section>
+
+    <!-- ================= MAIN MENU ================= -->
+    <section id="menu" class="menu" aria-labelledby="game-title">
+      <div class="menu__shade" aria-hidden="true"></div>
+      <header class="menu__top">
+        <a class="brand-lockup" href="../../projects.html" aria-label="Return to HX STONE work index">
+          <span class="brand-lockup__mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" fill="none"><path d="M6 26V6h10.5C24 6 28 9.4 28 16s-4 10-11.5 10H6Zm6-5h4.2c4.3 0 6.3-1.7 6.3-5s-2-5-6.3-5H12v10Z" fill="currentColor"/></svg>
+          </span>
+          <span class="brand-lockup__text">
+            <b>PHANTOM DIVISION</b>
+            <small>BLACKSITE OPERATIONS</small>
+          </span>
+        </a>
+        <div class="menu__meta mono">
+          <span><i class="status-dot"></i>SIMULATION LIVE</span>
+          <span>SITE-09 / 04:17 N</span>
+          <span>BUILD 1.0.4</span>
+        </div>
+      </header>
+
+      <div class="menu__grid">
+        <div class="menu__hero">
+          <p class="eyebrow mono"><span>01</span> TACTICAL BREACH SIMULATION</p>
+          <h1 id="game-title" class="hero-title">
+            <span class="hero-title__project">PROJECT:</span>
+            <span class="hero-title__name">PHANTOM</span>
+          </h1>
+          <div class="hero-rule"><span></span><i></i></div>
+          <p class="hero-copy">
+            SITE-09 has gone dark. Eight autonomous sentinels are still active beneath the surface.
+            Breach the facility, sever the signal, and leave nothing online.
+          </p>
+
+          <div class="menu__actions">
+            <button id="start-button" class="btn btn--primary" type="button">
+              <span class="btn__index mono">01</span>
+              <span class="btn__label">START MISSION</span>
+              <span class="btn__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+              </span>
+            </button>
+            <button class="btn btn--ghost" type="button" data-open="controls-modal">
+              <span class="btn__label">CONTROLS</span>
+            </button>
+            <button class="btn btn--ghost" type="button" data-open="settings-modal">
+              <span class="btn__label">SETTINGS</span>
+            </button>
+          </div>
+
+          <div class="menu__requirements mono">
+            <span>MOUSE + KEYBOARD</span>
+            <span>HEADPHONES RECOMMENDED</span>
+            <span id="best-time">BEST TIME —:—</span>
+          </div>
+        </div>
+
+        <aside class="dossier" aria-label="Mission dossier">
+          <div class="dossier__head">
+            <span class="mono">MISSION DOSSIER</span>
+            <span class="dossier__stamp mono">CLASSIFIED</span>
+          </div>
+          <div class="dossier__body">
+            <div class="dossier__index mono">OP / BLACKOUT-09</div>
+            <h2>BLACKOUT<br />PROTOCOL</h2>
+            <p>
+              An unregistered research cell beneath the Kestrel industrial complex.
+              Last transmission: <em>“It is already inside the walls.”</em>
+            </p>
+            <dl class="dossier__facts">
+              <div><dt>OBJECTIVE</dt><dd>PURGE ALL HOSTILES</dd></div>
+              <div><dt>HOSTILES</dt><dd class="mono">08 // ACTIVE</dd></div>
+              <div><dt>THREAT</dt><dd class="danger">CRITICAL</dd></div>
+              <div><dt>EXFIL</dt><dd>AUTOMATIC</dd></div>
+            </dl>
+            <div class="dossier__diagram" aria-hidden="true">
+              <svg viewBox="0 0 420 140" fill="none">
+                <path d="M8 110h84V36h62v74h58V56h80v54h56V22h64v88" stroke="currentColor" stroke-opacity=".3"/>
+                <path d="M8 110h84V36h62v74h58V56h80v54h56V22h64v88" stroke="#6be7ff" stroke-opacity=".65" stroke-dasharray="5 7"/>
+                <circle cx="210" cy="70" r="4" fill="#6be7ff"/>
+                <circle cx="210" cy="70" r="13" stroke="#6be7ff" stroke-opacity=".35"/>
+                <circle cx="210" cy="70" r="25" stroke="#6be7ff" stroke-opacity=".12"/>
+                <path d="M20 128h60M80 123v10M340 128h60M340 123v10" stroke="currentColor" stroke-opacity=".35"/>
+                <text x="12" y="16" fill="currentColor" fill-opacity=".45" font-size="9" font-family="monospace">SUBLEVEL 04 // GRID 09</text>
+                <text x="316" y="136" fill="currentColor" fill-opacity=".45" font-size="9" font-family="monospace">SCALE 1:400</text>
+              </svg>
+            </div>
+          </div>
+          <div class="dossier__foot mono">
+            <span><i class="status-dot status-dot--danger"></i>THREAT SIGNAL DETECTED</span>
+            <span>09° 14' 22" N</span>
+          </div>
+        </aside>
+      </div>
+
+      <footer class="menu__foot">
+        <span class="mono">© 2087 PHANTOM DIVISION — INTERNAL SIMULATION</span>
+        <span class="menu__foot-center mono"><span class="pulse-line"></span>NEURAL LINK READY</span>
+        <a class="mono menu__exit" href="../../projects.html">EXIT TO INDEX <span aria-hidden="true">↗</span></a>
+      </footer>
+    </section>
+
+    <!-- ================= PAUSE ================= -->
+    <section id="pause" class="overlay overlay--pause" aria-labelledby="pause-title" hidden>
+      <div class="overlay__scrim"></div>
+      <div class="panel pause-panel" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+        <div class="panel__eyebrow mono"><span class="status-dot status-dot--amber"></span>SIMULATION SUSPENDED</div>
+        <h2 id="pause-title" class="panel__title">PAUSED<span>//</span></h2>
+        <p class="panel__copy">Tactical feed is frozen. Hostile AI and mission timers are offline.</p>
+        <div class="pause-panel__stats mono">
+          <div><span>TIME</span><b id="pause-time">00:00.0</b></div>
+          <div><span>HOSTILES</span><b id="pause-remaining">08</b></div>
+          <div><span>ELIMINATED</span><b id="pause-kills">00</b></div>
+        </div>
+        <div class="panel__actions">
+          <button id="resume-button" class="btn btn--primary" type="button"><span class="btn__label">RESUME MISSION</span><span class="btn__icon">→</span></button>
+          <button id="pause-settings" class="btn btn--ghost" type="button"><span class="btn__label">SETTINGS</span></button>
+          <button id="pause-restart" class="btn btn--ghost" type="button"><span class="btn__label">RESTART</span></button>
+          <button id="pause-quit" class="btn btn--ghost btn--danger" type="button"><span class="btn__label">ABORT TO MENU</span></button>
+        </div>
+        <div class="panel__hint mono">PRESS <kbd>ENTER</kbd> OR CLICK RESUME TO RE-ENTER</div>
+      </div>
+    </section>
+
+    <!-- ================= END SCREEN ================= -->
+    <section id="end-screen" class="overlay overlay--end" aria-labelledby="end-title" hidden>
+      <div class="overlay__scrim"></div>
+      <div class="end-wrap" role="dialog" aria-modal="true" aria-labelledby="end-title">
+        <div class="end-kicker mono" id="end-kicker">OPERATION COMPLETE</div>
+        <h2 id="end-title" class="end-title">MISSION<br /><span id="end-title-accent">COMPLETE</span></h2>
+        <p class="end-copy" id="end-copy">All hostile signals neutralized. Site-09 is dark again.</p>
+
+        <div class="end-grade">
+          <div class="end-grade__ring"><span id="end-grade">S</span></div>
+          <div class="end-grade__meta">
+            <span class="mono">PERFORMANCE RATING</span>
+            <strong id="end-rating">EXEMPLARY</strong>
+            <span class="mono" id="end-score">SCORE 000000</span>
+          </div>
+        </div>
+
+        <dl class="end-stats">
+          <div><dt>MISSION TIME</dt><dd id="end-time">00:00.0</dd></div>
+          <div><dt>ELIMINATIONS</dt><dd id="end-kills">08 / 08</dd></div>
+          <div><dt>ACCURACY</dt><dd id="end-accuracy">0%</dd></div>
+          <div><dt>HEADSHOTS</dt><dd id="end-headshots">0</dd></div>
+          <div><dt>DAMAGE TAKEN</dt><dd id="end-damage">0</dd></div>
+          <div><dt>BEST STREAK</dt><dd id="end-streak">0</dd></div>
+        </dl>
+
+        <div class="panel__actions end-actions">
+          <button id="end-restart" class="btn btn--primary" type="button"><span class="btn__label">REDEPLOY</span><span class="btn__icon">↻</span></button>
+          <button id="end-menu" class="btn btn--ghost" type="button"><span class="btn__label">RETURN TO MENU</span></button>
+        </div>
+        <p class="end-hint mono">PRESS <kbd>R</kbd> TO REDEPLOY</p>
+      </div>
+    </section>
+
+    <!-- ================= CONTROLS MODAL ================= -->
+    <div id="controls-modal" class="modal" hidden>
+      <div class="modal__scrim" data-close></div>
+      <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="controls-title">
+        <div class="modal__head">
+          <div>
+            <span class="mono modal__kicker">FIELD MANUAL / 02</span>
+            <h2 id="controls-title">CONTROLS</h2>
+          </div>
+          <button class="icon-btn" type="button" data-close aria-label="Close controls">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+          </button>
+        </div>
+        <div class="controls-grid">
+          <div class="controls-col">
+            <h3 class="mono">MOVEMENT</h3>
+            <div class="control-row"><span>Move</span><span class="keys"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span></div>
+            <div class="control-row"><span>Sprint</span><span class="keys"><kbd>SHIFT</kbd></span></div>
+            <div class="control-row"><span>Jump</span><span class="keys"><kbd>SPACE</kbd></span></div>
+            <div class="control-row"><span>Look / Aim</span><span class="keys"><kbd>MOUSE</kbd></span></div>
+          </div>
+          <div class="controls-col">
+            <h3 class="mono">COMBAT</h3>
+            <div class="control-row"><span>Fire</span><span class="keys"><kbd>LMB</kbd></span></div>
+            <div class="control-row"><span>Aim down sights</span><span class="keys"><kbd>RMB</kbd></span></div>
+            <div class="control-row"><span>Reload</span><span class="keys"><kbd>R</kbd></span></div>
+            <div class="control-row"><span>Switch weapon</span><span class="keys"><kbd>1</kbd><kbd>2</kbd><kbd>Q</kbd><kbd>SCROLL</kbd></span></div>
+          </div>
+          <div class="controls-col">
+            <h3 class="mono">SYSTEM</h3>
+            <div class="control-row"><span>Pause / release cursor</span><span class="keys"><kbd>ESC</kbd></span></div>
+            <div class="control-row"><span>Interact / collect</span><span class="keys"><kbd>F</kbd></span></div>
+            <div class="control-row"><span>Redeploy after mission</span><span class="keys"><kbd>R</kbd></span></div>
+          </div>
+        </div>
+        <div class="modal__foot">
+          <span class="mono">RECOMMENDED: WIRED MOUSE, SOUND ON</span>
+          <button class="btn btn--small btn--primary" type="button" data-close><span class="btn__label">CLOSE</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= SETTINGS MODAL ================= -->
+    <div id="settings-modal" class="modal" hidden>
+      <div class="modal__scrim" data-close></div>
+      <div class="modal__panel modal__panel--settings" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+        <div class="modal__head">
+          <div>
+            <span class="mono modal__kicker">SYSTEM CONFIG / 03</span>
+            <h2 id="settings-title">SETTINGS</h2>
+          </div>
+          <button class="icon-btn" type="button" data-close aria-label="Close settings">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+          </button>
+        </div>
+
+        <div class="settings-grid">
+          <div class="setting">
+            <div class="setting__head">
+              <label for="sensitivity">MOUSE SENSITIVITY</label>
+              <output id="sensitivity-value" for="sensitivity">1.00</output>
+            </div>
+            <input id="sensitivity" type="range" min="0.2" max="3" step="0.05" value="1" />
+            <p>Scales raw mouse look. Lower is slower and more precise.</p>
+          </div>
+
+          <div class="setting">
+            <div class="setting__head">
+              <label for="fov">FIELD OF VIEW</label>
+              <output id="fov-value" for="fov">78°</output>
+            </div>
+            <input id="fov" type="range" min="65" max="105" step="1" value="78" />
+            <p>Hip-fire camera angle. Aiming uses a fixed optical zoom.</p>
+          </div>
+
+          <div class="setting">
+            <div class="setting__head">
+              <label for="volume">MASTER VOLUME</label>
+              <output id="volume-value" for="volume">65%</output>
+            </div>
+            <input id="volume" type="range" min="0" max="1" step="0.01" value="0.65" />
+            <p>Procedural weapon, impact and ambience audio.</p>
+          </div>
+
+          <div class="setting">
+            <div class="setting__head"><span>RENDER QUALITY</span><span class="mono" id="quality-note">RECOMMENDED</span></div>
+            <div class="segmented" role="radiogroup" aria-label="Render quality">
+              <button type="button" role="radio" data-quality="high" aria-checked="true">HIGH</button>
+              <button type="button" role="radio" data-quality="medium" aria-checked="false">BALANCED</button>
+              <button type="button" role="radio" data-quality="low" aria-checked="false">LOW</button>
+            </div>
+            <p>Lower quality disables bloom and reduces shadow resolution / pixel density.</p>
+          </div>
+
+          <div class="setting setting--row">
+            <div>
+              <span class="setting__title">INVERT VERTICAL LOOK</span>
+              <p>Reverse mouse pitch input.</p>
+            </div>
+            <label class="switch">
+              <input id="invert-y" type="checkbox" />
+              <span class="switch__track" aria-hidden="true"><span></span></span>
+              <span class="sr-only">Invert vertical look</span>
+            </label>
+          </div>
+
+          <div class="setting setting--row">
+            <div>
+              <span class="setting__title">REDUCED MOTION</span>
+              <p>Reduces weapon sway and HUD transitions.</p>
+            </div>
+            <label class="switch">
+              <input id="reduced-motion" type="checkbox" />
+              <span class="switch__track" aria-hidden="true"><span></span></span>
+              <span class="sr-only">Reduce motion</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal__foot">
+          <button id="reset-settings" class="text-btn mono" type="button">RESET DEFAULTS</button>
+          <button class="btn btn--small btn--primary" type="button" data-close><span class="btn__label">APPLY &amp; CLOSE</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= MOBILE / UNSUPPORTED ================= -->
+    <section id="mobile-notice" class="mobile-notice" hidden>
+      <div class="mobile-notice__inner">
+        <span class="mono mobile-notice__kicker">PLATFORM CHECK / FAILED</span>
+        <h2>DESKTOP<br /><span>REQUIRED</span></h2>
+        <p>
+          PROJECT: PHANTOM uses pointer-lock mouse aiming, WASD movement and simultaneous combat input.
+          A touchscreen cannot represent that control scheme reliably, so the simulation is intentionally
+          disabled on this device rather than pretending to support it.
+        </p>
+        <div class="mobile-notice__specs mono">
+          <span>INPUT: KEYBOARD + MOUSE</span>
+          <span>DISPLAY: 1024PX MINIMUM</span>
+          <span>ENGINE: WEBGL 2</span>
+        </div>
+        <p class="mobile-notice__hint">Open this page on a desktop computer with Chrome or Edge to deploy.</p>
+      </div>
+    </section>
+
+    <!-- ================= BOOT ================= -->
+    <div id="boot" class="boot" aria-live="polite">
+      <div class="boot__mark" aria-hidden="true">
+        <svg viewBox="0 0 64 64" fill="none"><path d="M14 52V12h20c13 0 21 6.7 21 20s-8 20-21 20H14Zm12-10h7.5C41 42 45.8 39.4 45.8 32S41 22 33.5 22H26v20Z" fill="currentColor"/></svg>
+      </div>
+      <div class="boot__label mono">PROJECT: PHANTOM</div>
+      <div class="boot__bar"><span></span></div>
+      <div class="boot__status mono" id="boot-status">INITIALIZING RENDER PIPELINE</div>
+    </div>
+
+    <div id="webgl-error" class="fatal" hidden>
+      <div class="fatal__panel">
+        <span class="mono">RENDERER FAULT</span>
+        <h2>WEBGL 2 UNAVAILABLE</h2>
+        <p>This simulation requires hardware-accelerated WebGL 2. Enable it in your browser settings or try a recent version of Chrome or Edge.</p>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

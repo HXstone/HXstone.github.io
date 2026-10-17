@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title data-i18n="page.notes.title">Notes · HX STONE</title>
 <meta name="description" content="A personal knowledge base by HX STONE — study logs, tinkering notes and half-formed ideas about AI, science and learning.">
-<meta name="theme-color" content="#0a0d10">
+<meta name="theme-color" content="#070a0c">
 <meta name="color-scheme" content="dark">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Notes · HX STONE">
@@ -62,7 +62,7 @@
 
   <section class="section section--plain">
     <div class="container">
-      <div class="notes-toolbar-wrap">
+      <div class="notes-toolbar-wrap" data-reveal>
         <div class="notes-toolbar" role="group" aria-label="Filter notes" data-i18n-aria-label="notes.filterLabel">
           <button class="filter" type="button" data-filter="all" aria-pressed="true" data-i18n="notes.f.all">All</button>
           <button class="filter" type="button" data-filter="ai" aria-pressed="false" data-i18n="notes.f.ai">AI</button>
@@ -78,7 +78,7 @@
       </div>
 
       <div class="row-list" id="notes-list">
-        <a class="row group" data-cat="learning" href="notes/2026-09-25-hello-world.html">
+        <a class="row group" data-cat="learning" data-reveal href="notes/2026-09-25-hello-world.html">
           <div class="row-main">
             <div class="row-head">
               <span class="cat" data-i18n="notes.f.learning">Learning</span>
@@ -90,7 +90,7 @@
           <span class="row-arrow" aria-hidden="true">→</span>
         </a>
 
-        <a class="row group" data-cat="learning" href="notes/2026-09-25-hello.html">
+        <a class="row group" data-cat="learning" data-reveal href="notes/2026-09-25-hello.html">
           <div class="row-main">
             <div class="row-head">
               <span class="cat" data-i18n="notes.f.learning">Learning</span>
@@ -114,7 +114,7 @@
 </main>
 
 <footer class="site-footer">
-  <div class="container grid footer-grid">
+  <div class="container grid footer-grid" data-reveal>
     <div class="col-full lg-col-7">
       <p class="label label--on-dark" data-i18n="footer.label">Contact</p>
       <h2 class="footer-big">

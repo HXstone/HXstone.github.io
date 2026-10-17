@@ -1,0 +1,21 @@
+{
+  "name": "project-phantom",
+  "private": true,
+  "version": "1.0.0",
+  "description": "PROJECT: PHANTOM — a browser-based tactical sci-fi FPS built with Three.js.",
+  "type": "module",
+  "engines": {
+    "node": ">=20.19"
+  },
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0"
+  },
+  "dependencies": {
+    "three": "0.180.0"
+  },
+  "devDependencies": {
+    "vite": "7.3.7"
+  }
+}

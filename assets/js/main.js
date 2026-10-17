@@ -126,6 +126,27 @@
     refreshMenuButton();
   }
 
+  /* ---------- Header scroll state ---------- */
+
+  if (header) {
+    var scrollQueued = false;
+
+    function syncHeader() {
+      header.classList.toggle("is-scrolled", window.scrollY > 6);
+      if (typeof revealPass === "function") revealPass();
+      scrollQueued = false;
+    }
+
+    window.addEventListener("scroll", function () {
+      if (!scrollQueued) {
+        window.requestAnimationFrame(syncHeader);
+        scrollQueued = true;
+      }
+    }, { passive: true });
+
+    syncHeader();
+  }
+
   /* ---------- Note category filter ---------- */
 
   var filters = Array.prototype.slice.call(
@@ -199,6 +220,51 @@
 
     setFilterState(currentFilter);
     refreshNotesUI();
+  }
+
+  /* ---------- Below-fold entrance ---------- */
+
+  var motionOK = !window.matchMedia ||
+    !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var revealItems = [];
+
+  /* Reveal anything that has entered (or already passed) the viewport.
+     Checking positions on scroll also catches anchor jumps and restored
+     scroll positions, where an IntersectionObserver can skip elements
+     that were never painted. */
+  function revealPass() {
+    if (!revealItems || !revealItems.length) return;
+
+    var limit = window.innerHeight * 0.94;
+
+    for (var i = revealItems.length - 1; i >= 0; i -= 1) {
+      var el = revealItems[i];
+
+      if (el.getBoundingClientRect().top < limit) {
+        el.classList.add("is-in");
+        revealItems.splice(i, 1);
+      }
+    }
+  }
+
+  if (motionOK) {
+    revealItems = Array.prototype.slice
+      .call(document.querySelectorAll("[data-reveal]"))
+      .filter(function (el) {
+        return el.getBoundingClientRect().top > window.innerHeight;
+      });
+
+    if (revealItems.length) {
+      document.documentElement.classList.add("motion-ready");
+
+      revealItems.forEach(function (el) {
+        el.classList.add("will-reveal");
+      });
+
+      revealPass();
+      window.addEventListener("resize", revealPass, { passive: true });
+    }
   }
 
   /* ---------- Footer year ---------- */
