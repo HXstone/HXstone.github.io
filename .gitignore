@@ -1,0 +1,6 @@
+# Local sandbox recovery data (not part of the site)
+.dsh-acl-recovery/
+
+# Editor / OS noise
+.DS_Store
+Thumbs.db

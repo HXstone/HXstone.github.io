@@ -8,6 +8,8 @@ Built with **Three.js + Vite**, procedural geometry/materials and Web Audio. No 
 
 ![Combat inside the SITE-09 reactor hall](screenshots/combat.jpg)
 
+![Combat HUD with objective, compass, vitals and ammunition](screenshots/hud.jpg)
+
 ## Quick start
 
 Requires Node.js **20.19+** (22.12+ recommended).

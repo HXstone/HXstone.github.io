@@ -502,7 +502,7 @@ export class UI {
   }
 
   updateObjective(killed, total) {
-    this.el.objectiveCount.textContent = `${String(killed).padStart(2, '0')} / ${String(total).padStart(2, '0')}`;
+    this.el.objectiveCount.textContent = String(Math.max(0, total - killed)).padStart(2, '0');
     this.el.killCount.childNodes[0].nodeValue = String(killed).padStart(2, '0');
     const totalSpan = this.el.killCount.querySelector('span');
     if (totalSpan) totalSpan.textContent = `/${String(total).padStart(2, '0')}`;
