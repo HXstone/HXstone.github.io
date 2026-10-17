@@ -1,9 +1,10 @@
 /* =========================================================
    HX STONE · main.js
-   语言切换 · 手机菜单 · 笔记筛选 · 页脚年份
+   Language · mobile navigation · note filtering · footer year
    ---------------------------------------------------------
-   Swiss International Style:交互只做状态切换,不做位移/缩放/
-   阴影/入场动画,所以这里没有滚动动效代码。
+   No framework, no animation library. State changes are kept
+   explicit so keyboard and screen-reader users get the same
+   information as pointer users.
    ========================================================= */
 
 (function () {
@@ -11,7 +12,7 @@
 
   document.documentElement.setAttribute("data-enhanced", "1");
 
-  /* ---------- 语言切换 ---------- */
+  /* ---------- Language ---------- */
 
   var STORAGE_KEY = "site-lang";
   var lang = "en";
@@ -20,20 +21,22 @@
     var saved = localStorage.getItem(STORAGE_KEY);
     if (saved === "zh" || saved === "en") lang = saved;
   } catch (e) {
-    /* 隐私模式下忽略 */
+    /* Private browsing can block storage; the page still works. */
   }
 
   var langBtn = document.querySelector(".lang-toggle");
 
   function refreshLangButton() {
     if (!langBtn) return;
-    langBtn.textContent = lang === "zh" ? "EN" : "中文";
+
+    var isZh = lang === "zh";
+    langBtn.textContent = isZh ? "EN" : "中文";
     langBtn.setAttribute(
       "aria-label",
-      lang === "zh" ? "Switch to English" : "切换到中文"
+      t(isZh ? "lang.switchEn" : "lang.switchZh")
     );
-    /* 语言按钮是切换控件,用 aria-pressed 表达当前状态(不靠颜色单独传递) */
-    langBtn.setAttribute("aria-pressed", lang === "zh" ? "true" : "false");
+    /* The button is a two-state switch, so expose its state as well. */
+    langBtn.setAttribute("aria-pressed", isZh ? "true" : "false");
   }
 
   if (typeof cacheEnglishText === "function" && typeof applyLang === "function") {
@@ -49,66 +52,156 @@
       try {
         localStorage.setItem(STORAGE_KEY, lang);
       } catch (e) {
-        /* 忽略 */
+        /* Ignore blocked storage. */
       }
 
       applyLang(lang);
       refreshLangButton();
+      refreshMenuButton();
+      refreshNotesUI();
     });
   }
 
-  /* ---------- 手机菜单 ---------- */
+  /* ---------- Mobile navigation ---------- */
 
   var header = document.querySelector(".site-header");
   var navToggle = document.querySelector(".nav-toggle");
 
-  function closeMenu() {
+  function menuIsOpen() {
+    return !!header && header.classList.contains("nav-open");
+  }
+
+  function refreshMenuButton() {
+    if (!navToggle) return;
+
+    var open = menuIsOpen();
+    navToggle.setAttribute("aria-expanded", open ? "true" : "false");
+    navToggle.setAttribute(
+      "aria-label",
+      t(open ? "nav.closeMenu" : "nav.openMenu")
+    );
+  }
+
+  function closeMenu(moveFocus) {
     if (!header) return;
+
     header.classList.remove("nav-open");
-    if (navToggle) navToggle.setAttribute("aria-expanded", "false");
+    refreshMenuButton();
+
+    if (moveFocus && navToggle) navToggle.focus();
+  }
+
+  function openMenu() {
+    if (!header) return;
+
+    header.classList.add("nav-open");
+    refreshMenuButton();
   }
 
   if (header && navToggle) {
     navToggle.addEventListener("click", function () {
-      var open = header.classList.toggle("nav-open");
-      navToggle.setAttribute("aria-expanded", open ? "true" : "false");
+      if (menuIsOpen()) {
+        closeMenu(false);
+      } else {
+        openMenu();
+      }
     });
 
+    /* A navigation choice closes the disclosure on small screens. */
     header.addEventListener("click", function (e) {
-      if (e.target.closest && e.target.closest("a")) closeMenu();
+      if (e.target.closest && e.target.closest("a")) closeMenu(false);
     });
 
     window.addEventListener("resize", function () {
-      if (window.innerWidth > 767) closeMenu();
+      if (window.innerWidth > 767 && menuIsOpen()) closeMenu(false);
     });
 
     document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape") closeMenu();
+      if (e.key === "Escape" && menuIsOpen()) {
+        e.preventDefault();
+        closeMenu(true);
+      }
+    });
+
+    refreshMenuButton();
+  }
+
+  /* ---------- Note category filter ---------- */
+
+  var filters = Array.prototype.slice.call(
+    document.querySelectorAll("[data-filter]")
+  );
+  var notes = Array.prototype.slice.call(
+    document.querySelectorAll("[data-cat]")
+  );
+  var notesList = document.getElementById("notes-list");
+  var notesCount = document.getElementById("notes-count");
+  var notesEmpty = document.getElementById("notes-empty");
+  var notesTotal = document.querySelectorAll("[data-notes-total]");
+  var currentFilter = "all";
+
+  function setFilterState(value) {
+    filters.forEach(function (btn) {
+      btn.setAttribute(
+        "aria-pressed",
+        btn.getAttribute("data-filter") === value ? "true" : "false"
+      );
     });
   }
 
-  /* ---------- 笔记分类筛选 ---------- */
+  function refreshNotesUI() {
+    if (!notes.length) return;
 
-  var filters = document.querySelectorAll("[data-filter]");
-  var notes = document.querySelectorAll("[data-cat]");
+    var shown = 0;
+
+    notes.forEach(function (note) {
+      var match =
+        currentFilter === "all" ||
+        note.getAttribute("data-cat") === currentFilter;
+
+      note.hidden = !match;
+      if (match) shown += 1;
+    });
+
+    if (notesCount) {
+      notesCount.textContent = t("notes.count", {
+        shown: shown,
+        total: notes.length
+      });
+    }
+
+    if (notesEmpty) notesEmpty.hidden = shown !== 0;
+    if (notesList) notesList.hidden = shown === 0;
+
+    notesTotal.forEach(function (el) {
+      el.textContent = String(notes.length).padStart(2, "0");
+    });
+  }
 
   if (filters.length && notes.length) {
     filters.forEach(function (btn) {
       btn.addEventListener("click", function () {
-        var want = btn.getAttribute("data-filter");
-
-        filters.forEach(function (b) {
-          b.setAttribute("aria-pressed", b === btn ? "true" : "false");
-        });
-
-        notes.forEach(function (note) {
-          note.hidden = !(want === "all" || note.getAttribute("data-cat") === want);
-        });
+        currentFilter = btn.getAttribute("data-filter") || "all";
+        setFilterState(currentFilter);
+        refreshNotesUI();
       });
     });
+
+    document.querySelectorAll("[data-filter-reset]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        currentFilter = "all";
+        setFilterState(currentFilter);
+        refreshNotesUI();
+        var all = document.querySelector('[data-filter="all"]');
+        if (all) all.focus();
+      });
+    });
+
+    setFilterState(currentFilter);
+    refreshNotesUI();
   }
 
-  /* ---------- 页脚年份 ---------- */
+  /* ---------- Footer year ---------- */
 
   var year = String(new Date().getFullYear());
   document.querySelectorAll("[data-year]").forEach(function (el) {

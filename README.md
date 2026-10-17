@@ -15,18 +15,19 @@ Student × Runner × AI Explorer.
 
 ## 设计风格
 
-整站遵循 **Swiss International Style（瑞士国际风格）**，规则写在
+整站采用 **Dark Titanium / Industrial Digital Lab** 视觉系统，规则写在
 `assets/css/base.css` 顶部的注释里，改样式前请先读：
 
-- 网格：12 列（桌面）/ 6 列（平板）/ 4 列（手机），严格对齐，大量负空间
-- 字体：Helvetica 及同类无衬线，只用一个字族，靠字号 / 字重 / 字距建立层级
-- 配色：仅 `#000000` `#ffffff` `#ff0000`（强调）`#0057b8`（次要强调）
-- 几何：直角（`border-radius: 0`）、无阴影、无渐变、无装饰性元素
-- 交互：只改 `color` / `border-color` / `background-color`，过渡统一
-  `150ms ease-out`；唯一允许的位移是按钮里的 `→` 箭头
-- 结构线：列表与卡片的左侧引导线在悬停时由灰变红，同时底色变浅灰
-- 无障碍：正文对比度 ≥ 4.5:1，有 `:focus-visible` 焦点样式和
-  `prefers-reduced-motion` 降级
+- 网格：12 列（桌面）/ 6 列（平板）/ 4 列（手机），对齐优先，留白服务于信息层级
+- 字体：Archivo + IBM Plex Mono（本地 `assets/fonts/`，无 CDN）；中文回退到系统 CJK
+- 配色：钛黑底 `#0a0d10`，冷蓝交互色 `#7da7ff`，橙色 `#ff7048` 仅用于状态 / 异常
+- 几何：10–12px 圆角、1px 细边框、分层深色表面、克制的阴影
+- 交互：只改变颜色、边框、透明度和 ≤2px 位移；焦点状态始终清晰可见
+- 状态：`LIVE` / `EXPERIMENTAL` / `ARCHIVED` 同时用文字、圆点和颜色表达
+- 导航：主站为 Home / Work / Notes / About；Games 在页脚并链接到可玩版本，
+  Work 页面则保留完整的案例研究
+- 无障碍：44px 点击区域、跳转链接、`:focus-visible`、`prefers-reduced-motion`，
+  以及过滤结果计数 / 空状态播报
 
 ## 目录概览
 
@@ -39,9 +40,11 @@ Student × Runner × AI Explorer.
 | `404.html` | 404 页 |
 | `games/`、`projects/*.html` | 网页小游戏（各自独立样式，不受站点样式影响） |
 | `assets/css/base.css` | 设计系统：token + 组件 + 页面样式 |
-| `assets/js/i18n.js` | 中文文案表与语言切换 |
-| `assets/js/main.js` | 语言切换、手机菜单、笔记筛选、页脚年份 |
+| `assets/js/i18n.js` | 中文文案表、无障碍文案与语言切换 |
+| `assets/js/main.js` | 语言切换、手机菜单、笔记筛选与空状态、页脚年份 |
+| `assets/fonts/` | 本地 Archivo / IBM Plex Mono 字体文件 |
 | `assets/img/` | 头像、favicon、分享图 |
+| `assets/img/work/` | 四个项目的真实游戏截图（项目卡片缩略图） |
 
 ## 本地预览
 

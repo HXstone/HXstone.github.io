@@ -10,29 +10,60 @@
 var I18N = {
   zh: {
     /* ---- 导航 ---- */
+    "skip": "跳到主要内容",
+    "nav.primary": "主导航",
+    "nav.footer": "页脚导航",
     "nav.home": "首页",
+    "nav.work": "作品",
     "nav.projects": "作品",
     "nav.notes": "笔记",
     "nav.about": "关于",
     "nav.games": "游戏",
+    "nav.openMenu": "打开菜单",
+    "nav.closeMenu": "关闭菜单",
+    "lang.switchEn": "切换到英文",
+    "lang.switchZh": "切换到中文",
 
     /* ---- 首页 ---- */
     "page.home.title": "HX STONE — 学生 × 跑者 × AI 探索者",
+    "hero.eyebrow": "数字产品实验室 / 作品集 2026",
     "hero.p1": "学生",
     "hero.p4": "跑者",
     "hero.p2": "AI 探索者",
     "hero.statement": "用 AI 和技术，搭建我的未来。",
     "hero.srSummary": "HX STONE — 一名探索 AI 的高中生，做一些小游戏、笔记和实验。",
     "hero.bio": "我把好奇心做成一个个小东西——游戏、笔记和实验；和 AI 一起实现，再反复测到满意。",
-    "hero.cta1": "看看作品",
-    "hero.cta2": "读读笔记",
+    "hero.cta1": "探索作品",
+    "hero.cta2": "阅读笔记",
+    "hero.note": "持续构建、测试、打磨。",
+    "hero.statusLabel": "实验室状态",
     "fact.projects": "作品",
     "fact.notes": "笔记",
     "fact.games": "可玩游戏",
     "fact.deps": "外部依赖",
 
-    "work.label": "索引 01",
-    "work.title": "作品",
+    "lab.label": "实验室 / 状态",
+    "lab.active": "活跃",
+    "lab.operator": "操作者",
+    "lab.role": "学生 / 构建者",
+    "lab.projects": "作品",
+    "lab.games": "游戏",
+    "lab.notes": "笔记",
+    "lab.cycle": "周期",
+    "lab.activeStatus": "活跃中",
+    "lab.current": "当前",
+    "lab.currentValue": "打磨 23:59",
+    "lab.stack": "工具链",
+    "lab.stackValue": "HTML / CSS / JS",
+    "lab.deps": "外部依赖",
+    "lab.depsValue": "00",
+    "lab.last": "最后校准",
+    "img.avatar.alt": "HX STONE 的黑白字母组合标识。",
+
+    "status.legend": "LIVE 维护中 · EXPERIMENTAL 迭代中 · ARCHIVED 稳定归档",
+
+    "work.label": "索引 01 / 近期作品",
+    "work.title": "近期作品",
     "work.link": "全部作品",
     "work.lead": "四个真实做过的东西。每个都从问题开始，到能玩、能用为止。",
     "work.mine.title": "扫雷",
@@ -43,12 +74,20 @@ var I18N = {
     "work.tank.desc": "可破坏砖墙、敌方 AI 与本地最高分的街机坦克游戏。",
     "work.2359.title": "23:59 ｜ 住宿生",
     "work.2359.desc": "扮演高中住宿生度过一个晚上：六小时、五项状态，每个选择都有代价。",
-    "work.2359.index": "游戏",
-    "work.mine.index": "游戏",
-    "work.dino.index": "游戏",
-    "work.tank.index": "游戏",
+    "work.2359.index": "游戏 / 2026",
+    "work.mine.index": "游戏 / 2026",
+    "work.dino.index": "游戏 / 2026",
+    "work.tank.index": "游戏 / 2026",
+    "img.2359.alt": "23:59 住宿生模拟器的游戏界面：状态栏与行动日志。",
+    "img.mine.alt": "扫雷游戏界面：9×9 棋盘、难度选择和计时器。",
+    "img.dino.alt": "恐龙快跑游戏界面：灰色像素恐龙、仙人掌和分数。",
+    "img.tank.alt": "坦克大战游戏界面：砖墙地图、敌方坦克和触屏控制。",
+    "play.2359": "试玩 23:59（在新标签页打开）",
+    "play.mine": "试玩扫雷（在新标签页打开）",
+    "play.dino": "试玩恐龙快跑（在新标签页打开）",
+    "play.tank": "试玩坦克大战（在新标签页打开）",
 
-    "notes.label": "索引 02",
+    "notes.label": "索引 02 / 笔记",
     "notes.title": "笔记",
     "notes.lead": "学习记录、折腾日志，和零碎的想法。",
     "notes.all": "全部笔记",
@@ -57,6 +96,12 @@ var I18N = {
     "notes.f.science": "科学",
     "notes.f.learning": "学习",
     "notes.f.ideas": "想法",
+    "notes.filterLabel": "按分类筛选笔记",
+    "notes.entries": "篇笔记",
+    "notes.updated": "更新于 2026.10",
+    "notes.count": "显示 {shown} / {total} 篇笔记",
+    "notes.empty": "这个分类还没有笔记。",
+    "notes.reset": "查看全部笔记",
 
     /* ---- 页脚 ---- */
     "footer.label": "联系方式",
@@ -65,13 +110,30 @@ var I18N = {
     "footer.note": "随时欢迎聊聊 AI、足球或跑步。",
     "footer.nav": "索引",
     "footer.contact": "写信给我",
+    "footer.gamesNote": "作品是案例研究；游戏直接进入可玩版本。",
 
     /* ---- 作品页 ---- */
     "page.projects.title": "作品 · HX STONE",
-    "projects.label": "索引",
+    "projects.label": "索引 / 04 个构建",
     "projects.title": "作品",
+    "projects.entries": "个构建",
     "projects.lead": "四个真实做过的东西。每个都从问题开始，到能玩、能用为止。",
-    "case.play": "打开游戏",
+    "projects.gamesNote": "这里是案例研究索引；游戏入口直接打开可玩版本。",
+    "projects.legendLive": "LIVE 维护中",
+    "projects.legendExperimental": "EXPERIMENTAL 迭代中",
+    "projects.legendArchived": "ARCHIVED 稳定归档",
+    "project.result": "结果",
+    "project.stack": "技术栈",
+    "project.status": "状态",
+    "project.build": "形态",
+    "project.buildValue": "浏览器内可玩",
+    "project.enter": "打开",
+    "projects.indexLabel": "项目索引",
+    "case.play": "试玩",
+    "case.playShort": "试玩",
+    "case.study": "查看案例",
+    "case.studyLabel": "案例研究",
+    "link.newTab": "（在新标签页打开）",
     "case.index": "案例 01",
     "case.index2": "案例 02",
     "case.index3": "案例 03",
@@ -109,19 +171,29 @@ var I18N = {
 
     /* ---- 关于页 ---- */
     "page.about.title": "关于 · HX STONE",
-    "about.label": "关于",
+    "about.label": "档案 / 关于",
     "about.quote": "我用<em>好奇心</em>做东西。<br>AI 是我的<em>创造伙伴</em>。",
     "about.p1": "我是一名高中生。足球和长跑让我保持状态；好奇心主要在 AI 上，也一直看市场和世界新闻。",
     "about.p2": "我不像工程师那样写代码，所以我有自己的做法：先定下做什么、什么叫好，借 AI 抵达，再反复测试打磨到站得住。这个网站就是这么来的。",
     "about.contact.title": "联系方式",
     "about.sayhi": "打个招呼",
     "about.hello": "随时欢迎聊聊 AI、足球或跑步。",
+    "about.fact.role": "身份",
+    "about.fact.roleValue": "高中生 / 构建者",
+    "about.fact.focus": "关注",
+    "about.fact.focusValue": "AI · 产品 · 网页",
+    "about.fact.method": "方法",
+    "about.fact.methodValue": "构建 → 测试 → 打磨",
+    "about.fact.status": "状态",
+    "about.fact.statusValue": "开放交流",
+    "about.profileCaption": "操作者档案 / 2026",
 
     /* ---- 笔记列表页 ---- */
     "page.notes.title": "笔记 · HX STONE",
 
     /* ---- 404 ---- */
     "page.notfound.title": "页面走丢了 · HX STONE",
+    "notfound.label": "错误 / 路由未找到",
     "notfound.title": "这个页面走丢了",
     "notfound.desc": "你要找的页面不存在，或者已经被移走了。",
     "notfound.home": "回到首页",
@@ -158,10 +230,22 @@ var I18N = {
     "note.hello.quote": "把东西做出来，再把它放到一个能被看见的地方——这本身就是一种完成。",
     "note.hello.h.next": "接下来",
     "note.hello.p.next": "之后会继续做新的小东西，也会在这里记录过程。如果有什么想聊的，欢迎发邮件给我。"
+  },
+
+  /* English strings that are generated or changed by JavaScript at runtime.
+     Static English copy stays in the HTML and is restored through data-en. */
+  en: {
+    "nav.openMenu": "Open menu",
+    "nav.closeMenu": "Close menu",
+    "lang.switchEn": "Switch to English",
+    "lang.switchZh": "Switch to Chinese",
+    "notes.count": "Showing {shown} of {total} notes",
+    "notes.empty": "No notes in this category yet.",
+    "notes.reset": "View all notes"
   }
 };
 
-/** 首次运行时,把页面上的英文原文缓存到 data-en */
+/** 首次运行时,把页面上的英文原文缓存到 data-en / data-en-alt / data-en-aria-label */
 function cacheEnglishText() {
   var root = document.documentElement;
   if (root.getAttribute("data-i18n-cached")) return;
@@ -174,7 +258,29 @@ function cacheEnglishText() {
     el.setAttribute("data-en-html", el.innerHTML);
   });
 
+  document.querySelectorAll("[data-i18n-alt]").forEach(function (el) {
+    el.setAttribute("data-en-alt", el.getAttribute("alt") || "");
+  });
+
+  document.querySelectorAll("[data-i18n-aria-label]").forEach(function (el) {
+    el.setAttribute("data-en-aria-label", el.getAttribute("aria-label") || "");
+  });
+
   root.setAttribute("data-i18n-cached", "1");
+}
+
+/** 取当前语言的文案，支持 {name} 占位符。 */
+function t(key, vars) {
+  var isZh = document.documentElement.lang.indexOf("zh") === 0;
+  var dict = isZh ? I18N.zh : I18N.en;
+  var value = dict[key];
+
+  if (value == null) value = I18N.en[key];
+  if (value == null) return key;
+
+  return String(value).replace(/\{(\w+)\}/g, function (match, name) {
+    return vars && vars[name] != null ? String(vars[name]) : match;
+  });
 }
 
 /**
@@ -206,6 +312,31 @@ function applyLang(lang) {
     } else {
       var en = el.getAttribute("data-en-html");
       if (en != null) el.innerHTML = en;
+    }
+  });
+
+  /* Images and accessible names can carry translated copy too. */
+  document.querySelectorAll("[data-i18n-alt]").forEach(function (el) {
+    var key = el.getAttribute("data-i18n-alt");
+
+    if (lang === "zh") {
+      var value = I18N.zh[key];
+      if (value != null) el.setAttribute("alt", value);
+    } else {
+      var en = el.getAttribute("data-en-alt");
+      if (en != null) el.setAttribute("alt", en);
+    }
+  });
+
+  document.querySelectorAll("[data-i18n-aria-label]").forEach(function (el) {
+    var key = el.getAttribute("data-i18n-aria-label");
+
+    if (lang === "zh") {
+      var value = I18N.zh[key];
+      if (value != null) el.setAttribute("aria-label", value);
+    } else {
+      var en = el.getAttribute("data-en-aria-label");
+      if (en != null) el.setAttribute("aria-label", en);
     }
   });
 }

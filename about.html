@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title data-i18n="page.about.title">About · HX STONE</title>
 <meta name="description" content="About HX STONE — I build with curiosity, and AI is my creative partner.">
-<meta name="theme-color" content="#ffffff">
-<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#0a0d10">
+<meta name="color-scheme" content="dark">
 <meta property="og:type" content="profile">
 <meta property="og:title" content="About · HX STONE">
 <meta property="og:description" content="I build with curiosity. AI is my creative partner.">
@@ -21,7 +21,7 @@
 </head>
 <body>
 
-<a class="skip" href="#main">Skip to content</a>
+<a class="skip" href="#main" data-i18n="skip">Skip to content</a>
 
 <header class="site-header">
   <div class="container header-inner">
@@ -29,13 +29,12 @@
       <span class="brand-mark" aria-hidden="true"></span>
       <span>HX STONE</span>
     </a>
-    <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false">
+    <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav">
       <span></span><span></span><span></span>
     </button>
-    <nav class="site-nav" aria-label="Primary">
+    <nav class="site-nav" id="site-nav" aria-label="Primary" data-i18n-aria-label="nav.primary">
       <a href="index.html" data-i18n="nav.home">Home</a>
-      <a href="projects.html" data-i18n="nav.projects">Projects</a>
-      <a href="projects.html#game-2359" data-i18n="nav.games">Games</a>
+      <a href="projects.html" data-i18n="nav.work">Work</a>
       <a href="notes.html" data-i18n="nav.notes">Notes</a>
       <a href="about.html" aria-current="page" data-i18n="nav.about">About</a>
       <button class="lang-toggle" type="button">中文</button>
@@ -46,37 +45,71 @@
 <main id="main">
 
   <header class="page-head">
-    <p class="label" data-i18n="about.label">About</p>
-    <h1 class="hero-statement" data-i18n-html="about.quote">I build with <em>curiosity</em>.<br>AI is my <em>creative partner</em>.</h1>
+    <div class="container">
+      <div class="page-head-grid">
+        <div>
+          <p class="label" data-i18n="about.label">Profile / About</p>
+          <h1 class="hero-statement" data-i18n-html="about.quote">I build with <em>curiosity</em>.<br>AI is my <em>creative partner</em>.</h1>
+        </div>
+        <div class="page-count">
+          <strong>2026</strong>
+          <span data-i18n="lab.active">Active</span>
+        </div>
+      </div>
+    </div>
   </header>
 
   <section class="section section--plain">
-    <div class="container grid">
-      <div class="col-full md-col-3 lg-col-7">
+    <div class="container about-grid">
+      <div class="about-copy">
         <p data-i18n="about.p1">I'm a high-school student. Football and long-distance running keep me moving; AI is where my curiosity goes to work, alongside markets and world news.</p>
         <p data-i18n="about.p2">I don't write code the way engineers do, so I work my own way: I decide what to build and what good looks like, use AI to get there, then test and refine until it holds up. Everything on this site came out of that loop.</p>
+
+        <dl class="about-facts">
+          <div>
+            <dt data-i18n="about.fact.role">Role</dt>
+            <dd data-i18n="about.fact.roleValue">Student / builder</dd>
+          </div>
+          <div>
+            <dt data-i18n="about.fact.focus">Focus</dt>
+            <dd data-i18n="about.fact.focusValue">AI · product · web</dd>
+          </div>
+          <div>
+            <dt data-i18n="about.fact.method">Method</dt>
+            <dd data-i18n="about.fact.methodValue">Build → test → refine</dd>
+          </div>
+          <div>
+            <dt data-i18n="about.fact.status">Status</dt>
+            <dd data-i18n="about.fact.statusValue">Open to conversations</dd>
+          </div>
+        </dl>
       </div>
 
-      <figure class="col-full md-col-3 lg-col-4 hero-portrait">
-        <img src="assets/img/avatar.jpg" alt="HX — the HX STONE mark" width="768" height="768">
-        <figcaption>Hexun</figcaption>
+      <figure class="profile-figure">
+        <img src="assets/img/avatar.jpg" alt="Black-and-white HX STONE monogram." width="768" height="768" loading="lazy" decoding="async" data-i18n-alt="img.avatar.alt">
+        <figcaption>
+          <span>Hexun</span>
+          <span data-i18n="about.profileCaption">Operator file / 2026</span>
+        </figcaption>
       </figure>
     </div>
   </section>
 
-  <section class="section">
-    <div class="container grid">
-      <div class="col-full md-col-3 lg-col-5">
-        <p class="label" data-i18n="about.contact.title">Contact</p>
-        <a class="link-arrow" href="mailto:hexun120716@outlook.com">
-          <span>hexun120716@outlook.com</span>
-          <span class="arrow" aria-hidden="true">→</span>
-        </a>
-      </div>
+  <section class="section" aria-labelledby="contact-title">
+    <div class="container">
+      <div class="contact-panel">
+        <div>
+          <p class="label" id="contact-title" data-i18n="about.contact.title">Contact</p>
+          <a class="link-arrow" href="mailto:hexun120716@outlook.com">
+            <span>hexun120716@outlook.com</span>
+            <span class="arrow" aria-hidden="true">→</span>
+          </a>
+        </div>
 
-      <div class="col-full md-col-3 lg-col-6">
-        <p class="label" data-i18n="about.sayhi">Say hello</p>
-        <p data-i18n="about.hello">Always happy to talk about AI, football or running.</p>
+        <div>
+          <p class="label" data-i18n="about.sayhi">Say hello</p>
+          <p data-i18n="about.hello">Always happy to talk about AI, football or running.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -94,13 +127,16 @@
       <p class="footer-note" data-i18n="footer.note">Always happy to talk about AI, football or running.</p>
     </div>
 
-    <nav class="col-full md-col-3 lg-col-4 lg-col-start-9 footer-col" aria-label="Footer">
+    <nav class="col-full md-col-3 lg-col-4 lg-col-start-9 footer-col" aria-label="Footer" data-i18n-aria-label="nav.footer">
       <p class="label" data-i18n="footer.nav">Index</p>
       <div class="footer-links">
         <a href="index.html" data-i18n="nav.home">Home</a>
-        <a href="projects.html" data-i18n="nav.projects">Projects</a>
+        <a href="projects.html" data-i18n="nav.work">Work</a>
+        <a href="projects.html#game-2359" data-i18n="nav.games">Games</a>
         <a href="notes.html" data-i18n="nav.notes">Notes</a>
+        <a href="about.html" data-i18n="nav.about">About</a>
       </div>
+      <p class="footer-games-note" data-i18n="footer.gamesNote">Work is the case-study index; Games opens the playable builds.</p>
     </nav>
 
     <div class="col-full footer-meta">
