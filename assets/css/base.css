@@ -91,7 +91,7 @@
   --fs-body: 16px;
   --fs-sm: 14px;
   --fs-xs: 12.5px;
-  --fs-micro: 11px;
+  --fs-micro: 11.5px;
 
   /* ---- Layout ---- */
   --maxw: 1240px;
@@ -2679,7 +2679,56 @@ em {
 }
 
 /* =========================================================
-   20 · REDUCED MOTION
+   20 · MICRO TYPE FLOOR
+   ---------------------------------------------------------
+   Technical labels sit on dark surfaces and are read at a
+   glance. Keep the smallest functional text at 11.5px so the
+   precision of the system does not cost legibility.
+   ========================================================= */
+
+.label,
+.mono-label,
+.cat,
+.status,
+.hero-eyebrow,
+.hero-meta,
+.hero-status,
+.lab-stats dt,
+.lab-readout span:first-child,
+.lab-foot,
+.work-topline .mono-label,
+.card-no,
+.tags,
+.page-count span,
+.index-no,
+.index-play,
+.legend,
+.project-spec .mono-label,
+.project-k,
+.case-study-head span,
+.step-k,
+.filter,
+.notes-updated,
+.row-date,
+.result-count,
+.about-facts dt,
+.profile-figure figcaption,
+.meta-row,
+.back-link,
+.footer-meta,
+.footer-links a,
+.empty-state .empty-code,
+.prose ol li::before {
+  font-size: 11.5px;
+}
+
+.lang-toggle,
+.lab-active { font-size: 11px; }
+
+.footer-games-note { font-size: 12px; }
+
+/* =========================================================
+   21 · REDUCED MOTION
    ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
@@ -2711,7 +2760,7 @@ em {
 }
 
 /* =========================================================
-   21 · PRINT
+   22 · PRINT
    ========================================================= */
 
 @media print {

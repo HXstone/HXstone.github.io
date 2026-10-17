@@ -87,7 +87,7 @@
 
 .brand-lockup__text b {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: clamp(13px, 0.9vw, 15.5px);
   font-weight: 500;
   letter-spacing: 0.16em;
 }
@@ -95,7 +95,7 @@
 .brand-lockup__text small {
   color: var(--muted);
   font-family: var(--mono);
-  font-size: 7px;
+  font-size: clamp(11px, 0.72vw, 13px);
   letter-spacing: 0.16em;
 }
 
@@ -104,7 +104,7 @@
   align-items: center;
   gap: clamp(16px, 2.5vw, 36px);
   color: var(--muted);
-  font-size: 8px;
+  font-size: clamp(12px, 0.8vw, 14px);
   letter-spacing: 0.12em;
 }
 
@@ -119,7 +119,7 @@
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(310px, 360px);
+  grid-template-columns: minmax(0, 1fr) clamp(360px, 26vw, 440px);
   align-items: center;
   gap: clamp(40px, 6vw, 110px);
   width: 100%;
@@ -141,7 +141,7 @@
   gap: 13px;
   margin-bottom: clamp(18px, 3vh, 32px);
   color: var(--cyan);
-  font-size: 8px;
+  font-size: clamp(12px, 0.8vw, 14px);
   letter-spacing: 0.24em;
 }
 
@@ -153,7 +153,7 @@
   height: 22px;
   border: 1px solid rgba(107, 231, 255, 0.32);
   border-radius: 50%;
-  font-size: 7px;
+  font-size: clamp(11px, 0.72vw, 13px);
   letter-spacing: 0;
 }
 
@@ -229,7 +229,7 @@
 .hero-copy {
   max-width: 46ch;
   color: var(--ink-soft);
-  font-size: clamp(12px, 1.08vw, 14px);
+  font-size: clamp(14px, 1.15vw, 16px);
   line-height: 1.7;
   letter-spacing: 0.012em;
   text-shadow: 0 1px 14px rgba(0, 0, 0, 0.8);
@@ -259,11 +259,11 @@
   height: 26px;
   border: 1px solid rgba(2, 16, 20, 0.28);
   border-radius: 50%;
-  font-size: 8px;
+  font-size: clamp(12px, 0.8vw, 14px);
 }
 
 #start-button .btn__label {
-  font-size: 11px;
+  font-size: clamp(14px, 1vw, 16.5px);
   letter-spacing: 0.18em;
   font-weight: 500;
 }
@@ -289,7 +289,7 @@
   gap: 20px;
   margin-top: 22px;
   color: var(--muted-dim);
-  font-size: 7px;
+  font-size: clamp(11px, 0.72vw, 13px);
   letter-spacing: 0.15em;
 }
 
@@ -332,7 +332,7 @@
   padding: 13px 17px;
   border-bottom: 1px solid var(--line);
   color: var(--muted);
-  font-size: 7px;
+  font-size: clamp(11px, 0.72vw, 13px);
   letter-spacing: 0.16em;
 }
 
@@ -340,7 +340,7 @@
   padding: 3px 6px;
   border: 1px solid rgba(255, 77, 88, 0.5);
   color: var(--red);
-  font-size: 7px;
+  font-size: clamp(11px, 0.72vw, 13px);
   letter-spacing: 0.16em;
   transform: rotate(-2deg);
 }
@@ -352,7 +352,7 @@
 
 .dossier__index {
   color: var(--cyan);
-  font-size: 8px;
+  font-size: clamp(12px, 0.8vw, 14px);
   letter-spacing: 0.17em;
 }
 
@@ -367,7 +367,7 @@
 .dossier__body > p {
   margin-top: 15px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: clamp(13px, 0.9vw, 15.5px);
   line-height: 1.65;
 }
 
@@ -395,14 +395,14 @@
 .dossier__facts dt {
   color: var(--muted);
   font-family: var(--mono);
-  font-size: 7px;
+  font-size: clamp(11px, 0.72vw, 13px);
   letter-spacing: 0.14em;
 }
 
 .dossier__facts dd {
   color: var(--ink-soft);
   font-family: var(--mono);
-  font-size: 8px;
+  font-size: clamp(12px, 0.8vw, 14px);
   letter-spacing: 0.1em;
 }
 
@@ -425,7 +425,7 @@
   border-top: 1px solid var(--line);
   border-bottom: 0;
   color: var(--muted-dim);
-  font-size: 6px;
+  font-size: clamp(11px, 0.68vw, 12.5px);
 }
 
 .dossier__foot span:first-child {
@@ -439,7 +439,7 @@
   padding-top: 18px;
   border-top: 1px solid rgba(174, 204, 216, 0.13);
   color: var(--muted-dim);
-  font-size: 7px;
+  font-size: clamp(11px, 0.72vw, 13px);
   letter-spacing: 0.12em;
 }
 
@@ -527,7 +527,7 @@
   align-items: center;
   gap: 8px;
   color: var(--amber);
-  font-size: 8px;
+  font-size: clamp(12px, 0.8vw, 14px);
   letter-spacing: 0.2em;
 }
 
@@ -555,7 +555,7 @@
   max-width: 44ch;
   margin-top: 14px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: clamp(14px, 1vw, 16.5px);
   line-height: 1.65;
 }
 
@@ -577,7 +577,7 @@
 
 .pause-panel__stats span {
   color: var(--muted);
-  font-size: 7px;
+  font-size: clamp(11px, 0.72vw, 13px);
   letter-spacing: 0.14em;
 }
 
@@ -606,7 +606,7 @@
 .panel__hint {
   margin-top: 18px;
   color: var(--muted-dim);
-  font-size: 7px;
+  font-size: clamp(11px, 0.72vw, 13px);
   letter-spacing: 0.12em;
 }
 
@@ -650,7 +650,7 @@
 .end-kicker {
   grid-column: 1 / -1;
   color: var(--cyan);
-  font-size: 8px;
+  font-size: clamp(12px, 0.8vw, 14px);
   letter-spacing: 0.24em;
 }
 
@@ -683,7 +683,7 @@
   max-width: 44ch;
   margin-top: 20px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: clamp(14px, 1vw, 16.5px);
   line-height: 1.7;
 }
 
@@ -735,20 +735,20 @@
 
 .end-grade__meta > span:first-child {
   color: var(--muted);
-  font-size: 7px;
+  font-size: clamp(11px, 0.72vw, 13px);
   letter-spacing: 0.16em;
 }
 
 .end-grade__meta strong {
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: clamp(15.5px, 1.1vw, 18.5px);
   font-weight: 500;
   letter-spacing: 0.12em;
 }
 
 .end-grade__meta span:last-child {
   color: var(--muted);
-  font-size: 8px;
+  font-size: clamp(12px, 0.8vw, 14px);
 }
 
 .end-stats {
@@ -773,7 +773,7 @@
 .end-stats dt {
   color: var(--muted);
   font-family: var(--mono);
-  font-size: 7px;
+  font-size: clamp(11px, 0.72vw, 13px);
   letter-spacing: 0.13em;
 }
 
@@ -800,7 +800,7 @@
 .end-hint {
   grid-column: 1;
   color: var(--muted-dim);
-  font-size: 7px;
+  font-size: clamp(11px, 0.72vw, 13px);
   letter-spacing: 0.12em;
 }
 
@@ -853,7 +853,7 @@
 
 .modal__kicker {
   color: var(--cyan);
-  font-size: 8px;
+  font-size: clamp(12px, 0.8vw, 14px);
   letter-spacing: 0.2em;
 }
 
@@ -876,7 +876,7 @@
   padding-bottom: 10px;
   border-bottom: 1px solid var(--line);
   color: var(--muted);
-  font-size: 8px;
+  font-size: clamp(12px, 0.8vw, 14px);
   font-weight: 400;
   letter-spacing: 0.18em;
 }
@@ -889,7 +889,7 @@
   min-height: 42px;
   border-bottom: 1px solid rgba(174, 204, 216, 0.07);
   color: var(--ink-soft);
-  font-size: 11px;
+  font-size: clamp(14px, 1vw, 16.5px);
 }
 
 .keys {
@@ -901,7 +901,7 @@
 .keys kbd {
   min-width: 21px;
   min-height: 20px;
-  font-size: 7px;
+  font-size: clamp(11px, 0.72vw, 13px);
 }
 
 .modal__foot {
@@ -916,7 +916,7 @@
 
 .modal__foot > .mono {
   color: var(--muted-dim);
-  font-size: 7px;
+  font-size: clamp(11px, 0.72vw, 13px);
   letter-spacing: 0.12em;
 }
 
@@ -941,21 +941,21 @@
 .setting__title {
   color: var(--ink-soft);
   font-family: var(--mono);
-  font-size: 8px;
+  font-size: clamp(12px, 0.8vw, 14px);
   letter-spacing: 0.13em;
 }
 
 .setting__head output {
   color: var(--cyan);
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: clamp(14px, 1vw, 16.5px);
   letter-spacing: 0.03em;
 }
 
 .setting p {
   margin-top: 8px;
   color: var(--muted-dim);
-  font-size: 9px;
+  font-size: clamp(12.5px, 0.85vw, 14.5px);
   line-height: 1.55;
 }
 
@@ -974,7 +974,7 @@
 
 #quality-note {
   color: var(--muted);
-  font-size: 7px;
+  font-size: clamp(11px, 0.72vw, 13px);
   letter-spacing: 0.12em;
 }
 
@@ -991,7 +991,7 @@
   background: rgba(5, 9, 12, 0.9);
   color: var(--muted);
   font-family: var(--mono);
-  font-size: 8px;
+  font-size: clamp(12px, 0.8vw, 14px);
   letter-spacing: 0.12em;
   transition: color 0.2s, background-color 0.2s;
 }
@@ -1121,7 +1121,7 @@ input[type='range']::-moz-range-thumb {
 
 .mobile-notice__kicker {
   color: var(--red);
-  font-size: 8px;
+  font-size: clamp(12px, 0.8vw, 14px);
   letter-spacing: 0.18em;
 }
 
@@ -1140,7 +1140,7 @@ input[type='range']::-moz-range-thumb {
 .mobile-notice p {
   margin-top: 20px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: clamp(15.5px, 1.1vw, 18.5px);
   line-height: 1.7;
 }
 
@@ -1152,14 +1152,14 @@ input[type='range']::-moz-range-thumb {
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
   color: var(--ink-soft);
-  font-size: 8px;
+  font-size: clamp(12px, 0.8vw, 14px);
   letter-spacing: 0.13em;
 }
 
 .mobile-notice__hint {
   color: var(--cyan) !important;
   font-family: var(--mono);
-  font-size: 9px !important;
+  font-size: clamp(12.5px, 0.85vw, 14.5px) !important;
   letter-spacing: 0.08em;
 }
 
@@ -1299,7 +1299,7 @@ input[type='range']::-moz-range-thumb {
   }
 
   .hero-copy {
-    font-size: 13px;
+    font-size: clamp(15.5px, 1.1vw, 18.5px);
   }
 
   .end-wrap {
@@ -1350,7 +1350,7 @@ input[type='range']::-moz-range-thumb {
   }
 
   .hero-copy {
-    font-size: 12px;
+    font-size: clamp(14.5px, 1.05vw, 17.5px);
   }
 
   .dossier__diagram {
